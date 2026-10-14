@@ -1,6 +1,6 @@
 ---
-title: "How to stop strangers from running up your OpenAI bill"
-description: "Your AI feature's API route is a free proxy to your OpenAI or Anthropic account unless you lock it down. Auth, rate limits, input caps, and spend limits that actually work."
+title: "Stop strangers from running up your OpenAI bill"
+description: "Your AI API route is a free proxy to your OpenAI or Anthropic account until you lock it down. Auth, rate limits, input caps, and spend limits."
 pubDate: 2026-10-13
 category: guide
 tags:
@@ -16,7 +16,7 @@ faqs:
   - question: "My OpenAI key is only on the server. Am I safe?"
     answer: "Not yet. If your API route forwards any prompt from any visitor, people can use your route as a free model endpoint. You need authentication, rate limits, and limits on what the route accepts."
   - question: "Can I set a hard spending cap on OpenAI?"
-    answer: "OpenAI lets you set budgets and usage alerts at the organization and project level in the platform settings. Check the current options in your dashboard, use a separate project and key per app, and treat alerts as a backstop, not your only defense."
+    answer: "OpenAI lets you set monthly spend limits for an organization or project and turn on hard enforcement, which blocks requests once the limit is hit. Alerts alone do not stop traffic, and spend can slightly exceed the limit. Use a separate project and key per app, and treat limits as a backstop, not your only defense."
   - question: "What is a reasonable rate limit for an AI feature?"
     answer: "Start with a few requests per minute per user and a daily cap per user that matches what a real user needs. Tighten it for anonymous visitors, or require sign in for the AI feature."
 ---
@@ -96,7 +96,7 @@ Cap how many past messages you resend in a chat, since long histories multiply t
 ## 4. Set limits at the provider
 
 - Create a separate **project** and API key for each app in the OpenAI platform, so one leaked or abused key does not affect others and usage is easy to read.
-- Set a **budget** and usage **alerts** for that project and the organization in the billing and limits settings.
+- Set a monthly **spend limit** with **hard enforcement** for that project and the organization. Alerts alone do not stop traffic.
 - Restrict the key's permissions to the endpoints you use, where the provider supports it.
 - Anthropic, Google, and other providers have similar workspace and spend settings. Check their consoles.
 

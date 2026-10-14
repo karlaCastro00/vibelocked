@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 
 const description =
-  'Free leak scanner for vibe coders. Scan a public GitHub repo for exposed OpenAI, Stripe, Supabase service role, AWS, GitHub and other keys. Runs in your browser, nothing is uploaded.';
+  'Free scanner for vibe coders. Find exposed OpenAI, Stripe, Supabase service role, AWS, and GitHub keys in a public GitHub repo. Runs in your browser.';
 
 const jsonLd = {
   '@type': 'WebApplication',
@@ -29,7 +29,7 @@ const jsonLd = {
       <form id="repo-form">
         <label for="repo-url"><strong>Public GitHub repo URL</strong></label>
         <div class="scan-actions">
-          <input id="repo-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://github.com/you/your-app" required />
+          <input id="repo-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://github.com/you/your-app" required />
           <button class="button" type="submit" id="repo-run">Scan repo</button>
         </div>
       </form>
@@ -119,7 +119,7 @@ const jsonLd = {
       const r = await scanRepo(url, { onProgress: (d, t) => { status.textContent = `Scanned ${d} of ${t} files...`; } });
       const high = r.findings.filter((f) => f.level === 'high').length;
       const warn = r.findings.filter((f) => f.level === 'warn').length;
-      status.textContent = `Done: ${r.repo} on ${r.branch}, ${r.scanned} files checked${r.truncated ? ` (first ${r.scanned} of ${r.totalCandidates} text files, env and config files first)` : ''}.`;
+      status.textContent = `Done: ${r.repo} on ${r.branch}, ${r.scanned} file${r.scanned === 1 ? '' : 's'} checked${r.truncated ? ` (first ${r.scanned} of ${r.totalCandidates} text files, env and config files first)` : ''}.`;
       render(r.findings, r.findings.length === 0
         ? 'No known key formats found in the files checked. That is not a guarantee, and old commits were not checked.'
         : `${high} likely secret${high === 1 ? '' : 's'}, ${warn} to review, ${r.findings.length - high - warn} safe to ship. Values are partly masked.`);

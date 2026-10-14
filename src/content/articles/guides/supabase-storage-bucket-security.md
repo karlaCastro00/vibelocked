@@ -1,6 +1,6 @@
 ---
-title: "Supabase Storage security: public vs private buckets and RLS policies"
-description: "How to stop strangers from listing, downloading, or overwriting files in your Supabase Storage buckets, with copy-paste policies for per-user folders and signed URLs."
+title: "Supabase Storage security: buckets and RLS policies"
+description: "Stop strangers from listing, downloading, or overwriting files in Supabase Storage, with policies for per-user folders and signed URLs."
 pubDate: 2026-10-13
 category: guide
 tags:

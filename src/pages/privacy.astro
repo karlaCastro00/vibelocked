@@ -28,17 +28,21 @@ const description =
       <p>
         We use <a href="https://www.goatcounter.com">GoatCounter</a> to count page views. It sets no cookies and does not track you across sites. For each view it records the page path, the referring page, the browser and operating system, screen size, and an approximate country. It does not store your IP address or build a profile of you. A short-lived hash is used only to avoid counting the same visit twice. See the <a href="https://www.goatcounter.com/help/privacy">GoatCounter privacy policy</a>. Blocking the script with a content blocker does not affect how the site works.
       </p>
+      <h2>Repo scanner</h2>
+      <p>
+        The <a href="/scan">scanner</a> runs in your browser. When you scan a repo, your browser requests the file list and file contents directly from GitHub (api.github.com and raw.githubusercontent.com), so GitHub sees that request like any other visit. The repo URL and the results are not sent to VibeLocked and are not stored. The scanner only reads public repos and never asks for a token or a login.
+      </p>
       <h2>Email you send us</h2>
       <p>
         If you write to <a href={`mailto:${SITE.helloEmail}`}>{SITE.helloEmail}</a> or <a href={`mailto:${SITE.sponsorEmail}`}>{SITE.sponsorEmail}</a>, we use the message to reply and, for sponsor mail, to discuss a placement. We do not sell that correspondence.
       </p>
       <h2>Hosting logs</h2>
       <p>
-        The site is meant to be hosted as static files on a service such as Cloudflare Pages or GitHub Pages. Those hosts may keep ordinary request logs, including IP addresses, as part of serving the files. VibeLocked does not add its own logging on top.
+        The site is hosted as static files on GitHub Pages. GitHub may keep ordinary request logs, including IP addresses, as part of serving the files. VibeLocked does not add its own logging on top.
       </p>
       <h2>Links</h2>
       <p>
-        Guides link to official vendor documentation. Those sites have their own policies. Sponsor and affiliate links, when a placement exists, will be labeled on the page. This launch version uses empty placeholders, not paid links.
+        Guides link to official vendor documentation. Those sites have their own policies. Sponsor and affiliate links, when a placement exists, will be labeled on the page. There are no paid or affiliate links on the site right now.
       </p>
       <h2>Children</h2>
       <p>

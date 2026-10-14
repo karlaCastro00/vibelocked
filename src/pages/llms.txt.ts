@@ -29,14 +29,14 @@ ${lines(checklists)}
 ${lines(guides)}
 
 ## Site
-- [Home](${absUrl('/')}): The promise, latest checklists and guides, sponsor slot, and newsletter placeholder.
+- [Home](${absUrl('/')}): The promise, latest checklists and guides, the free repo scanner, and newsletter signup.
 - [Checklists index](${absUrl('/checklists')}): All launch checklists.
 - [Secret leak scanner](${absUrl('/scan')}): Free client-side scanner. Scans a public GitHub repo in the browser to detect OpenAI, Stripe, Supabase service role, AWS, GitHub and other keys. Nothing leaves the browser.
 - [Guides index](${absUrl('/guides')}): All launch guides.
 - [Sponsor](${absUrl('/sponsor')}): Media kit. Contact ${SITE.sponsorEmail}. No invented traffic numbers.
 - [About](${absUrl('/about')}): Independence, funding, and corrections.
-- [Newsletter](${absUrl('/newsletter')}): Weekly note. The signup form does not store email yet.
-- [Privacy](${absUrl('/privacy')}): No analytics cookies in this version.
+- [Newsletter](${absUrl('/newsletter')}): Weekly note sent with Buttondown. Double opt-in, one-click unsubscribe.
+- [Privacy](${absUrl('/privacy')}): No cookies. Cookieless page counts with GoatCounter. The scanner sends nothing to VibeLocked.
 - [RSS](${absUrl('/rss.xml')}): Article feed.
 
 ## Optional
