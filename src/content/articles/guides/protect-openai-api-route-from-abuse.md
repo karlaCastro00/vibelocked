@@ -23,7 +23,7 @@ faqs:
 
 Moving the OpenAI key out of the frontend is step one. Step two is the one AI generated apps usually skip: the server route that holds the key will happily answer anyone on the internet. Bots find these routes, and you pay for every token.
 
-First, make sure the key really is off the client. Paste your built JavaScript into the [VibeLocked scanner](/scan). If it finds an `sk-` key, stop here and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+First, make sure the key really is off the client. Run the [VibeLocked scanner](/scan) console snippet on your live app. If it finds an `sk-` key, stop here and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
 
 ## What abuse looks like
 

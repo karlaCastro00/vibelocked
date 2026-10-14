@@ -31,7 +31,7 @@ ${lines(guides)}
 ## Site
 - [Home](${absUrl('/')}): The promise, latest checklists and guides, sponsor slot, and newsletter placeholder.
 - [Checklists index](${absUrl('/checklists')}): All launch checklists.
-- [Secret leak scanner](${absUrl('/scan')}): Free client-side scanner. Paste code or env text to detect OpenAI, Stripe, Supabase service role, AWS, GitHub and other keys. Nothing leaves the browser.
+- [Secret leak scanner](${absUrl('/scan')}): Free client-side scanner. Scans a public GitHub repo, or the live site via a console snippet, to detect OpenAI, Stripe, Supabase service role, AWS, GitHub and other keys. Nothing leaves the browser.
 - [Guides index](${absUrl('/guides')}): All launch guides.
 - [Sponsor](${absUrl('/sponsor')}): Media kit. Contact ${SITE.sponsorEmail}. No invented traffic numbers.
 - [About](${absUrl('/about')}): Independence, funding, and corrections.

@@ -1,8 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
+import { buildConsoleSnippet } from '../lib/scanner';
 
+const snippet = buildConsoleSnippet();
 const description =
-  'Free secret leak scanner for vibe coders. Paste code or .env text and find exposed OpenAI, Stripe, Supabase, AWS, GitHub and other keys. Runs fully in your browser.';
+  'Free leak scanner for vibe coders. Scan a public GitHub repo or your live site for exposed OpenAI, Stripe, Supabase service role, AWS, GitHub and other keys. Runs in your browser, nothing is uploaded.';
 
 const jsonLd = {
   '@type': 'WebApplication',
@@ -19,36 +21,57 @@ const jsonLd = {
   <div class="wrap">
     <header class="page-intro">
       <p class="kicker">Free tool</p>
-      <h1 class="page-title">Scan code for leaked keys</h1>
+      <h1 class="page-title">Find leaked keys before someone else does</h1>
       <p class="lede">
-        Paste a file, a diff, a build bundle, or your .env text. The check runs in this tab with JavaScript. Nothing is uploaded, logged, or stored.
+        Check what the public can already see: your public GitHub repo, or the JavaScript your live app ships. You never type a secret here. Everything runs in your browser and nothing is uploaded to VibeLocked.
       </p>
     </header>
 
-    <div class="panel scan-panel">
-      <label for="scan-input"><strong>Code or env text</strong></label>
-      <textarea id="scan-input" rows="14" spellcheck="false" autocomplete="off" placeholder="OPENAI_API_KEY=sk-proj-...&#10;const stripe = new Stripe('sk_live_...')"></textarea>
-      <div class="scan-actions">
-        <button class="button" type="button" id="scan-run">Scan</button>
-        <button class="button button-ghost" type="button" id="scan-clear">Clear</button>
-        <span class="scan-note">Tip: paste the JavaScript your deployed site serves, not only your source.</span>
-      </div>
+    <div class="scan-tabs" role="tablist" aria-label="Scan mode">
+      <button type="button" role="tab" id="tab-repo" aria-controls="panel-repo" aria-selected="true">Scan a public GitHub repo</button>
+      <button type="button" role="tab" id="tab-site" aria-controls="panel-site" aria-selected="false">Scan your live site</button>
     </div>
+
+    <section class="panel scan-panel" id="panel-repo" role="tabpanel" aria-labelledby="tab-repo">
+      <form id="repo-form">
+        <label for="repo-url"><strong>Public GitHub repo URL</strong></label>
+        <div class="scan-actions">
+          <input id="repo-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://github.com/you/your-app" required />
+          <button class="button" type="submit" id="repo-run">Scan repo</button>
+        </div>
+      </form>
+      <p class="scan-note">
+        Needs nothing private: no login, no token. Your browser reads the repo from GitHub's public API and raw.githubusercontent.com, then checks up to 150 text files locally (skipping node_modules, lockfiles, binaries, and files over 200 KB). GitHub allows about 60 API calls per hour per network without login, and a scan uses two.
+      </p>
+      <p id="repo-status" class="scan-note" aria-live="polite"></p>
+    </section>
+
+    <section class="panel scan-panel" id="panel-site" role="tabpanel" aria-labelledby="tab-site" hidden>
+      <p>
+        Browsers block one website from reading another, so this page cannot fetch your app. Instead, open your deployed app, open the developer console (F12, then Console), paste this snippet, and press Enter. It reads the scripts your page loaded, runs the same patterns as the repo scan, and prints a table. It sends nothing anywhere.
+      </p>
+      <div class="scan-actions">
+        <button class="button" type="button" id="copy-snippet">Copy snippet</button>
+        <span id="copy-status" class="scan-note" aria-live="polite"></span>
+      </div>
+      <pre class="snippet"><code id="snippet">{snippet}</code></pre>
+      <p class="scan-note">Only run console snippets you can read. This one only reads the page and logs to the console. Check every page with a different bundle, such as a dashboard or admin route.</p>
+    </section>
 
     <div id="scan-results" class="scan-results" aria-live="polite"></div>
 
     <article class="prose">
       <h2>What it looks for</h2>
       <ul>
-        <li>OpenAI, Anthropic, Google (Gemini, Firebase server keys), Groq, xAI, Replicate, Hugging Face tokens</li>
+        <li>OpenAI, Anthropic, Google (Gemini, Maps), Groq, xAI, Replicate, Hugging Face tokens</li>
         <li>Stripe secret and restricted keys, and webhook signing secrets</li>
         <li>Supabase service role keys (legacy JWT with role service_role) and new sb_secret_ keys</li>
         <li>AWS access key IDs and secret keys, GitHub and GitLab tokens, Slack tokens and webhooks</li>
-        <li>Twilio, SendGrid, Resend, Mailgun, Discord bot tokens, private key blocks, and database URLs with a password</li>
+        <li>Twilio, SendGrid, Resend, Discord webhooks, private key blocks, and database URLs with a password</li>
         <li>Generic secret assignments, such as SECRET=, TOKEN=, or PASSWORD= with a long value</li>
       </ul>
       <p>
-        Publishable values like a Stripe pk_ key, a Supabase anon key, or a Firebase web config are reported as safe to ship, so you can tell them apart from the real secrets. See <a href="/guides/supabase-anon-key-vs-service-role-key">anon key vs service role key</a>.
+        Publishable values like a Stripe pk_ key, a Supabase anon key, or a Firebase web config are reported as safe to ship, so you can tell them apart from real secrets. See <a href="/guides/supabase-anon-key-vs-service-role-key">anon key vs service role key</a>.
       </p>
       <h2>If it finds a live secret</h2>
       <p>
@@ -56,7 +79,7 @@ const jsonLd = {
       </p>
       <h2>Limits</h2>
       <p>
-        Pattern matching misses keys with no fixed format and can flag test values. A clean result is not proof that a project is safe. For whole repos and history, run Gitleaks or TruffleHog locally or in CI.
+        The repo scan reads the current branch only, not old commits, and stops at 150 files. Pattern matching misses keys with no fixed format and can flag test values. A clean result is not proof that a project is safe. For private repos and full history, run Gitleaks or TruffleHog on your own machine or in CI.
       </p>
     </article>
   </div>
@@ -64,8 +87,9 @@ const jsonLd = {
 
 <style>
   .scan-panel { padding: 1.1rem 1.15rem; margin-top: 1rem; }
-  .scan-panel textarea {
-    width: 100%; box-sizing: border-box; margin-top: 0.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  .scan-panel input {
+    flex: 1 1 18rem; min-width: 0;
+    width: 100%; box-sizing: border-box; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.85rem; padding: 0.75rem; border-radius: 6px; border: 1px solid currentColor; background: transparent; color: inherit;
   }
   .scan-actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 0.7rem; }
@@ -76,10 +100,28 @@ const jsonLd = {
   .scan-results :global(.finding.warn) { border-color: #d48806; }
   .scan-results :global(code) { word-break: break-all; }
   .scan-results :global(.sum) { font-weight: 600; }
+  .scan-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .scan-tabs button { font: inherit; padding: 0.5rem 0.9rem; border: 1px solid currentColor; border-radius: 6px; background: transparent; color: inherit; cursor: pointer; opacity: 0.7; }
+  .scan-tabs button[aria-selected='true'] { opacity: 1; font-weight: 600; }
+  .snippet { max-height: 16rem; overflow: auto; font-size: 0.75rem; padding: 0.75rem; border-radius: 6px; white-space: pre-wrap; word-break: break-all; }
+  .scan-results :global(a) { word-break: break-all; }
 </style>
-
 <script>
-  import { scan } from '../lib/scanner';
+  import { scanRepo, RepoScanError, type RepoFinding } from '../lib/repoScan';
+
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.scan-tabs [role=tab]')];
+  tabs.forEach((tab) => tab.addEventListener('click', () => {
+    tabs.forEach((t) => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+    });
+    out.replaceChildren();
+  }));
+
+  const out = document.getElementById('scan-results') as HTMLDivElement;
+  const status = document.getElementById('repo-status') as HTMLParagraphElement;
+  const runBtn = document.getElementById('repo-run') as HTMLButtonElement;
 
   function el(tag: string, cls: string, text: string) {
     const node = document.createElement(tag);
@@ -88,32 +130,46 @@ const jsonLd = {
     return node;
   }
 
-  const input = document.getElementById('scan-input') as HTMLTextAreaElement;
-  const out = document.getElementById('scan-results') as HTMLDivElement;
-
-  function render() {
-    out.replaceChildren();
-    const text = input.value;
-    if (!text.trim()) return;
-    const findings = scan(text);
-    const high = findings.filter((f) => f.level === 'high').length;
-    const warn = findings.filter((f) => f.level === 'warn').length;
-    out.append(
-      el('p', 'sum', findings.length === 0
-        ? 'No known key formats found. That is not a guarantee, so keep secrets in server env vars anyway.'
-        : `${high} likely secret${high === 1 ? '' : 's'}, ${warn} to review, ${findings.length - high - warn} safe to ship.`),
-    );
+  function render(findings: RepoFinding[], summary: string) {
+    out.replaceChildren(el('p', 'sum', summary));
     for (const f of findings) {
       const box = el('div', 'finding ' + f.level, '');
       const label = f.level === 'high' ? 'Secret' : f.level === 'warn' ? 'Review' : 'Public';
-      box.append(el('strong', '', `${label}: ${f.name}`), el('span', '', ` on line ${f.line} `), el('code', '', mask(f.value)), el('p', '', f.fix));
+      const link = el('a', '', `${f.path}:${f.line}`) as HTMLAnchorElement;
+      link.href = f.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+      box.append(el('strong', '', `${label}: ${f.name} `), link, el('span', '', ' '), el('code', '', f.masked), el('p', '', f.fix));
       out.append(box);
     }
   }
 
-  document.getElementById('scan-run')?.addEventListener('click', render);
-  document.getElementById('scan-clear')?.addEventListener('click', () => {
-    input.value = '';
+  document.getElementById('repo-form')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = (document.getElementById('repo-url') as HTMLInputElement).value;
     out.replaceChildren();
+    runBtn.disabled = true;
+    status.textContent = 'Reading the file list from GitHub...';
+    try {
+      const r = await scanRepo(url, { onProgress: (d, t) => { status.textContent = `Scanned ${d} of ${t} files...`; } });
+      const high = r.findings.filter((f) => f.level === 'high').length;
+      const warn = r.findings.filter((f) => f.level === 'warn').length;
+      status.textContent = `Done: ${r.repo} on ${r.branch}, ${r.scanned} files checked${r.truncated ? ` (first ${r.scanned} of ${r.totalCandidates} text files, env and config files first)` : ''}.`;
+      render(r.findings, r.findings.length === 0
+        ? 'No known key formats found in the files checked. That is not a guarantee, and old commits were not checked.'
+        : `${high} likely secret${high === 1 ? '' : 's'}, ${warn} to review, ${r.findings.length - high - warn} safe to ship. Values are partly masked.`);
+    } catch (err) {
+      status.textContent = err instanceof RepoScanError ? err.message : 'Something went wrong while scanning. Try again in a minute.';
+    } finally {
+      runBtn.disabled = false;
+    }
+  });
+
+  document.getElementById('copy-snippet')!.addEventListener('click', async () => {
+    const msg = document.getElementById('copy-status')!;
+    try {
+      await navigator.clipboard.writeText(document.getElementById('snippet')!.textContent || '');
+      msg.textContent = 'Copied. Paste it into the console on your own site.';
+    } catch {
+      msg.textContent = 'Copy failed. Select the code below and copy it manually.';
+    }
   });
 </script>
