@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import { SITE } from '../lib/site';
 
 const description =
-  'What VibeLocked collects. This static site sets no analytics cookies. The newsletter form does not store your email yet.';
+  'What VibeLocked collects. This static site uses cookie-free GoatCounter analytics. The newsletter form does not store your email yet.';
 ---
 
 <Base title="Privacy" description={description} path="/privacy">
@@ -12,16 +12,20 @@ const description =
       <p class="kicker">Privacy</p>
       <h1 class="page-title">Privacy</h1>
       <p class="lede">
-        This version of the site is a folder of static files. It does not have accounts, and it does not run analytics.
+        This version of the site is a folder of static files. It does not have accounts. It counts visits with GoatCounter, which sets no cookies.
       </p>
     </header>
     <article class="prose">
       <h2>What we collect</h2>
       <p>
-        Reading the site does not create an account. Pages do not embed third-party analytics, advertising pixels, or social trackers. The theme button stores your light or dark choice in <code>localStorage</code> on your device. That is not a cookie, and it is not sent to us.
+        Reading the site does not create an account. Pages do not embed advertising pixels or social trackers. The theme button stores your light or dark choice in <code>localStorage</code> on your device. That is not a cookie, and it is not sent to us.
       </p>
       <p>
         The newsletter form is a placeholder. Submitting it is handled in your browser and does not send the address to a server. When a real email provider is connected, this page will name that provider and describe what it stores before you are asked to sign up again.
+      </p>
+      <h2>Analytics</h2>
+      <p>
+        We use <a href="https://www.goatcounter.com">GoatCounter</a> to count page views. It sets no cookies and does not track you across sites. For each view it records the page path, the referring page, the browser and operating system, screen size, and an approximate country. It does not store your IP address or build a profile of you. A short-lived hash is used only to avoid counting the same visit twice. See the <a href="https://www.goatcounter.com/help/privacy">GoatCounter privacy policy</a>. Blocking the script with a content blocker does not affect how the site works.
       </p>
       <h2>Email you send us</h2>
       <p>
