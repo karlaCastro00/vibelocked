@@ -28,7 +28,7 @@ Checked against the Stripe docs linked below on October 14, 2026.
 
 Your handler will mark an order paid, grant a subscription, or store a customer id. If it does that for an unsigned body, anyone can POST a fake `checkout.session.completed` and grant themselves the thing you sell.
 
-The browser success page is not proof either. The customer can close the tab. Fulfill from the verified webhook, or by retrieving the Checkout Session or PaymentIntent with your secret key on the server. Do not fulfill from a query parameter the client can edit.
+The browser success page is not proof either. The customer can close the tab. Fulfill from the verified webhook, or by retrieving the Checkout Session or PaymentIntent with your secret key on the server. Do not fulfill from a query parameter the client can edit. The [Stripe success page paywall bypass guide](/guides/stripe-success-page-paywall-bypass) shows the fix in full.
 
 ## Verify the signature on the raw body
 

@@ -85,7 +85,7 @@ It gets into the client in a few ways:
 
 Search the built files for `sb_secret_` and `service_role`. If you find one, rotate it, then move it to the server. Rotating comes first. The [first hour guide](/guides/first-hour-after-an-api-key-leaks) is the order.
 
-A Firebase service account file in the repo is the same class of mistake. The web `apiKey` is not. Google's [API keys page](https://firebase.google.com/docs/projects/api-keys) says the client key is not what protects Firestore. Rules are.
+A Firebase service account file in the repo is the same class of mistake. The web `apiKey` is not. Google's [API keys page](https://firebase.google.com/docs/projects/api-keys) says the client key is not what protects Firestore. Rules are. See [is the Firebase API key safe to expose](/guides/firebase-api-key-public-app-check) for the details and where App Check fits.
 
 ## Missing auth on routes you forgot were public
 

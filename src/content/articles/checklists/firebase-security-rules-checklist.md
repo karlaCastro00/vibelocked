@@ -49,7 +49,7 @@ If your rules contain `allow read, write: if request.time < timestamp.date(...)`
 
 ## The client config is not the lock
 
-Google's [API keys](https://firebase.google.com/docs/projects/api-keys) page says security of Realtime Database, Cloud Firestore, and Cloud Storage is enforced with Firebase Security Rules and App Check, not by keeping the Firebase API key secret. It is normal for `apiKey`, `authDomain`, and `projectId` to be in the app.
+Google's [API keys](https://firebase.google.com/docs/projects/api-keys) page says security of Realtime Database, Cloud Firestore, and Cloud Storage is enforced with Firebase Security Rules and App Check, not by keeping the Firebase API key secret. It is normal for `apiKey`, `authDomain`, and `projectId` to be in the app. Our guide on [why the Firebase API key is public and what App Check adds](/guides/firebase-api-key-public-app-check) covers what to lock down instead.
 
 The same page says not to rely only on restricting or hiding API keys. Restricting a key in Google Cloud is a useful extra limit. It does not replace rules.
 

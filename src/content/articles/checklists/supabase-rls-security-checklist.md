@@ -26,7 +26,7 @@ Checked against the Supabase docs linked at the bottom on October 14, 2026. Thos
 
 ## Know which key you shipped
 
-Every request carries an API key. Supabase Auth, when someone is signed in, identifies who is calling. The key identifies what is calling.
+Every request carries an API key. Supabase Auth, when someone is signed in, identifies who is calling. The key identifies what is calling. RLS is only as strong as your sign up rules, so also review your [Supabase Auth security settings](/guides/supabase-auth-security-settings).
 
 | Where the code runs | Key | Why |
 | --- | --- | --- |
@@ -132,7 +132,7 @@ Supabase Storage uses RLS on `storage.objects`. By default, Storage does not all
 
 The service key bypasses Storage RLS too. Supabase's storage access control page says not to share it.
 
-If a bucket is meant to be public, assume anyone with the object URL can read the file. Open a private window, signed out, and request the URL. For user uploads, keep the bucket private and write policies that match the owner.
+If a bucket is meant to be public, assume anyone with the object URL can read the file. Open a private window, signed out, and request the URL. For user uploads, keep the bucket private and write policies that match the owner. The [Supabase Storage bucket security guide](/guides/supabase-storage-bucket-security) has example policies.
 
 ## Functions and triggers
 

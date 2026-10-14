@@ -82,7 +82,7 @@ Use the [review prompt](/guides/security-review-prompt-for-ai-coding-tools). Rej
 
 ## 8. Share a staging URL first
 
-Point the staging project at a separate Supabase project or Firebase project, with separate Stripe test keys. Do not debug against production data. When you are ready, deploy the rules and the server env vars in the same change as the code. A new client against old open rules, or old client code against a secret that was rotated, is how launches break.
+Point the staging project at a separate Supabase project or Firebase project, with separate Stripe test keys. Do not debug against production data. On Vercel, check which variables reach [preview deployments](/guides/vercel-preview-deployments-env-vars), because a public preview URL with production keys is production. When you are ready, deploy the rules and the server env vars in the same change as the code. A new client against old open rules, or old client code against a secret that was rotated, is how launches break.
 
 ## 9. Write down where the new keys live
 

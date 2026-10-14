@@ -49,7 +49,7 @@ Stripe publishable keys (`pk_`) may be in the client. Secret keys may not. Strip
 
 How the generator exposes env vars depends on the framework. The [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code) covers the `NEXT_PUBLIC_` and `VITE_` prefixes. v0 projects are often Next.js. Bolt projects are often Vite. Read the prefix that matches the repo you actually have.
 
-On Replit, put credentials in the Secrets tool, which stores them as environment variables, instead of hard-coding them. Replit's [Secrets docs](https://docs.replit.com/core-concepts/project-editor/app-setup/secrets) call out public projects, git, and screen sharing as ways a hard-coded key gets out.
+On Replit, put credentials in the Secrets tool, which stores them as environment variables, instead of hard-coding them. Replit's [Secrets docs](https://docs.replit.com/core-concepts/project-editor/app-setup/secrets) call out public projects, git, and screen sharing as ways a hard-coded key gets out. The [Replit Secrets guide](/guides/replit-secrets-guide) walks through it step by step.
 
 ## 3. Read the database rules
 
@@ -59,7 +59,7 @@ If the app uses Supabase:
 - `anon` does not have write grants on private tables.
 - Policies use `auth.uid()`, not a user id from the request body.
 - Views set `security_invoker` on Postgres 15 and above, or they are not exposed.
-- Storage buckets for user files are private, and `storage.objects` has owner policies.
+- Storage buckets for user files are private, and `storage.objects` has owner policies. See [Supabase Storage bucket security](/guides/supabase-storage-bucket-security).
 - The secret key appears only in server code.
 
 If the app uses Firebase:
@@ -94,7 +94,7 @@ The [Stripe webhook guide](/guides/securing-stripe-webhooks) is the longer versi
 
 ## 6. AI features that spend your key
 
-A chat box in the UI usually means a route that calls OpenAI, Anthropic, or another provider with your key. If that route does not check a session, anyone who can hit the URL spends your quota.
+A chat box in the UI usually means a route that calls OpenAI, Anthropic, or another provider with your key. If that route does not check a session, anyone who can hit the URL spends your quota. Here is [how to protect an OpenAI API route from abuse](/guides/protect-openai-api-route-from-abuse) with auth, rate limits, and spend caps.
 
 Require a signed-in user when the feature is not meant to be public. Cap how much text you will forward. Do not log the provider key. Do not return the provider's raw error if it echoes request headers.
 

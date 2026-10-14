@@ -41,7 +41,7 @@ So `VITE_OPENAI_API_KEY` is a public key by definition, no matter how the variab
 
 Safe to expose: a Stripe `pk_` key, a Supabase anon or `sb_publishable_` key (with Row Level Security on), a Firebase web config, a GoatCounter or analytics site code.
 
-Never expose: OpenAI, Anthropic, or other model keys, Stripe `sk_` or `rk_` keys, a Supabase service role or `sb_secret_` key, database URLs, webhook signing secrets, AWS keys.
+Never expose: OpenAI, Anthropic, or other model keys, Stripe `sk_` or `rk_` keys, a Clerk `sk_` key (see [Clerk publishable key vs secret key](/guides/clerk-publishable-key-vs-secret-key)), a Supabase service role or `sb_secret_` key, database URLs, webhook signing secrets, AWS keys.
 
 ## Cursor
 
@@ -49,7 +49,7 @@ Cursor edits a real project on your disk, so the normal rules apply plus a few f
 
 1. **Ignore `.env` in git first.** Check `.gitignore` contains `.env`, `.env.*`, and `!.env.example`. Then confirm nothing is tracked: `git ls-files | grep -i env`.
 2. **Add a `.cursorignore`.** It uses gitignore syntax. Add `.env*`, key files, and any folder of credentials. Cursor's docs describe it as best effort for indexing and AI features, not a sandbox.
-3. **Keep production secrets out of the local folder.** Use development or test keys locally (Stripe test mode, a separate Supabase project). Store production values only in your host's secret settings.
+3. **Keep production secrets out of the local folder.** Use development or test keys locally (Stripe test mode, a separate Supabase project). Store production values only in your host's secret settings. On Vercel, scope them to Production so [preview deployments](/guides/vercel-preview-deployments-env-vars) do not get them.
 4. **Watch agent commands.** Review commands like `cat .env`, `printenv`, or scripts that print config before you approve them. Output in the chat is sent to the model.
 5. **Do not paste keys into the chat.** Describe the variable name instead: "read `OPENAI_API_KEY` from `process.env` in the API route".
 
@@ -69,7 +69,7 @@ Lovable apps are React and Vite on the frontend, with Supabase as the usual back
 1. The Supabase URL and anon or publishable key in the client are expected. They are only safe when [Row Level Security](/checklists/supabase-rls-security-checklist) is enabled with real policies on every exposed table.
 2. Secret keys (OpenAI, Stripe secret, Resend, and so on) belong in Supabase Edge Function secrets, read with `Deno.env.get('NAME')` inside the function. The browser calls the function, never the provider.
 3. Never place the service role key in client code or in a `VITE_` variable. It bypasses RLS completely. See [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
-4. If you ask Lovable to "connect OpenAI", read the generated code and confirm the call happens in an edge function.
+4. If you ask Lovable to "connect OpenAI", read the generated code and confirm the call happens in an edge function. Then [protect that route from abuse](/guides/protect-openai-api-route-from-abuse) so strangers cannot spend your credits.
 
 ## A quick pre-deploy check for any tool
 

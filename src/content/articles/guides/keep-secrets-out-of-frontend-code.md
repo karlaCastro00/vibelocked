@@ -33,6 +33,8 @@ Checked against the Next.js, Vite, Supabase, Firebase, and Stripe docs linked be
 | Supabase secret key, legacy service_role | No | Yes |
 | Firebase web `apiKey`, `projectId`, `authDomain` | Yes | Also fine |
 | Firebase service account JSON, Admin SDK credential | No | Yes |
+| Clerk publishable key (`pk_`) | Yes | Also fine |
+| Clerk secret key (`sk_`) | No | Yes |
 | Stripe publishable key (`pk_`) | Yes | Also fine |
 | Stripe secret key (`sk_`), restricted key (`rk_`), webhook secret (`whsec_`) | No | Yes |
 | OpenAI, Anthropic, AWS, database URLs | No | Yes |
@@ -92,7 +94,7 @@ The browser asks your server to do the privileged thing. The server holds the ke
 
 - Next.js: a Route Handler or Server Action, reading a normal env var.
 - Supabase: an Edge Function, with the key in [function secrets](https://supabase.com/docs/guides/functions/secrets), using the secret key only when you mean to bypass RLS.
-- Replit: the [Secrets tool](https://docs.replit.com/core-concepts/project-editor/app-setup/secrets), which injects environment variables, not a string in a source file.
+- Replit: the [Secrets tool](https://docs.replit.com/core-concepts/project-editor/app-setup/secrets), which injects environment variables, not a string in a source file. More in our [Replit Secrets guide](/guides/replit-secrets-guide).
 - Any host: the deployment environment, not the repository.
 
 If the framework has no server, you do not have a place for a secret. Do not "just put it in the client for now." Add a small server, a function, or a backend that already exists. Supabase RLS lets the browser talk to Postgres with the publishable key for the rows the user should see. That is the path that does not need the secret key at all.
