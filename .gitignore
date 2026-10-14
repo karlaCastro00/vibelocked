@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# local operator files (do not commit)
+ops-log.md
+distribution.md
+.sprint-lock
