@@ -3,9 +3,9 @@ export type Rule = { name: string; re: RegExp; level: 'high' | 'warn' | 'info'; 
 export const rules: Rule[] = [
   { name: 'OpenAI API key', re: /\bsk-(?:proj-|svcacct-|admin-)?[A-Za-z0-9_-]{20,}T3BlbkFJ[A-Za-z0-9_-]{20,}\b|\bsk-(?:proj|svcacct|admin)-[A-Za-z0-9_-]{40,}/g, level: 'high', fix: 'Revoke at platform.openai.com/api-keys and call OpenAI only from a server.' },
   { name: 'Anthropic API key', re: /\bsk-ant-(?:api|admin)\d{2}-[A-Za-z0-9_-]{80,}/g, level: 'high', fix: 'Revoke in the Anthropic Console and move calls server side.' },
-  { name: 'Stripe secret key', re: /\bsk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'Roll the key in the Stripe Dashboard under Developers, API keys.' },
+  { name: 'Stripe or Clerk secret key', re: /\bsk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'If it is Stripe, roll it under Developers, API keys. If it is Clerk (also sk_live_/sk_test_), add a new Secret Key in the Clerk Dashboard, deploy, then delete the old one.' },
   { name: 'Stripe restricted key', re: /\brk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'Roll the restricted key in the Stripe Dashboard.' },
-  { name: 'Stripe webhook secret', re: /\bwhsec_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'Roll the endpoint signing secret in Stripe and keep it server side.' },
+  { name: 'Stripe or Clerk webhook secret', re: /\bwhsec_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'Rotate the endpoint signing secret in Stripe or Clerk and keep it server side only.' },
   { name: 'Supabase secret key', re: /\bsb_secret_[A-Za-z0-9_-]{20,}/g, level: 'high', fix: 'Delete and recreate it under Project Settings, API Keys. Never ship it to the browser.' },
   { name: 'AWS access key ID', re: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g, level: 'high', fix: 'Deactivate and delete the key in IAM, then check CloudTrail for use.' },
   { name: 'AWS secret access key', re: /aws_?secret_?access_?key["'\s:=]+[A-Za-z0-9/+]{40}/gi, level: 'high', fix: 'Deactivate the matching access key in IAM.' },
@@ -24,7 +24,7 @@ export const rules: Rule[] = [
   { name: 'Replicate token', re: /\br8_[A-Za-z0-9]{36,}\b/g, level: 'high', fix: 'Revoke it in Replicate account settings.' },
   { name: 'Private key block', re: /-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY(?: BLOCK)?-----/g, level: 'high', fix: 'Treat the key pair as compromised and replace it.' },
   { name: 'Database URL with password', re: /\b(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|rediss):\/\/[^\s:@/'"]+:[^\s@/'"]{3,}@[^\s'"]+/g, level: 'high', fix: 'Change the database password and keep the URL in server env vars only.' },
-  { name: 'Stripe publishable key', re: /\bpk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'info', fix: 'Publishable keys are meant for the browser.' },
+  { name: 'Stripe or Clerk publishable key', re: /\bpk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'info', fix: 'Publishable keys (Stripe pk_ or Clerk pk_) are meant for the browser.' },
   { name: 'Supabase publishable key', re: /\bsb_publishable_[A-Za-z0-9_-]{20,}/g, level: 'info', fix: 'Safe to ship if Row Level Security is on for every exposed table.' },
 ];
 

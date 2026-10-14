@@ -75,7 +75,7 @@ The risk is a shared helper file that touches the secret and then gets imported 
 
 ## Check for a leak
 
-1. Search your repo for `sk_live_`, `sk_test_`, and `whsec_`, including old commits. The [VibeLocked scanner](/scan) checks public GitHub repos for `sk_` and `whsec_` strings. Note that Stripe uses the same prefixes, so a Clerk key may be labeled as a Stripe key. Either way it is a secret.
+1. Search your repo for `sk_live_`, `sk_test_`, and `whsec_`, including old commits. The [VibeLocked scanner](/scan) checks public GitHub repos for `sk_` and `whsec_` strings. The scanner labels shared `sk_` and `whsec_` prefixes as Stripe or Clerk, since both products use them. Either way it is a secret.
 2. Open your deployed site, view the JavaScript files in DevTools, and search for `sk_`.
 3. Check your host (Vercel, Netlify, and so on) for any `NEXT_PUBLIC_` or `VITE_` variable holding a secret.
 
