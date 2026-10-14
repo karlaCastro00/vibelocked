@@ -7,30 +7,19 @@ interface Props {
 const { id = 'email', tone = 'band' } = Astro.props;
 ---
 
-<form class:list={['signup', tone === 'page' && 'page-signup']} data-newsletter>
+<form
+  class:list={['signup', tone === 'page' && 'page-signup']}
+  action="https://buttondown.com/api/emails/embed-subscribe/vibelocked"
+  method="post"
+  target="_blank"
+>
   <label for={id}>Email</label>
   <div class="signup-row">
-    <input id={id} type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" />
+    <input id={id} name="email" type="email" required autocomplete="email" inputmode="email" placeholder="you@example.com" />
+    <input type="hidden" name="embed" value="1" />
     <button type="submit">Join the list</button>
   </div>
-  <p class="form-status" role="status" hidden>
-    Not connected yet. This page does not store or send your email.
-  </p>
   <p class="fine">
-    Placeholder only. The weekly note is not wired to an email provider yet, so submitting this form stays in your browser.
+    Sent with <a href="https://buttondown.com" rel="noopener">Buttondown</a>. You will get a confirmation email first. Unsubscribe from any issue in one click.
   </p>
 </form>
-
-<script is:inline>
-  document.querySelectorAll('form[data-newsletter]').forEach(function (form) {
-    if (form.dataset.bound === 'true') return;
-    form.dataset.bound = 'true';
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      var status = form.querySelector('.form-status');
-      if (status) status.hidden = false;
-      var input = form.querySelector('input');
-      if (input) input.value = '';
-    });
-  });
-</script>
