@@ -55,7 +55,9 @@ export async function scanRepo(
 
   let branch = parsed.branch;
   if (!branch) branch = (await api(`/repos/${owner}/${repo}`)).default_branch as string;
-  const tree = await api(`/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`);
+  // Pin to the exact commit so raw.githubusercontent.com's CDN cache never serves stale files.
+  const commit = (await api(`/repos/${owner}/${repo}/commits/${encodeURIComponent(branch)}`)).sha as string;
+  const tree = await api(`/repos/${owner}/${repo}/git/trees/${commit}?recursive=1`);
   const blobs = (tree.tree as { path: string; type: string; size?: number }[]).filter((t) => t.type === 'blob');
   const candidates = blobs.filter((t) => !SKIP_DIRS.test(t.path) && !LOCKFILES.test(t.path) && !BINARY.test(t.path) && (t.size ?? 0) <= MAX_SIZE && (t.size ?? 0) > 0);
   candidates.sort((a, b) => priority(b.path) - priority(a.path));
@@ -67,13 +69,13 @@ export async function scanRepo(
     while (i < picked.length) {
       const file = picked[i++];
       try {
-        const res = await f(`https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(branch!)}/${file.path.split('/').map(encodeURIComponent).join('/')}`);
+        const res = await f(`https://raw.githubusercontent.com/${owner}/${repo}/${commit}/${file.path.split('/').map(encodeURIComponent).join('/')}`);
         if (!res.ok) { skipped++; continue; }
         const text = await res.text();
         if (text.slice(0, 8000).includes('\u0000')) { skipped++; continue; }
         for (const hit of scan(text)) {
           findings.push({ ...hit, path: file.path, masked: mask(hit.value),
-            url: `https://github.com/${owner}/${repo}/blob/${branch}/${file.path}#L${hit.line}` });
+            url: `https://github.com/${owner}/${repo}/blob/${commit}/${file.path}#L${hit.line}` });
         }
       } catch { skipped++; }
       finally { opts.onProgress?.(++done, picked.length); }
