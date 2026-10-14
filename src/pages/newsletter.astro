@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import { SITE } from '../lib/site';
+
+const description =
+  'A weekly VibeLocked note on leaks, security rules, and launch checks. Signup is a placeholder and does not store email yet.';
+
+const jsonLd = {
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does the newsletter form store my email?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. The form is a placeholder. Submitting it stays in your browser and does not send the address to a server.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What will the weekly note include?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'One practical security note for people shipping AI-built apps: a rule change, a leak pattern, or a launch check, with links to official docs. It will not invent incident statistics.',
+      },
+    },
+  ],
+};
+---
+
+<Base title="Weekly security notes" description={description} path="/newsletter" jsonLd={jsonLd}>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">Newsletter</p>
+      <h1 class="page-title">A short note, once a week</h1>
+      <p class="lede">
+        For people about to share an AI-built app. One leak pattern, one rule worth checking, or one launch step, with a link to the vendor doc.
+      </p>
+    </header>
+    <article class="prose">
+      <h2>What you will get</h2>
+      <ul>
+        <li>Something you can check in your own project that week.</li>
+        <li>Links to official docs, not a retelling of a breach we did not verify.</li>
+        <li>A skip week when there is nothing worth sending. No padded issues.</li>
+      </ul>
+      <h2>What you will not get</h2>
+      <ul>
+        <li>A product pitch from VibeLocked. We do not sell a scanner.</li>
+        <li>Unlabeled sponsor copy. If a future issue mentions a sponsor, the line will say so.</li>
+        <li>A stored email address from the form on this page. It is not connected.</li>
+      </ul>
+      <p>
+        Questions about the list: <a href={`mailto:${SITE.helloEmail}`}>{SITE.helloEmail}</a>.
+      </p>
+    </article>
+    <div class="panel" style="padding: 1.1rem 1.15rem; margin-top: 1.4rem; max-width: 40rem;">
+      <h2 style="font-family: var(--serif); margin: 0 0 0.4rem;">Join the list</h2>
+      <NewsletterForm id="newsletter-email" tone="page" />
+    </div>
+  </div>
+</Base>

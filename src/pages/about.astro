@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+
+const description =
+  'VibeLocked is an independent security publication for people who build apps with AI coding tools. No invented stats, no fake affiliation.';
+---
+
+<Base title="About" description={description} path="/about">
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">About</p>
+      <h1 class="page-title">A field manual, not a scanner</h1>
+      <p class="lede">
+        VibeLocked helps people who build with AI coding tools ship an app without handing out their database or their keys.
+      </p>
+    </header>
+    <article class="prose">
+      <h2>Who it is for</h2>
+      <p>
+        You used Lovable, Bolt, v0, Cursor, Replit, or a similar tool. The app talks to Supabase, Firebase, Stripe, or a Next.js route. It works in the preview. You are about to send the link to a customer, a client, or the open internet.
+      </p>
+      <p>
+        The promise of the site is narrow: ship your AI-built app without leaking data or keys. The pages are checklists and guides you can run yourself. They are not a penetration test and they are not a substitute for a professional review of a high-risk product.
+      </p>
+      <h2>Independent, on purpose</h2>
+      <p>
+        VibeLocked is not affiliated with Lovable, Bolt, v0, Cursor, Replit, Supabase, Firebase, Stripe, Vercel, or the Next.js project. Those names are used so you can find the notes that match your stack. Their trademarks belong to them.
+      </p>
+      <p>
+        Articles cite official documentation and describe mechanisms. They do not invent breaches, victim stories, or statistics. If a vendor doc and this site disagree, trust the vendor doc and <a href={`mailto:${SITE.helloEmail}`}>tell us</a>.
+      </p>
+      <h2>How it is funded</h2>
+      <p>
+        The writing is free to read. The site is built to run as static files, so hosting can stay at zero dollars on Cloudflare Pages or GitHub Pages. Money, when it exists, comes from four labeled places:
+      </p>
+      <ul>
+        <li>A sponsor slot on the homepage.</li>
+        <li>A single featured-tool slot.</li>
+        <li>Affiliate links, which will be marked as affiliate links.</li>
+        <li>A weekly newsletter, once the signup is actually connected.</li>
+      </ul>
+      <p>
+        None of the launch articles are sponsored. A sponsor does not get to edit a checklist so that their product is the only answer. The <a href="/sponsor">media kit</a> says what is for sale and what is not. There is no audience number on that page, because we will not publish a traffic figure we have not measured.
+      </p>
+      <h2>Contact</h2>
+      <p>
+        Corrections and general notes: <a href={`mailto:${SITE.helloEmail}`}>{SITE.helloEmail}</a>.
+        Sponsors: <a href={`mailto:${SITE.sponsorEmail}`}>{SITE.sponsorEmail}</a>.
+      </p>
+    </article>
+  </div>
+</Base>

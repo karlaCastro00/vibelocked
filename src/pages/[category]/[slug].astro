@@ -1,0 +1,202 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SponsorSlot from '../../components/SponsorSlot.astro';
+import { SITE, absUrl } from '../../lib/site';
+import {
+  articlePath,
+  articleSlug,
+  categoryLabel,
+  categoryPath,
+  findRelated,
+  formatDate,
+  publishedArticles,
+  readingMinutes,
+  type Article,
+} from '../../lib/articles';
+
+export async function getStaticPaths() {
+  const articles = await publishedArticles();
+  return articles.map((article) => ({
+    params: {
+      category: categoryPath(article.data.category),
+      slug: articleSlug(article),
+    },
+    props: { id: article.id },
+  }));
+}
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props as Props;
+const entry = await getEntry('articles', id);
+if (!entry) {
+  throw new Error(`Missing article ${id}`);
+}
+
+const { Content, headings } = await render(entry);
+const all = await publishedArticles();
+const related = findRelated(entry, all);
+const path = articlePath(entry);
+const url = absUrl(path);
+const minutes = readingMinutes(entry.body);
+const sectionLabel = entry.data.category === 'checklist' ? 'Checklists' : 'Guides';
+const sectionHref = `/${categoryPath(entry.data.category)}`;
+const modified = entry.data.updatedDate ?? entry.data.pubDate;
+const toc = headings.filter((heading) => heading.depth === 2);
+
+const articleLd: Record<string, unknown> = {
+  '@type': 'Article',
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.pubDate.toISOString(),
+  dateModified: modified.toISOString(),
+  mainEntityOfPage: url,
+  url,
+  image: absUrl('/og.png'),
+  author: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+    logo: {
+      '@type': 'ImageObject',
+      url: absUrl('/og.png'),
+    },
+  },
+};
+
+const breadcrumbLd = {
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: absUrl('/') },
+    { '@type': 'ListItem', position: 2, name: sectionLabel, item: absUrl(sectionHref) },
+    { '@type': 'ListItem', position: 3, name: entry.data.title, item: url },
+  ],
+};
+
+const jsonLd: Record<string, unknown>[] = [articleLd, breadcrumbLd];
+if (entry.data.faqs.length > 0) {
+  jsonLd.push({
+    '@type': 'FAQPage',
+    mainEntity: entry.data.faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  });
+}
+---
+
+<Base
+  title={entry.data.title}
+  description={entry.data.description}
+  path={path}
+  ogType="article"
+  published={entry.data.pubDate}
+  modified={modified}
+  jsonLd={jsonLd}
+>
+  <div class="wrap article-layout">
+    <article>
+      <p class="crumbs">
+        <a href="/">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href={sectionHref}>{sectionLabel}</a>
+        <span aria-hidden="true">/</span>
+        <span>{entry.data.title}</span>
+      </p>
+      <p class="kicker">{categoryLabel(entry.data.category)}</p>
+      <h1 class="article-title">{entry.data.title}</h1>
+      <p class="dek">{entry.data.description}</p>
+      <p class="meta-row">
+        <time datetime={entry.data.pubDate.toISOString()}>Published {formatDate(entry.data.pubDate)}</time>
+        {entry.data.updatedDate && (
+          <time datetime={entry.data.updatedDate.toISOString()}>Updated {formatDate(entry.data.updatedDate)}</time>
+        )}
+        {minutes && <span>{minutes} min read</span>}
+      </p>
+      <p class="trust-line">
+        Independent notes from VibeLocked. Not a pentest, and not affiliated with the tools named below.
+      </p>
+      {
+        toc.length > 0 && (
+          <nav class="toc toc-mobile" aria-label="On this page">
+            <p class="kicker">On this page</p>
+            <ol>
+              {toc.map((heading) => (
+                <li>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+      <div class="prose">
+        <Content />
+      </div>
+      {
+        entry.data.faqs.length > 0 && (
+          <section class="prose" aria-labelledby="faq-heading">
+            <h2 id="faq-heading">Questions</h2>
+            <div class="faq-list">
+              {entry.data.faqs.map((faq) => (
+                <article class="faq-item">
+                  <h3>{faq.question}</h3>
+                  <p>{faq.answer}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )
+      }
+      {
+        related.length > 0 && (
+          <section class="related" aria-labelledby="related-heading">
+            <p class="kicker" id="related-heading">Keep going</p>
+            <ul class="ruled">
+              {related.map((item) => (
+                <li>
+                  <a href={articlePath(item)}>
+                    <span class="num">{categoryLabel(item.data.category).slice(0, 1)}</span>
+                    <span>
+                      <strong>{item.data.title}</strong>
+                      <em>{item.data.description}</em>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+      <div class="slot-grid">
+        <SponsorSlot />
+      </div>
+    </article>
+    {
+      toc.length > 0 && (
+        <aside class="toc toc-desktop" aria-label="On this page">
+          <p class="kicker">On this page</p>
+          <ol>
+            {toc.map((heading) => (
+              <li>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      )
+    }
+  </div>
+</Base>

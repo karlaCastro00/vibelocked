@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import RuledList from '../../components/RuledList.astro';
+import { publishedArticles } from '../../lib/articles';
+
+const articles = (await publishedArticles()).filter((article) => article.data.category === 'guide');
+const description =
+  'Guides on leaked API keys, frontend secrets, Stripe webhooks, IDOR, and a security review prompt for AI coding tools.';
+---
+
+<Base title="Security guides for vibe coders" description={description} path="/guides">
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">Guides</p>
+      <h1 class="page-title">Guides</h1>
+      <p class="lede">
+        Longer notes for the failures that show up when an AI coding tool ships a real backend: keys in the bundle, open rules, and routes with no auth check.
+      </p>
+    </header>
+    <RuledList articles={articles} />
+  </div>
+</Base>

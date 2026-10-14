@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+
+const description =
+  'What VibeLocked collects. This static site sets no analytics cookies. The newsletter form does not store your email yet.';
+---
+
+<Base title="Privacy" description={description} path="/privacy">
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">Privacy</p>
+      <h1 class="page-title">Privacy</h1>
+      <p class="lede">
+        This version of the site is a folder of static files. It does not have accounts, and it does not run analytics.
+      </p>
+    </header>
+    <article class="prose">
+      <h2>What we collect</h2>
+      <p>
+        Reading the site does not create an account. Pages do not embed third-party analytics, advertising pixels, or social trackers. The theme button stores your light or dark choice in <code>localStorage</code> on your device. That is not a cookie, and it is not sent to us.
+      </p>
+      <p>
+        The newsletter form is a placeholder. Submitting it is handled in your browser and does not send the address to a server. When a real email provider is connected, this page will name that provider and describe what it stores before you are asked to sign up again.
+      </p>
+      <h2>Email you send us</h2>
+      <p>
+        If you write to <a href={`mailto:${SITE.helloEmail}`}>{SITE.helloEmail}</a> or <a href={`mailto:${SITE.sponsorEmail}`}>{SITE.sponsorEmail}</a>, we use the message to reply and, for sponsor mail, to discuss a placement. We do not sell that correspondence.
+      </p>
+      <h2>Hosting logs</h2>
+      <p>
+        The site is meant to be hosted as static files on a service such as Cloudflare Pages or GitHub Pages. Those hosts may keep ordinary request logs, including IP addresses, as part of serving the files. VibeLocked does not add its own logging on top.
+      </p>
+      <h2>Links</h2>
+      <p>
+        Guides link to official vendor documentation. Those sites have their own policies. Sponsor and affiliate links, when a placement exists, will be labeled on the page. This launch version uses empty placeholders, not paid links.
+      </p>
+      <h2>Children</h2>
+      <p>
+        The site is written for people building software. It is not directed at children.
+      </p>
+      <h2>Changes</h2>
+      <p>
+        If this policy changes, the page will change with it. The meaningful version is the one published at this URL.
+      </p>
+      <h2>Contact</h2>
+      <p>
+        Privacy questions: <a href={`mailto:${SITE.helloEmail}`}>{SITE.helloEmail}</a>.
+      </p>
+    </article>
+  </div>
+</Base>

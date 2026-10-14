@@ -1,0 +1,29 @@
+---
+interface Props {
+  featured?: boolean;
+}
+
+const { featured = false } = Astro.props;
+---
+
+<aside class="slot" aria-label={featured ? 'Featured tool' : 'Sponsor slot'}>
+  <p class="slot-label">{featured ? 'Featured tool' : 'Sponsor slot'}</p>
+  {
+    featured ? (
+      <>
+        <p class="slot-title">This spot is open</p>
+        <p>
+          One security tool, labeled as featured, with a plain reason it is here. Nothing is featured yet. Scanners and secrets managers can ask about it.
+        </p>
+      </>
+    ) : (
+      <>
+        <p class="slot-title">Your tool here, sponsor VibeLocked</p>
+        <p>
+          This box is unsold. It is a paid placement for security tools, kept separate from the guides. None of the launch articles are sponsored.
+        </p>
+      </>
+    )
+  }
+  <p><a href="/sponsor">View the media kit</a></p>
+</aside>

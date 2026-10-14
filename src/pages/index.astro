@@ -1,0 +1,129 @@
+---
+import Base from '../layouts/Base.astro';
+import RuledList from '../components/RuledList.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import SponsorSlot from '../components/SponsorSlot.astro';
+import { SITE, absUrl } from '../lib/site';
+import { publishedArticles } from '../lib/articles';
+
+const articles = await publishedArticles();
+const checklists = articles.filter((article) => article.data.category === 'checklist');
+const guides = articles.filter((article) => article.data.category === 'guide');
+
+const description =
+  'Ship your AI-built app without leaking data or keys. Checklists and guides for Lovable, Bolt, v0, Cursor, Replit, Supabase, Firebase, and Next.js.';
+
+const jsonLd = {
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  description,
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+    email: SITE.helloEmail,
+    logo: {
+      '@type': 'ImageObject',
+      url: absUrl('/og.png'),
+    },
+  },
+};
+---
+
+<Base
+  title="VibeLocked | Ship your AI-built app without leaking data or keys"
+  description={description}
+  path="/"
+  absoluteTitle
+  jsonLd={jsonLd}
+>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <p class="kicker">Independent security hub</p>
+        <h1>Ship your AI-built app without leaking data or keys.</h1>
+        <p class="lede">
+          VibeLocked is a plain-language field manual for people building with Lovable, Bolt, v0, Cursor, Replit, Supabase, Firebase, and Next.js.
+        </p>
+        <p class="muted">
+          The guides are free to read. Sponsors, a featured tool slot, labeled affiliate links, and a weekly newsletter are how the site stays up. Launch articles are not paid placements.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="/checklists/ship-checklist-for-a-vibe-coded-app">Start with the ship checklist</a>
+          <a class="button button-ghost" href="/guides/first-hour-after-an-api-key-leaks">A key already leaked</a>
+        </div>
+      </div>
+      <aside class="start-here">
+        <p class="kicker">Start here</p>
+        <ol>
+          <li>
+            <a href="/checklists/ship-checklist-for-a-vibe-coded-app">
+              <span class="num">01</span>
+              <span>
+                <strong>Before you share the URL</strong>
+                <span>Keys, rules, auth, and webhooks in the order that matters.</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="/guides/first-hour-after-an-api-key-leaks">
+              <span class="num">02</span>
+              <span>
+                <strong>If a key is already out</strong>
+                <span>Revoke it before you clean up the file or the git history.</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="/guides/security-review-prompt-for-ai-coding-tools">
+              <span class="num">03</span>
+              <span>
+                <strong>Ask the coding tool to review itself</strong>
+                <span>A copy-paste prompt, and how to read the answer.</span>
+              </span>
+            </a>
+          </li>
+        </ol>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="checklists-heading">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Checklists</p>
+          <h2 id="checklists-heading">Run these before launch</h2>
+        </div>
+        <a href="/checklists">All checklists</a>
+      </div>
+      <RuledList articles={checklists} />
+    </section>
+
+    <section class="section" aria-labelledby="guides-heading">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Guides</p>
+          <h2 id="guides-heading">Read these when something looks off</h2>
+        </div>
+        <a href="/guides">All guides</a>
+      </div>
+      <RuledList articles={guides} />
+    </section>
+
+    <div class="slot-grid">
+      <SponsorSlot />
+      <SponsorSlot featured />
+    </div>
+  </div>
+
+  <section class="band" aria-labelledby="newsletter-heading">
+    <div class="wrap">
+      <p class="kicker">Weekly note</p>
+      <h2 id="newsletter-heading">One useful security note a week</h2>
+      <p class="muted">
+        Leaks, rules, and launch checks. No invented incident counts. The form below is a placeholder until the list is connected.
+      </p>
+      <NewsletterForm id="home-email" />
+    </div>
+  </section>
+</Base>

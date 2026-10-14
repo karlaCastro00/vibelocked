@@ -1,0 +1,31 @@
+---
+import { articlePath, categoryLabel, formatDate, type Article } from '../lib/articles';
+
+interface Props {
+  articles: Article[];
+}
+
+const { articles } = Astro.props;
+---
+
+{
+  articles.length === 0 ? (
+    <p class="muted">Nothing in this section yet.</p>
+  ) : (
+    <ol class="ruled">
+      {articles.map((article, index) => (
+        <li>
+          <a href={articlePath(article)}>
+            <span class="num">{String(index + 1).padStart(2, '0')}</span>
+            <span>
+              <span class="kicker">{categoryLabel(article.data.category)}</span>
+              <strong>{article.data.title}</strong>
+              <em>{article.data.description}</em>
+            </span>
+            <time datetime={article.data.pubDate.toISOString()}>{formatDate(article.data.pubDate)}</time>
+          </a>
+        </li>
+      ))}
+    </ol>
+  )
+}

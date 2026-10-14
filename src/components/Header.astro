@@ -1,0 +1,74 @@
+---
+const path = Astro.url.pathname;
+const links = [
+  { href: '/checklists', label: 'Checklists' },
+  { href: '/guides', label: 'Guides' },
+  { href: '/newsletter', label: 'Newsletter' },
+  { href: '/sponsor', label: 'Sponsor' },
+  { href: '/about', label: 'About' },
+];
+
+function current(href: string) {
+  return path === href || path.startsWith(`${href}/`);
+}
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="logo" href="/">
+      <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="currentColor"></rect>
+        <rect x="8" y="14" width="16" height="12" rx="2" fill="var(--bg)"></rect>
+        <path d="M11 14.5V11a5 5 0 0 1 10 0v3.5" fill="none" stroke="var(--bg)" stroke-width="2"></path>
+      </svg>
+      <span class="logo-word"><em>Vibe</em>Locked</span>
+    </a>
+    <div class="header-actions">
+      <nav class="nav-desktop" aria-label="Primary">
+        {
+          links.map((link) => (
+            <a href={link.href} aria-current={current(link.href) ? 'page' : undefined}>
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+      <button class="theme-toggle" type="button" id="theme-toggle" aria-pressed="false">
+        <span class="when-light">Dark</span>
+        <span class="when-dark">Light</span>
+      </button>
+      <details class="nav-mobile">
+        <summary>Menu</summary>
+        <nav aria-label="Mobile">
+          {
+            links.map((link) => (
+              <a href={link.href} aria-current={current(link.href) ? 'page' : undefined}>
+                {link.label}
+              </a>
+            ))
+          }
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<script is:inline>
+  (function () {
+    var button = document.getElementById('theme-toggle');
+    if (!button) return;
+    function sync() {
+      var dark = document.documentElement.dataset.theme === 'dark';
+      button.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    }
+    sync();
+    button.addEventListener('click', function () {
+      var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try {
+        localStorage.setItem('vibelocked-theme', next);
+      } catch (error) {}
+      sync();
+    });
+  })();
+</script>

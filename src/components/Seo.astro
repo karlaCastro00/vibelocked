@@ -1,0 +1,65 @@
+---
+import { SITE, absUrl } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  absoluteTitle?: boolean;
+  ogType?: 'website' | 'article';
+  published?: Date;
+  modified?: Date;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  path,
+  absoluteTitle = false,
+  ogType = 'website',
+  published,
+  modified,
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const documentTitle = absoluteTitle ? title : `${title} | ${SITE.name}`;
+const canonical = absUrl(path);
+const image = absUrl('/og.png');
+const graph = jsonLd
+  ? {
+      '@context': 'https://schema.org',
+      '@graph': Array.isArray(jsonLd) ? jsonLd : [jsonLd],
+    }
+  : undefined;
+const json = graph ? JSON.stringify(graph).replace(/</g, '\\u003c') : '';
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+<title>{documentTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content={noindex ? 'noindex,follow' : 'index,follow'} />
+<meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#101311" media="(prefers-color-scheme: dark)" />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={documentTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={image} />
+<meta property="og:locale" content="en_US" />
+{published && <meta property="article:published_time" content={published.toISOString()} />}
+{modified && <meta property="article:modified_time" content={modified.toISOString()} />}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={documentTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" href="/og.png" />
+<link rel="alternate" type="application/rss+xml" title={`${SITE.name} articles`} href={absUrl('/rss.xml')} />
+{json && <script type="application/ld+json" set:html={json} />}

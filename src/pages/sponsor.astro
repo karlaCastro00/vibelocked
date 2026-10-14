@@ -1,0 +1,112 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+
+const description =
+  'Sponsor VibeLocked. Honest media kit for security scanners and secrets managers. No invented traffic numbers.';
+
+const jsonLd = {
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'How do I sponsor VibeLocked?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Email sponsors@vibelocked.com with the tool, the URL, and who it helps. The homepage sponsor slot and the featured-tool slot are unsold.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Do you publish audience size?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. Traffic figures will be published only after measurement exists. VibeLocked does not estimate or invent audience numbers.',
+      },
+    },
+  ],
+};
+---
+
+<Base title="Sponsor VibeLocked" description={description} path="/sponsor" jsonLd={jsonLd}>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">Media kit</p>
+      <h1 class="page-title">Sponsor the site</h1>
+      <p class="lede">
+        VibeLocked is a security hub for people who ship apps with AI coding tools. The readers are builders, not a scraped list of CISOs.
+      </p>
+    </header>
+    <article class="prose">
+      <h2>Who it is for</h2>
+      <p>
+        People using Lovable, Bolt, v0, Cursor, Replit, Supabase, Firebase, and Next.js who need to keep data and keys from leaking. If your tool is a security scanner, a secrets manager, or something a solo builder can actually run before launch, you are in the right room.
+      </p>
+      <h2>What we will not invent</h2>
+      <ul>
+        <li>Traffic, subscribers, or open rates. Those numbers will show up here only after they are measured. Until then, the honest figure is: not published.</li>
+        <li>Case studies, logos, or quotes from customers we do not have.</li>
+        <li>A rate card with made-up prices. Email for the current card.</li>
+      </ul>
+      <h2>Placements</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Slot</th>
+            <th>Where it appears</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sponsor slot</td>
+            <td>Homepage. Copy on the empty slot: "Your tool here, sponsor VibeLocked".</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td>Featured tool</td>
+            <td>Homepage, one tool, with a sentence on why it is there.</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td>Article footer</td>
+            <td>A labeled sponsor line under a guide, visually separate from the article.</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td>Newsletter mention</td>
+            <td>One labeled line in the weekly note.</td>
+            <td>Not for sale until the list exists</td>
+          </tr>
+          <tr>
+            <td>Affiliate link</td>
+            <td>Inside a guide, only where the tool fits the step, with the word Affiliate on the link.</td>
+            <td>None are live</td>
+          </tr>
+        </tbody>
+      </table>
+      <h2>Labeling</h2>
+      <p>
+        Paid placements say Sponsor or Featured. Affiliate links say Affiliate. A guide that is not paid does not wear those labels. Launch articles have no sponsor and no affiliate links.
+      </p>
+      <p>
+        A sponsor does not get to rewrite a checklist so their product is the only correct answer. Corrections to the technical text still follow the vendor docs.
+      </p>
+      <h2>What to send</h2>
+      <ul>
+        <li>Tool name and URL.</li>
+        <li>One paragraph on who it helps.</li>
+        <li>Which slot you want, and the week you have in mind.</li>
+        <li>Whether the link would be a paid placement, an affiliate link, or both.</li>
+      </ul>
+      <p>
+        Contact: <a href={`mailto:${SITE.sponsorEmail}`}>{SITE.sponsorEmail}</a>.
+      </p>
+      <aside class="callout">
+        <p>
+          <strong>Placeholder, on purpose.</strong> The boxes on the homepage are empty so you can see the inventory. They are not sample ads for a real customer.
+        </p>
+      </aside>
+    </article>
+  </div>
+</Base>

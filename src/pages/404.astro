@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+
+const description = 'That page is not on VibeLocked. Try the checklists or the guides.';
+---
+
+<Base title="Page not found" description={description} path="/404" noindex>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">404</p>
+      <h1 class="page-title">That page is not here</h1>
+      <p class="lede">The link may be old, or the article may have moved. The checklists and guides are the useful part of the site.</p>
+      <div class="hero-actions">
+        <a class="button" href="/checklists">Checklists</a>
+        <a class="button button-ghost" href="/guides">Guides</a>
+      </div>
+    </header>
+  </div>
+</Base>

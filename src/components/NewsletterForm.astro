@@ -1,0 +1,36 @@
+---
+interface Props {
+  id?: string;
+  tone?: 'band' | 'page';
+}
+
+const { id = 'email', tone = 'band' } = Astro.props;
+---
+
+<form class:list={['signup', tone === 'page' && 'page-signup']} data-newsletter>
+  <label for={id}>Email</label>
+  <div class="signup-row">
+    <input id={id} type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" />
+    <button type="submit">Join the list</button>
+  </div>
+  <p class="form-status" role="status" hidden>
+    Not connected yet. This page does not store or send your email.
+  </p>
+  <p class="fine">
+    Placeholder only. The weekly note is not wired to an email provider yet, so submitting this form stays in your browser.
+  </p>
+</form>
+
+<script is:inline>
+  document.querySelectorAll('form[data-newsletter]').forEach(function (form) {
+    if (form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var status = form.querySelector('.form-status');
+      if (status) status.hidden = false;
+      var input = form.querySelector('input');
+      if (input) input.value = '';
+    });
+  });
+</script>
