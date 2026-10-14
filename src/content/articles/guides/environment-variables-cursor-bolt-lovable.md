@@ -24,7 +24,7 @@ faqs:
 
 Most leaked keys in AI-built apps are not stolen. They are shipped. A variable gets the wrong prefix, a key gets pasted into a component, or a `.env` file gets committed. This guide covers the rules that decide where an env var ends up, then the specific habits for Cursor, Bolt.new, and Lovable.
 
-Want a fast check right now? Run the [VibeLocked scanner](/scan) on your public GitHub repo, or use its console snippet on your live site. It runs in your browser and flags real secrets versus publishable keys.
+Want a fast check right now? Run the [VibeLocked scanner](/scan) on your public GitHub repo. It runs in your browser and flags real secrets versus publishable keys.
 
 ## The one rule: the prefix decides who can read it
 
@@ -59,7 +59,7 @@ Bolt.new runs your project in a browser based environment and usually scaffolds 
 
 1. Anything you read with `import.meta.env.VITE_*` ships to visitors. Use those only for publishable values.
 2. Calls that need a secret key need a server. In a Bolt project that is typically a Supabase Edge Function, a Netlify function, or a separate API route. Put the secret in that platform's environment settings, not in the frontend `.env`.
-3. Before you deploy, open the built site, view the JavaScript files in dev tools, and search for `sk-`, `sk_live`, and `service_role`. Or run the live site snippet from [the scanner](/scan).
+3. Before you deploy, open the built site, view the JavaScript files in dev tools, and search for `sk-`, `sk_live`, and `service_role`. Then scan the repo with [the scanner](/scan).
 4. If you export to GitHub, check the `.env` file did not come along.
 
 ## Lovable
@@ -84,7 +84,7 @@ git grep -nE "sk-|sk_live_|rk_live_|sb_secret_|service_role|AKIA|-----BEGIN"
 npm run build && grep -rnE "sk-|sk_live_|sb_secret_|service_role" dist/
 ```
 
-Then run [/scan](/scan) on the public repo and the live site. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+Then run [/scan](/scan) on the public repo. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
 
 ## Sources
 

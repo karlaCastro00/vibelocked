@@ -104,7 +104,7 @@ Set an allowed MIME type list and a file size limit on the bucket in its setting
 
 ## Keys
 
-The anon or publishable key in your frontend is expected. The service role or `sb_secret_` key bypasses every Storage policy. If you are not sure which one your app ships, run the [VibeLocked scanner](/scan) snippet on your live app. It decodes Supabase JWTs and flags a service role key. More on this in [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
+The anon or publishable key in your frontend is expected. The service role or `sb_secret_` key bypasses every Storage policy. If you are not sure which one your app ships, search your built JavaScript for `service_role` and `sb_secret_`, or run the [VibeLocked scanner](/scan) on your public repo. It decodes Supabase JWTs and flags a service role key. More on this in [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
 
 ## Five minute test
 

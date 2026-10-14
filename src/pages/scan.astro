@@ -1,10 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import { buildConsoleSnippet } from '../lib/scanner';
 
-const snippet = buildConsoleSnippet();
 const description =
-  'Free leak scanner for vibe coders. Scan a public GitHub repo or your live site for exposed OpenAI, Stripe, Supabase service role, AWS, GitHub and other keys. Runs in your browser, nothing is uploaded.';
+  'Free leak scanner for vibe coders. Scan a public GitHub repo for exposed OpenAI, Stripe, Supabase service role, AWS, GitHub and other keys. Runs in your browser, nothing is uploaded.';
 
 const jsonLd = {
   '@type': 'WebApplication',
@@ -23,16 +21,11 @@ const jsonLd = {
       <p class="kicker">Free tool</p>
       <h1 class="page-title">Find leaked keys before someone else does</h1>
       <p class="lede">
-        Check what the public can already see: your public GitHub repo, or the JavaScript your live app ships. You never type a secret here. Everything runs in your browser and nothing is uploaded to VibeLocked.
+        Check what the public can already see in your public GitHub repo. You never type a secret here. Everything runs in your browser and nothing is uploaded to VibeLocked.
       </p>
     </header>
 
-    <div class="scan-tabs" role="tablist" aria-label="Scan mode">
-      <button type="button" role="tab" id="tab-repo" aria-controls="panel-repo" aria-selected="true">Scan a public GitHub repo</button>
-      <button type="button" role="tab" id="tab-site" aria-controls="panel-site" aria-selected="false">Scan your live site</button>
-    </div>
-
-    <section class="panel scan-panel" id="panel-repo" role="tabpanel" aria-labelledby="tab-repo">
+    <section class="panel scan-panel" id="panel-repo">
       <form id="repo-form">
         <label for="repo-url"><strong>Public GitHub repo URL</strong></label>
         <div class="scan-actions">
@@ -44,18 +37,6 @@ const jsonLd = {
         Needs nothing private: no login, no token. Your browser reads the repo from GitHub's public API and raw.githubusercontent.com, then checks up to 150 text files locally (skipping node_modules, lockfiles, binaries, and files over 200 KB). GitHub allows about 60 API calls per hour per network without login, and a scan uses two.
       </p>
       <p id="repo-status" class="scan-note" aria-live="polite"></p>
-    </section>
-
-    <section class="panel scan-panel" id="panel-site" role="tabpanel" aria-labelledby="tab-site" hidden>
-      <p>
-        Browsers block one website from reading another, so this page cannot fetch your app. Instead, open your deployed app, open the developer console (F12, then Console), paste this snippet, and press Enter. It reads the scripts your page loaded, runs the same patterns as the repo scan, and prints a table. It sends nothing anywhere.
-      </p>
-      <div class="scan-actions">
-        <button class="button" type="button" id="copy-snippet">Copy snippet</button>
-        <span id="copy-status" class="scan-note" aria-live="polite"></span>
-      </div>
-      <pre class="snippet"><code id="snippet">{snippet}</code></pre>
-      <p class="scan-note">Only run console snippets you can read. This one only reads the page and logs to the console. Check every page with a different bundle, such as a dashboard or admin route.</p>
     </section>
 
     <div id="scan-results" class="scan-results" aria-live="polite"></div>
@@ -100,24 +81,10 @@ const jsonLd = {
   .scan-results :global(.finding.warn) { border-color: #d48806; }
   .scan-results :global(code) { word-break: break-all; }
   .scan-results :global(.sum) { font-weight: 600; }
-  .scan-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
-  .scan-tabs button { font: inherit; padding: 0.5rem 0.9rem; border: 1px solid currentColor; border-radius: 6px; background: transparent; color: inherit; cursor: pointer; opacity: 0.7; }
-  .scan-tabs button[aria-selected='true'] { opacity: 1; font-weight: 600; }
-  .snippet { max-height: 16rem; overflow: auto; font-size: 0.75rem; padding: 0.75rem; border-radius: 6px; white-space: pre-wrap; word-break: break-all; }
   .scan-results :global(a) { word-break: break-all; }
 </style>
 <script>
   import { scanRepo, RepoScanError, type RepoFinding } from '../lib/repoScan';
-
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.scan-tabs [role=tab]')];
-  tabs.forEach((tab) => tab.addEventListener('click', () => {
-    tabs.forEach((t) => {
-      const on = t === tab;
-      t.setAttribute('aria-selected', String(on));
-      document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
-    });
-    out.replaceChildren();
-  }));
 
   const out = document.getElementById('scan-results') as HTMLDivElement;
   const status = document.getElementById('repo-status') as HTMLParagraphElement;
@@ -160,16 +127,6 @@ const jsonLd = {
       status.textContent = err instanceof RepoScanError ? err.message : 'Something went wrong while scanning. Try again in a minute.';
     } finally {
       runBtn.disabled = false;
-    }
-  });
-
-  document.getElementById('copy-snippet')!.addEventListener('click', async () => {
-    const msg = document.getElementById('copy-status')!;
-    try {
-      await navigator.clipboard.writeText(document.getElementById('snippet')!.textContent || '');
-      msg.textContent = 'Copied. Paste it into the console on your own site.';
-    } catch {
-      msg.textContent = 'Copy failed. Select the code below and copy it manually.';
     }
   });
 </script>

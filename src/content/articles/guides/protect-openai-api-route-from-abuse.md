@@ -23,7 +23,7 @@ faqs:
 
 Moving the OpenAI key out of the frontend is step one. Step two is the one AI generated apps usually skip: the server route that holds the key will happily answer anyone on the internet. Bots find these routes, and you pay for every token.
 
-First, make sure the key really is off the client. Run the [VibeLocked scanner](/scan) console snippet on your live app. If it finds an `sk-` key, stop here and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+First, make sure the key really is off the client. Open your live app, view its JavaScript files in the browser dev tools Sources tab, and search for `sk-`. If the code is in a public repo, run the [VibeLocked scanner](/scan) on it too. If it finds an `sk-` key, stop here and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
 
 ## What abuse looks like
 
@@ -108,7 +108,7 @@ Log user id, token counts, and status for each call. Look at provider usage the 
 
 ## Checklist
 
-- [ ] No model key in the browser bundle ([scan it](/scan))
+- [ ] No model key in the repo ([scan it](/scan)) or the browser bundle
 - [ ] Route requires a session, or a separate tiny limit for anonymous use
 - [ ] Shared rate limit per user and per IP, plus a daily quota
 - [ ] Model, system prompt, and max tokens fixed on the server

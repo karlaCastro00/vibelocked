@@ -89,27 +89,3 @@ export function scan(text: string): Finding[] {
 }
 
 
-/** Build a self-contained browser console snippet that runs the same patterns on a site's loaded scripts. */
-export function buildConsoleSnippet(): string {
-  const ruleData = rules.map((r) => [r.name, r.re.source, r.re.flags, r.level]);
-  return `(async () => {
-  const RULES = ${JSON.stringify(ruleData)}.map(([n, s, f, l]) => [n, new RegExp(s, f), l]);
-  const JWT = new RegExp(${JSON.stringify(jwtRe.source)}, 'g');
-  const mask = (v) => v.length <= 12 ? v.slice(0, 3) + '...' : v.slice(0, 8) + '...' + v.slice(-4);
-  const role = (t) => { try { const p = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(atob(p + '='.repeat((4 - p.length % 4) % 4))).role || ''; } catch (e) { return ''; } };
-  const urls = new Set([...document.scripts].map((s) => s.src).filter(Boolean));
-  performance.getEntriesByType('resource').forEach((e) => { if (/\\.m?js(\\?|$)/.test(e.name)) urls.add(e.name); });
-  const sources = [...document.scripts].filter((s) => !s.src).map((s, i) => ['inline script ' + (i + 1), s.textContent]);
-  sources.push(['page HTML', document.documentElement.outerHTML]);
-  for (const u of urls) { try { sources.push([u, await (await fetch(u)).text()]); } catch (e) { console.warn('VibeLocked: could not read', u); } }
-  const out = [];
-  for (const [where, text] of sources) {
-    const line = (i) => text.slice(0, i).split('\\n').length;
-    for (const [name, re, level] of RULES) for (const m of text.matchAll(re)) out.push({ level, name, where, line: line(m.index), value: mask(m[0]) });
-    for (const m of text.matchAll(JWT)) { const r = role(m[0]); out.push({ level: r === 'service_role' ? 'high' : r === 'anon' ? 'info' : 'warn', name: r === 'service_role' ? 'Supabase service role key' : r === 'anon' ? 'Supabase anon key' : 'JSON Web Token', where, line: line(m.index), value: mask(m[0]) }); }
-  }
-  const uniq = [...new Map(out.map((o) => [o.name + o.where + o.value, o])).values()].sort((a, b) => ({ high: 0, warn: 1, info: 2 })[a.level] - ({ high: 0, warn: 1, info: 2 })[b.level]);
-  console.log('VibeLocked scan: ' + sources.length + ' sources, ' + uniq.filter((o) => o.level === 'high').length + ' likely secrets. Nothing was sent anywhere.');
-  if (uniq.length) console.table(uniq); else console.log('No known key formats found.');
-})();`;
-}
