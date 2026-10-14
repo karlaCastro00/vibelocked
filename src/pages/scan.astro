@@ -1,0 +1,206 @@
+---
+import Base from '../layouts/Base.astro';
+
+const description =
+  'Free secret leak scanner for vibe coders. Paste code or .env text and find exposed OpenAI, Stripe, Supabase, AWS, GitHub and other keys. Runs fully in your browser.';
+
+const jsonLd = {
+  '@type': 'WebApplication',
+  name: 'VibeLocked secret leak scanner',
+  url: 'https://vibelocked.com/scan',
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  description,
+};
+---
+
+<Base title="Secret leak scanner" description={description} path="/scan" jsonLd={jsonLd}>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">Free tool</p>
+      <h1 class="page-title">Scan code for leaked keys</h1>
+      <p class="lede">
+        Paste a file, a diff, a build bundle, or your .env text. The check runs in this tab with JavaScript. Nothing is uploaded, logged, or stored.
+      </p>
+    </header>
+
+    <div class="panel scan-panel">
+      <label for="scan-input"><strong>Code or env text</strong></label>
+      <textarea id="scan-input" rows="14" spellcheck="false" autocomplete="off" placeholder="OPENAI_API_KEY=sk-proj-...&#10;const stripe = new Stripe('sk_live_...')"></textarea>
+      <div class="scan-actions">
+        <button class="button" type="button" id="scan-run">Scan</button>
+        <button class="button button-ghost" type="button" id="scan-clear">Clear</button>
+        <span class="scan-note">Tip: paste the JavaScript your deployed site serves, not only your source.</span>
+      </div>
+    </div>
+
+    <div id="scan-results" class="scan-results" aria-live="polite"></div>
+
+    <article class="prose">
+      <h2>What it looks for</h2>
+      <ul>
+        <li>OpenAI, Anthropic, Google (Gemini, Firebase server keys), Groq, xAI, Replicate, Hugging Face tokens</li>
+        <li>Stripe secret and restricted keys, and webhook signing secrets</li>
+        <li>Supabase service role keys (legacy JWT with role service_role) and new sb_secret_ keys</li>
+        <li>AWS access key IDs and secret keys, GitHub and GitLab tokens, Slack tokens and webhooks</li>
+        <li>Twilio, SendGrid, Resend, Mailgun, Discord bot tokens, private key blocks, and database URLs with a password</li>
+        <li>Generic secret assignments, such as SECRET=, TOKEN=, or PASSWORD= with a long value</li>
+      </ul>
+      <p>
+        Publishable values like a Stripe pk_ key, a Supabase anon key, or a Firebase web config are reported as safe to ship, so you can tell them apart from the real secrets. See <a href="/guides/supabase-anon-key-vs-service-role-key">anon key vs service role key</a>.
+      </p>
+      <h2>If it finds a live secret</h2>
+      <p>
+        Rotate the key at the provider first, then remove it from code and history. Deleting the line is not enough once it was pushed or deployed. Follow <a href="/guides/first-hour-after-an-api-key-leaks">the first hour after an API key leaks</a> and <a href="/guides/check-if-api-key-leaked-on-github">check your GitHub history</a>.
+      </p>
+      <h2>Limits</h2>
+      <p>
+        Pattern matching misses keys with no fixed format and can flag test values. A clean result is not proof that a project is safe. For whole repos and history, run Gitleaks or TruffleHog locally or in CI.
+      </p>
+    </article>
+  </div>
+</Base>
+
+<style>
+  .scan-panel { padding: 1.1rem 1.15rem; margin-top: 1rem; }
+  .scan-panel textarea {
+    width: 100%; box-sizing: border-box; margin-top: 0.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85rem; padding: 0.75rem; border-radius: 6px; border: 1px solid currentColor; background: transparent; color: inherit;
+  }
+  .scan-actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 0.7rem; }
+  .scan-note { font-size: 0.85rem; opacity: 0.75; }
+  .scan-results { margin: 1.4rem 0; max-width: 52rem; }
+  .scan-results :global(.finding) { border-left: 4px solid #c0392b; padding: 0.5rem 0.8rem; margin: 0.6rem 0; }
+  .scan-results :global(.finding.info) { border-color: #2e8b57; }
+  .scan-results :global(.finding.warn) { border-color: #d48806; }
+  .scan-results :global(code) { word-break: break-all; }
+  .scan-results :global(.sum) { font-weight: 600; }
+</style>
+
+<script>
+  type Rule = { name: string; re: RegExp; level: 'high' | 'warn' | 'info'; fix: string };
+  const rules: Rule[] = [
+    { name: 'OpenAI API key', re: /\bsk-(?:proj-|svcacct-|admin-)?[A-Za-z0-9_-]{20,}T3BlbkFJ[A-Za-z0-9_-]{20,}\b|\bsk-(?:proj|svcacct|admin)-[A-Za-z0-9_-]{40,}/g, level: 'high', fix: 'Revoke at platform.openai.com/api-keys and call OpenAI only from a server.' },
+    { name: 'Anthropic API key', re: /\bsk-ant-(?:api|admin)\d{2}-[A-Za-z0-9_-]{80,}/g, level: 'high', fix: 'Revoke in the Anthropic Console and move calls server side.' },
+    { name: 'Stripe secret key', re: /\bsk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'Roll the key in the Stripe Dashboard under Developers, API keys.' },
+    { name: 'Stripe restricted key', re: /\brk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'Roll the restricted key in the Stripe Dashboard.' },
+    { name: 'Stripe webhook secret', re: /\bwhsec_[A-Za-z0-9]{20,}/g, level: 'high', fix: 'Roll the endpoint signing secret in Stripe and keep it server side.' },
+    { name: 'Supabase secret key', re: /\bsb_secret_[A-Za-z0-9_-]{20,}/g, level: 'high', fix: 'Delete and recreate it under Project Settings, API Keys. Never ship it to the browser.' },
+    { name: 'AWS access key ID', re: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g, level: 'high', fix: 'Deactivate and delete the key in IAM, then check CloudTrail for use.' },
+    { name: 'AWS secret access key', re: /aws_?secret_?access_?key["'\s:=]+[A-Za-z0-9/+]{40}/gi, level: 'high', fix: 'Deactivate the matching access key in IAM.' },
+    { name: 'GitHub token', re: /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}\b|\bgithub_pat_[A-Za-z0-9_]{60,}/g, level: 'high', fix: 'Revoke it under GitHub Settings, Developer settings.' },
+    { name: 'GitLab token', re: /\bglpat-[A-Za-z0-9_-]{20,}/g, level: 'high', fix: 'Revoke it in GitLab access tokens.' },
+    { name: 'Google API key', re: /\bAIza[0-9A-Za-z_-]{35}\b/g, level: 'warn', fix: 'Fine in a Firebase web config if restricted. If it is a Gemini or Maps key without restrictions, restrict or rotate it in Google Cloud.' },
+    { name: 'Slack token', re: /\bxox[abposr]-[A-Za-z0-9-]{10,}/g, level: 'high', fix: 'Revoke the token in your Slack app settings.' },
+    { name: 'Slack webhook URL', re: /https:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9/_-]+/g, level: 'high', fix: 'Regenerate the incoming webhook.' },
+    { name: 'Discord webhook URL', re: /https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[A-Za-z0-9_-]+/g, level: 'high', fix: 'Delete the webhook in the channel settings and create a new one.' },
+    { name: 'Twilio API key', re: /\bSK[0-9a-fA-F]{32}\b/g, level: 'warn', fix: 'If this is a Twilio key, delete it in the Twilio Console.' },
+    { name: 'SendGrid API key', re: /\bSG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}\b/g, level: 'high', fix: 'Delete it in SendGrid API Keys.' },
+    { name: 'Resend API key', re: /\bre_[A-Za-z0-9]{8,}_[A-Za-z0-9]{16,}/g, level: 'high', fix: 'Revoke it in the Resend dashboard.' },
+    { name: 'Hugging Face token', re: /\bhf_[A-Za-z0-9]{34,}\b/g, level: 'high', fix: 'Invalidate it in Hugging Face access tokens.' },
+    { name: 'Groq API key', re: /\bgsk_[A-Za-z0-9]{40,}\b/g, level: 'high', fix: 'Revoke it in the Groq console.' },
+    { name: 'xAI API key', re: /\bxai-[A-Za-z0-9]{60,}\b/g, level: 'high', fix: 'Revoke it in the xAI console.' },
+    { name: 'Replicate token', re: /\br8_[A-Za-z0-9]{36,}\b/g, level: 'high', fix: 'Revoke it in Replicate account settings.' },
+    { name: 'Private key block', re: /-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY(?: BLOCK)?-----/g, level: 'high', fix: 'Treat the key pair as compromised and replace it.' },
+    { name: 'Database URL with password', re: /\b(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|rediss):\/\/[^\s:@/'"]+:[^\s@/'"]{3,}@[^\s'"]+/g, level: 'high', fix: 'Change the database password and keep the URL in server env vars only.' },
+    { name: 'Stripe publishable key', re: /\bpk_(?:live|test)_[A-Za-z0-9]{20,}/g, level: 'info', fix: 'Publishable keys are meant for the browser.' },
+    { name: 'Supabase publishable key', re: /\bsb_publishable_[A-Za-z0-9_-]{20,}/g, level: 'info', fix: 'Safe to ship if Row Level Security is on for every exposed table.' },
+  ];
+
+  const jwtRe = /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g;
+  const genericRe = /\b([A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PASSWD|API_KEY|PRIVATE_KEY)[A-Z0-9_]*)\s*[:=]\s*["']?([^\s"'`,;]{16,})/g;
+
+  function decodeJwtPayload(token: string): Record<string, unknown> | null {
+    try {
+      const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(part + '='.repeat((4 - (part.length % 4)) % 4)));
+    } catch {
+      return null;
+    }
+  }
+
+  function mask(value: string) {
+    if (value.length <= 12) return value.slice(0, 3) + '...';
+    return value.slice(0, 8) + '...' + value.slice(-4);
+  }
+
+  function lineOf(text: string, index: number) {
+    return text.slice(0, index).split('\n').length;
+  }
+
+  type Finding = { name: string; level: Rule['level']; value: string; line: number; fix: string };
+
+  function scan(text: string): Finding[] {
+    const found: Finding[] = [];
+    const seen = new Set<string>();
+    const add = (f: Finding) => {
+      const key = f.name + f.value;
+      if (seen.has(key)) return;
+      seen.add(key);
+      found.push(f);
+    };
+    for (const rule of rules) {
+      for (const m of text.matchAll(rule.re)) {
+        add({ name: rule.name, level: rule.level, value: m[0], line: lineOf(text, m.index ?? 0), fix: rule.fix });
+      }
+    }
+    for (const m of text.matchAll(jwtRe)) {
+      const payload = decodeJwtPayload(m[0]);
+      const role = payload && typeof payload.role === 'string' ? payload.role : '';
+      const line = lineOf(text, m.index ?? 0);
+      if (role === 'service_role') {
+        add({ name: 'Supabase service role key', level: 'high', value: m[0], line, fix: 'This bypasses Row Level Security. Rotate the JWT secret or move to new API keys in Supabase, and use it only on a server.' });
+      } else if (role === 'anon') {
+        add({ name: 'Supabase anon key', level: 'info', value: m[0], line, fix: 'Meant for the browser, but only safe with Row Level Security on every exposed table.' });
+      } else {
+        add({ name: 'JSON Web Token', level: 'warn', value: m[0], line, fix: 'Check what this token grants and when it expires. Session tokens should not live in code.' });
+      }
+    }
+    const covered = found.map((f) => f.value);
+    for (const m of text.matchAll(genericRe)) {
+      const value = m[2];
+      if (covered.some((c) => c.includes(value) || value.includes(c))) continue;
+      if (/^(?:process\.env|import\.meta\.env|\$\{|<|your|xxx|changeme|example)/i.test(value)) continue;
+      add({ name: 'Possible secret in ' + m[1], level: 'warn', value, line: lineOf(text, m.index ?? 0), fix: 'If this is a real value, move it to server env vars and rotate it.' });
+    }
+    const order = { high: 0, warn: 1, info: 2 };
+    return found.sort((a, b) => order[a.level] - order[b.level] || a.line - b.line);
+  }
+
+  function el(tag: string, cls: string, text: string) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    node.textContent = text;
+    return node;
+  }
+
+  const input = document.getElementById('scan-input') as HTMLTextAreaElement;
+  const out = document.getElementById('scan-results') as HTMLDivElement;
+
+  function render() {
+    out.replaceChildren();
+    const text = input.value;
+    if (!text.trim()) return;
+    const findings = scan(text);
+    const high = findings.filter((f) => f.level === 'high').length;
+    const warn = findings.filter((f) => f.level === 'warn').length;
+    out.append(
+      el('p', 'sum', findings.length === 0
+        ? 'No known key formats found. That is not a guarantee, so keep secrets in server env vars anyway.'
+        : `${high} likely secret${high === 1 ? '' : 's'}, ${warn} to review, ${findings.length - high - warn} safe to ship.`),
+    );
+    for (const f of findings) {
+      const box = el('div', 'finding ' + f.level, '');
+      const label = f.level === 'high' ? 'Secret' : f.level === 'warn' ? 'Review' : 'Public';
+      box.append(el('strong', '', `${label}: ${f.name}`), el('span', '', ` on line ${f.line} `), el('code', '', mask(f.value)), el('p', '', f.fix));
+      out.append(box);
+    }
+  }
+
+  document.getElementById('scan-run')?.addEventListener('click', render);
+  document.getElementById('scan-clear')?.addEventListener('click', () => {
+    input.value = '';
+    out.replaceChildren();
+  });
+</script>
