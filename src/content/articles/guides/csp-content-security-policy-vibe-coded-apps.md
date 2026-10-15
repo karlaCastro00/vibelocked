@@ -181,7 +181,7 @@ Where the third-party lines come from:
 | `default-src` | Fallback for fetch directives you do not list | `'self'` |
 | `script-src` | Where JavaScript can load from, and whether inline or eval runs | `'self'` plus a nonce or hashes; specific hosts only if you must |
 | `style-src` | Stylesheets and inline styles | `'self'`, add font CSS hosts if used |
-| `img-src` | Images | `'self' data:` plus your image or avatar hosts |
+| `img-src` | Images | `'self' data:` plus your image or avatar hosts (Supabase Storage or Vercel Blob domains if you serve uploads there; see [secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob)) |
 | `connect-src` | `fetch`, XHR, WebSockets, beacons | `'self'` plus your API, auth, database, and analytics hosts |
 | `font-src` | Web fonts from `@font-face` | `'self'`, or your font host |
 | `frame-src` / `child-src` | What your page may embed in iframes (`child-src` also covers workers) | Only the payment, captcha, or embed hosts you use |

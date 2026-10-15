@@ -59,7 +59,7 @@ If the app uses Supabase:
 - `anon` does not have write grants on private tables.
 - Policies use `auth.uid()`, not a user id from the request body.
 - Views set `security_invoker` on Postgres 15 and above, or they are not exposed.
-- Storage buckets for user files are private, and `storage.objects` has owner policies. See [Supabase Storage bucket security](/guides/supabase-storage-bucket-security).
+- Storage buckets for user files are private, and `storage.objects` has owner policies. See [Supabase Storage bucket security](/guides/supabase-storage-bucket-security). Upload handlers validate type, size, and filenames, and prefer direct-to-storage for large files ([secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob)).
 - The secret key appears only in server code.
 
 If the app uses Firebase:

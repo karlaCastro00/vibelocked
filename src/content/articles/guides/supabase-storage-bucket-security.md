@@ -100,7 +100,7 @@ The request still has to pass your `SELECT` policy, so users can only sign their
 
 ## Limit what gets uploaded
 
-Set an allowed MIME type list and a file size limit on the bucket in its settings. That stops someone from using your public bucket to host large files or HTML pages on your project domain. Treat file names as untrusted and avoid serving user uploaded HTML or SVG from a public bucket.
+Set an allowed MIME type list and a file size limit on the bucket in its settings. That stops someone from using your public bucket to host large files or HTML pages on your project domain. Treat file names as untrusted and avoid serving user uploaded HTML or SVG from a public bucket. For the Next.js upload path itself (auth before tokens, MIME allow-lists, filename sanitizing, Vercel Blob client uploads), see [secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob).
 
 ## Keys
 

@@ -120,6 +120,8 @@ Search the repo for `route.ts`, `route.js`, and `'use server'`. For each one, po
 
 Scheduled routes under `/api/cron` are the same problem with a different caller. Vercel can send `Authorization: Bearer` with `CRON_SECRET`, but only if you set the env var and check it. Without that check, a browser GET runs the job. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret).
 
+Upload routes and Blob token handlers are another favorite open door: no session check, trust in `file.type`, and files written under `public/`. Treat them like any other privileged API ([secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob)).
+
 ## Trusting the user id in the body
 
 This is IDOR with an extra step. The UI sends `{ "userId": "<the signed-in user>" }` because that was easy to generate. The server believes it.
