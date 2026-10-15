@@ -42,6 +42,7 @@ Where to do it, for the stack vibe-coded apps usually use:
 | AWS access key | Deactivate the access key, then delete it after you confirm nothing you own still needs it. | [Access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) |
 | GitHub personal access token | Revoke it in GitHub settings. Public leaks of GitHub PATs are also auto-revoked. | [Remediation](https://docs.github.com/en/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/remediating-a-leaked-secret) |
 | OpenAI or Anthropic API key | Revoke it in that provider's API keys page, then issue a new one on the server only. | Use the provider console. Do not paste the new key into a chat. |
+| Auth.js `AUTH_SECRET` / NextAuth `NEXTAUTH_SECRET` | Generate a new secret, update host env, redeploy. Use a secret array `[new, old]` if you need existing sessions to keep working. | [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth) |
 
 If you cannot tell which key leaked, revoke the ones that were in the file and issue replacements. A short outage you chose is better than a key that still works.
 

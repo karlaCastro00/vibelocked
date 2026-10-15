@@ -38,6 +38,7 @@ Checked against the Next.js, Vite, Supabase, Firebase, and Stripe docs linked be
 | Stripe publishable key (`pk_`) | Yes | Also fine |
 | Stripe secret key (`sk_`), restricted key (`rk_`), webhook secret (`whsec_`) | No | Yes |
 | OpenAI, Anthropic, AWS, database URLs | No | Yes |
+| Auth.js `AUTH_SECRET` / NextAuth `NEXTAUTH_SECRET` | No | Yes ([guide](/guides/authjs-auth-secret-nextauth)) |
 
 "Yes" for a browser key does not mean the data is public. It means the vendor designed that key to be public and put the real control somewhere else: Supabase RLS, Firebase Security Rules, or Stripe's rule that the secret key is the one that can charge and refund. Those controls are covered in the [RLS checklist](/checklists/supabase-rls-security-checklist) and the [Firebase checklist](/checklists/firebase-security-rules-checklist).
 

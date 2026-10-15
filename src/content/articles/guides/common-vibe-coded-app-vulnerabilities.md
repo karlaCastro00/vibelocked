@@ -79,7 +79,7 @@ The Supabase publishable key is supposed to be in the browser. The secret key is
 
 It gets into the client in a few ways:
 
-- A `NEXT_PUBLIC_` or `VITE_` env var. The [secrets guide](/guides/keep-secrets-out-of-frontend-code) explains those prefixes.
+- A `NEXT_PUBLIC_` or `VITE_` env var. The [secrets guide](/guides/keep-secrets-out-of-frontend-code) explains those prefixes. The same mistake shows up with Auth.js as `NEXT_PUBLIC_AUTH_SECRET`; see [AUTH_SECRET and NEXTAUTH_SECRET](/guides/authjs-auth-secret-nextauth).
 - A string literal in a shared `supabase.ts` that both the server and the client import.
 - A "temporary" debug line the generator added and nobody removed.
 

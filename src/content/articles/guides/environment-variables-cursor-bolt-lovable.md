@@ -41,7 +41,7 @@ So `VITE_OPENAI_API_KEY` is a public key by definition, no matter how the variab
 
 Safe to expose: a Stripe `pk_` key, a Supabase anon or `sb_publishable_` key (with Row Level Security on), a Firebase web config, a GoatCounter or analytics site code.
 
-Never expose: OpenAI, Anthropic, or other model keys, Stripe `sk_` or `rk_` keys, a Clerk `sk_` key (see [Clerk publishable key vs secret key](/guides/clerk-publishable-key-vs-secret-key)), a Supabase service role or `sb_secret_` key, database URLs, webhook signing secrets, AWS keys.
+Never expose: OpenAI, Anthropic, or other model keys, Stripe `sk_` or `rk_` keys, a Clerk `sk_` key (see [Clerk publishable key vs secret key](/guides/clerk-publishable-key-vs-secret-key)), Auth.js `AUTH_SECRET` or NextAuth `NEXTAUTH_SECRET` (see [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth)), a Supabase service role or `sb_secret_` key, database URLs, webhook signing secrets, AWS keys.
 
 ## Cursor
 

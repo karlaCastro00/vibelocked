@@ -61,7 +61,7 @@ The names `auth` and `db` are placeholders for your own auth library and databas
 - **Only hiding the button.** Not rendering a delete button for non admins does not stop a direct request to the action.
 - **Returning too much.** Whatever an action returns is sent to the client. Return only the fields the UI needs.
 - **Auth only in middleware.** Keep checks in the action or in a shared data access layer. The [CVE-2025-29927 middleware auth bypass](/guides/nextjs-middleware-auth-bypass-cve-2025-29927) showed how a middleware check can be skipped entirely.
-- **Secrets in client components.** Server only code can use secrets. Mark modules with `import 'server-only'` so they fail to build if imported into the client.
+- **Secrets in client components.** Server only code can use secrets. Mark modules with `import 'server-only'` so they fail to build if imported into the client. Never put Auth.js `AUTH_SECRET` (or older `NEXTAUTH_SECRET`) behind `NEXT_PUBLIC_`. Details in the [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth).
 
 ## Built in protections, and their limits
 
