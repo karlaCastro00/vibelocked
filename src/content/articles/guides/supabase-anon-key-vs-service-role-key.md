@@ -37,7 +37,7 @@ Supabase now also offers newer key formats, publishable keys (`sb_publishable_..
 
 ## Why the anon key is fine to ship
 
-The anon key identifies your project and maps requests to the `anon` Postgres role (or the `authenticated` role once a user signs in). What a request can actually read or write is decided by Row Level Security policies in Postgres. If RLS is off on a table in an exposed schema, the anon key can read and write that table. So the question is never "is my anon key hidden", it is "are my policies correct". Use the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist) to check.
+The anon key identifies your project and maps requests to the `anon` Postgres role (or the `authenticated` role once a user signs in). What a request can actually read or write is decided by Row Level Security policies in Postgres. If RLS is off on a table in an exposed schema, the anon key can read and write that table. So the question is never "is my anon key hidden", it is "are my policies correct". Use the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist) to check. Also review [Supabase Auth security settings](/guides/supabase-auth-security-settings) (email confirm, signup limits, redirect allowlists), because open auth weakens every policy.
 
 ## Why the service role key is dangerous
 

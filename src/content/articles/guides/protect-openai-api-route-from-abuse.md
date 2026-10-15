@@ -51,7 +51,7 @@ const { data: { user } } = await supabase.auth.getUser();
 if (!user) return new Response('Unauthorized', { status: 401 });
 ```
 
-If you want a free demo for anonymous visitors, give it a separate, much smaller limit and add a bot check such as Cloudflare Turnstile.
+If you want a free demo for anonymous visitors, give it a separate, much smaller limit and add a bot check such as Cloudflare Turnstile. Open signups mean anyone can get a valid JWT, so also review [Supabase Auth security settings](/guides/supabase-auth-security-settings) if that is your auth stack.
 
 ## 2. Rate limit per user and per IP
 

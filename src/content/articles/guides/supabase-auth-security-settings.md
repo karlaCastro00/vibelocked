@@ -78,6 +78,7 @@ None of this helps if the service role key is in your frontend. It bypasses Auth
 - [ ] Signups off if invite only, CAPTCHA on public forms, custom SMTP set
 - [ ] MFA for admins
 - [ ] RLS checked with the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist)
+- [ ] Storage buckets for user files are private with owner policies ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security))
 
 ## Sources
 

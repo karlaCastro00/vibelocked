@@ -258,7 +258,7 @@ None of these steps needs a secret. Example policies above use placeholders like
 - [ ] Rolled out as Report-Only first, then enforced
 - [ ] Response headers checked on production after deploy
 
-CSP is one layer. The bigger risks in AI-built apps are still auth and data access: read [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities) and run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) before launch.
+CSP is one layer. The bigger risks in AI-built apps are still auth and data access: read [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities) and run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) before launch. While you are looking at response headers, also check `Access-Control-Allow-Origin` for reflected origins with credentials ([CORS misconfiguration in vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps)).
 
 ## Sources
 

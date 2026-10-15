@@ -157,7 +157,7 @@ Require a signed-in user when the feature is not public. Limit the size of the i
 8. If the app has an AI feature, check that its tools use the user's permissions and its output is not rendered as raw HTML. See [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
 9. Check every dependency your AI tool added actually exists and is the real package. See [AI hallucinated packages (slopsquatting)](/guides/ai-hallucinated-packages-slopsquatting).
 
-The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) puts these in launch order.
+The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) puts these in launch order. If the app came from Lovable, Bolt, v0, or Replit, follow with the [pre-launch checklist for AI builders](/checklists/lovable-bolt-pre-launch-security-checklist).
 
 ## Official docs
 

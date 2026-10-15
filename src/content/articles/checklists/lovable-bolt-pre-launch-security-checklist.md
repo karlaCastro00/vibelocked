@@ -90,7 +90,7 @@ If Stripe is wired up:
 - Test mode and live mode use different keys and different endpoint secrets.
 - The client uses the publishable key only.
 
-The [Stripe webhook guide](/guides/securing-stripe-webhooks) is the longer version. Do not mark an order paid because the browser said the checkout succeeded.
+The [Stripe webhook guide](/guides/securing-stripe-webhooks) is the longer version. Do not mark an order paid because the browser said the checkout succeeded, and do not trust a `?session_id=` success page alone ([Stripe success page paywall bypass](/guides/stripe-success-page-paywall-bypass)).
 
 ## 6. AI features that spend your key
 
@@ -102,7 +102,7 @@ Require a signed-in user when the feature is not meant to be public. Cap how muc
 
 - `.env`, `.env.local`, and service account JSON files are not in git. A `.env.example` with empty values is fine.
 - The generator's chat, if it contains a pasted key, is not something you commit or screenshot into a public bug report.
-- Dependencies have a lockfile. You do not need a new library for every suggestion the model makes. Read the one it added.
+- Dependencies have a lockfile. You do not need a new library for every suggestion the model makes. Confirm the package exists on npmjs.com or pypi.org before you install; AI tools sometimes invent names ([hallucinated packages / slopsquatting](/guides/ai-hallucinated-packages-slopsquatting)).
 - Every third-party script the generator added (analytics, chat widgets, embeds) is one you meant to keep. A [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps) then limits scripts to those hosts.
 
 Cursor and similar editors can see the files and the text you put in the chat. Do not paste a live secret in to "help it debug." Rotate the key if you already did. The [first hour guide](/guides/first-hour-after-an-api-key-leaks) is the order of operations.

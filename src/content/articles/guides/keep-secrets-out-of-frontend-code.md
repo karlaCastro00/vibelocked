@@ -40,7 +40,7 @@ Checked against the Next.js, Vite, Supabase, Firebase, and Stripe docs linked be
 | OpenAI, Anthropic, AWS, database URLs | No | Yes |
 | Auth.js `AUTH_SECRET` / NextAuth `NEXTAUTH_SECRET` | No | Yes ([guide](/guides/authjs-auth-secret-nextauth)) |
 
-"Yes" for a browser key does not mean the data is public. It means the vendor designed that key to be public and put the real control somewhere else: Supabase RLS, Firebase Security Rules, or Stripe's rule that the secret key is the one that can charge and refund. Those controls are covered in the [RLS checklist](/checklists/supabase-rls-security-checklist) and the [Firebase checklist](/checklists/firebase-security-rules-checklist).
+"Yes" for a browser key does not mean the data is public. It means the vendor designed that key to be public and put the real control somewhere else: Supabase RLS, Firebase Security Rules, or Stripe's rule that the secret key is the one that can charge and refund. Those controls are covered in the [RLS checklist](/checklists/supabase-rls-security-checklist) and the [Firebase checklist](/checklists/firebase-security-rules-checklist). For why the Firebase web `apiKey` is expected in the client and where App Check fits, see [is the Firebase API key safe to expose](/guides/firebase-api-key-public-app-check).
 
 Secrets can also leak as whole files your server serves, like `/.env` or `/.git/config`. See [is your .env, .git folder, or source code public?](/guides/exposed-env-git-source-maps-deployed-app).
 

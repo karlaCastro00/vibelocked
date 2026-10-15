@@ -70,6 +70,9 @@ Lovable apps are React and Vite on the frontend, with Supabase as the usual back
 2. Secret keys (OpenAI, Stripe secret, Resend, and so on) belong in Supabase Edge Function secrets, read with `Deno.env.get('NAME')` inside the function. The browser calls the function, never the provider.
 3. Never place the service role key in client code or in a `VITE_` variable. It bypasses RLS completely. See [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
 4. If you ask Lovable to "connect OpenAI", read the generated code and confirm the call happens in an edge function. Then [protect that route from abuse](/guides/protect-openai-api-route-from-abuse) so strangers cannot spend your credits.
+5. Before you share a preview URL, walk the [Lovable and Bolt pre-launch security checklist](/checklists/lovable-bolt-pre-launch-security-checklist). It covers the tool-specific places keys and open rules tend to hide.
+
+On Replit, put credentials in the Secrets tool instead of hard-coding them. The [Replit Secrets guide](/guides/replit-secrets-guide) covers public projects, git, and screen sharing as leak paths.
 
 ## A quick pre-deploy check for any tool
 
@@ -84,7 +87,7 @@ git grep -nE "sk-|sk_live_|rk_live_|sb_secret_|service_role|AKIA|-----BEGIN"
 npm run build && grep -rnE "sk-|sk_live_|sb_secret_|service_role" dist/
 ```
 
-Then run [/scan](/scan) on the public repo. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks). If you committed a `.env` file, [this guide shows how to untrack it and remove it from git history](/guides/remove-api-key-from-github-history).
+Then run [/scan](/scan) on the public repo. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks). If you committed a `.env` file, [this guide shows how to untrack it and remove it from git history](/guides/remove-api-key-from-github-history). On the live site, confirm `/.env` and `/.git/config` return 404 ([how to check for exposed .env, .git, and source maps](/guides/exposed-env-git-source-maps-deployed-app)).
 
 ## Sources
 

@@ -64,7 +64,7 @@ Absence of a log line is not proof the key was unused. Some products log more th
 
 Issue a new key with less privilege than the one that leaked, if the provider allows it. Stripe restricted keys are the usual example: a key that can do the one API call you need, not the whole account. Supabase secret keys stay on the server. Firebase client config can stay in the app. A service account cannot.
 
-Store the new value in the host's secret store: the deployment environment, Supabase Edge Function secrets, or Replit Secrets. Do not commit it. Do not prefix it with `NEXT_PUBLIC_` or `VITE_`. The [secrets guide](/guides/keep-secrets-out-of-frontend-code) is the detail.
+Store the new value in the host's secret store: the deployment environment, Supabase Edge Function secrets, or [Replit Secrets](/guides/replit-secrets-guide). Do not commit it. Do not prefix it with `NEXT_PUBLIC_` or `VITE_`. The [secrets guide](/guides/keep-secrets-out-of-frontend-code) is the detail.
 
 Do not send the new key in the same chat, email, or ticket that contained the old one. Stripe's key docs say not to share keys over email or chat.
 

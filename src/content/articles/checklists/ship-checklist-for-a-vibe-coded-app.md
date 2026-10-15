@@ -37,7 +37,7 @@ If you do not find one, still search. The strings to look for are in the [fronte
 Public, and safe to ship only because something else enforces access:
 
 - Supabase publishable key, or the legacy anon key. See the [API keys guide](https://supabase.com/docs/guides/getting-started/api-keys).
-- Firebase web config `apiKey`. See [API keys](https://firebase.google.com/docs/projects/api-keys).
+- Firebase web config `apiKey`. See [API keys](https://firebase.google.com/docs/projects/api-keys) and our [Firebase API key and App Check guide](/guides/firebase-api-key-public-app-check).
 - Stripe publishable key (`pk_`). See [API keys](https://docs.stripe.com/keys).
 
 Secret, server only:
@@ -51,7 +51,7 @@ A `NEXT_PUBLIC_` or `VITE_` prefix means the value is for the browser. A secret 
 
 ## 3. Lock the database the client can reach
 
-Supabase: run the [RLS checklist](/checklists/supabase-rls-security-checklist). RLS on, grants tightened, one policy per operation, views checked, storage policies written, tests run as `anon` and `authenticated`.
+Supabase: run the [RLS checklist](/checklists/supabase-rls-security-checklist). RLS on, grants tightened, one policy per operation, views checked, storage policies written ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security)), tests run as `anon` and `authenticated`.
 
 Firebase: run the [rules checklist](/checklists/firebase-security-rules-checklist). No test-mode rule, no `if true`, owner checks on private documents, queries that match the rules, separate rules for Storage and Realtime Database.
 
@@ -71,7 +71,7 @@ Create two test users and request user A's id while signed in as user B. The [ID
 
 ## 5. Payments
 
-If you take money, the browser does not get to say that a payment succeeded. The [Stripe webhook guide](/guides/securing-stripe-webhooks) covers signature checks, the raw body, and duplicate events. Use test keys until that route is verified. Switch to live keys only on the server, stored as environment variables, not in the repo. Stripe's [best practices](https://docs.stripe.com/keys-best-practices) say not to put secret keys in source code.
+If you take money, the browser does not get to say that a payment succeeded. The [Stripe webhook guide](/guides/securing-stripe-webhooks) covers signature checks, the raw body, and duplicate events. Do not unlock a paywall from a success URL query string either; that is the [Stripe success page paywall bypass](/guides/stripe-success-page-paywall-bypass). Use test keys until that route is verified. Switch to live keys only on the server, stored as environment variables, not in the repo. Stripe's [best practices](https://docs.stripe.com/keys-best-practices) say not to put secret keys in source code.
 
 ## 6. Look at the built files
 
@@ -83,7 +83,7 @@ In the same headers, look for `Access-Control-Allow-Origin`. If it echoes back a
 
 ## 7. Ask the tool that wrote it, then read the diff
 
-Use the [review prompt](/guides/security-review-prompt-for-ai-coding-tools). Reject any change that disables RLS, opens a Firebase rule, or moves a secret into the client to make a request succeed.
+Use the [review prompt](/guides/security-review-prompt-for-ai-coding-tools). Reject any change that disables RLS, opens a Firebase rule, or moves a secret into the client to make a request succeed. Also confirm every new dependency the model added is a real package on the registry ([AI hallucinated packages / slopsquatting](/guides/ai-hallucinated-packages-slopsquatting)).
 
 ## 8. Share a staging URL first
 

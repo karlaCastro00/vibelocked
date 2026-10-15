@@ -66,7 +66,7 @@ The names `auth` and `db` are placeholders for your own auth library and databas
 
 ## Built in protections, and their limits
 
-Next.js only accepts POST for actions and compares the Origin header to the host, which helps against CSRF. It also creates encrypted, non deterministic action IDs and removes unused actions from the client bundle. None of that replaces your own authentication and authorization checks.
+Next.js only accepts POST for actions and compares the Origin header to the host, which helps against CSRF. It also creates encrypted, non deterministic action IDs and removes unused actions from the client bundle. None of that replaces your own authentication and authorization checks. Custom Route Handlers do not get that Origin check for free; if you add CORS headers yourself, follow the [CORS guide for vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps).
 
 If your app runs behind a proxy with a different domain, review the `serverActions.allowedOrigins` option.
 
