@@ -35,7 +35,7 @@ ${lines(guides)}
 - [Guides index](${absUrl('/guides')}): All launch guides.
 - [Sponsor](${absUrl('/sponsor')}): Media kit. Contact ${SITE.sponsorEmail}. No invented traffic numbers.
 - [About](${absUrl('/about')}): Independence, funding, and corrections.
-- [Newsletter](${absUrl('/newsletter')}): Weekly note sent with Buttondown. Double opt-in, one-click unsubscribe.
+- [Newsletter](${absUrl('/newsletter')}): A security note every two weeks, sent with Buttondown. Double opt-in, one-click unsubscribe.
 - [Privacy](${absUrl('/privacy')}): No cookies. Cookieless page counts with GoatCounter. The scanner sends nothing to VibeLocked.
 - [RSS](${absUrl('/rss.xml')}): Article feed.
 

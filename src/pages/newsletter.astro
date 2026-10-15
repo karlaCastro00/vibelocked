@@ -4,7 +4,7 @@ import NewsletterForm from '../components/NewsletterForm.astro';
 import { SITE } from '../lib/site';
 
 const description =
-  'A weekly VibeLocked note on leaks, security rules, and launch checks. Free, sent with Buttondown, double opt-in.';
+  'A VibeLocked security note every two weeks on leaks, security rules, and launch checks. Free, sent with Buttondown, double opt-in.';
 
 const jsonLd = {
   '@type': 'FAQPage',
@@ -19,7 +19,7 @@ const jsonLd = {
     },
     {
       '@type': 'Question',
-      name: 'What will the weekly note include?',
+      name: 'What will each edition include?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'One practical security note for people shipping AI-built apps: a rule change, a leak pattern, or a launch check, with links to official docs. It will not invent incident statistics.',
@@ -29,11 +29,11 @@ const jsonLd = {
 };
 ---
 
-<Base title="Weekly security notes" description={description} path="/newsletter" jsonLd={jsonLd}>
+<Base title="Security notes every two weeks" description={description} path="/newsletter" jsonLd={jsonLd}>
   <div class="wrap">
     <header class="page-intro">
       <p class="kicker">Newsletter</p>
-      <h1 class="page-title">A short note, once a week</h1>
+      <h1 class="page-title">A short note, every two weeks</h1>
       <p class="lede">
         For people about to share an AI-built app. One leak pattern, one rule worth checking, or one launch step, with a link to the vendor doc.
       </p>
@@ -43,7 +43,7 @@ const jsonLd = {
       <ul>
         <li>Something you can check in your own project that week.</li>
         <li>Links to official docs, not a retelling of a breach we did not verify.</li>
-        <li>A skip week when there is nothing worth sending. No padded editions.</li>
+        <li>A skipped edition when there is nothing worth sending. No padded editions.</li>
       </ul>
       <h2>What you will not get</h2>
       <ul>
@@ -51,6 +51,10 @@ const jsonLd = {
         <li>Unlabeled sponsor copy. If a future edition mentions a sponsor, the line will say so.</li>
         <li>Your address sold or shared. It stays with Buttondown and is used only for this list.</li>
       </ul>
+      <h2>Read past editions</h2>
+      <p>
+        <a href="https://buttondown.com/vibelocked/archive/vibelocked-edition-1-the-keys-ai-tools-love-to/" rel="noopener">Edition 1: the keys AI tools love to leak</a> covers which keys belong in your frontend and which must stay on your server. Every edition is in the <a href="https://buttondown.com/vibelocked/archive/" rel="noopener">archive</a>.
+      </p>
       <p>
         Questions about the list: <a href={`mailto:${SITE.helloEmail}`}>{SITE.helloEmail}</a>.
       </p>
