@@ -79,6 +79,8 @@ The signed-in user has to come from the session, not from the body. Then the que
 
 On Next.js, a page that redirects when you are logged out does not protect a Route Handler or a Server Action. Next.js tells you to verify the caller inside each of those. A login screen alone does not do it.
 
+Also check the redirect *after* a successful login. If the generator wired `callbackUrl`, `redirectTo`, or `redirect_url` from the query string, a crafted link can send a signed-in user to a phishing site. Fix pattern: [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
+
 Search for routes named `admin`, `seed`, `debug`, `internal`, and `migrate`. If they ship in the preview, they are on the internet.
 
 ## 5. Payments and webhooks

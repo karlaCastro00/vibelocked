@@ -14,6 +14,7 @@ related:
   - environment-variables-cursor-bolt-lovable
   - nextjs-server-actions-security
   - clerk-publishable-key-vs-secret-key
+  - open-redirect-callbackurl-authjs-supabase-clerk
 faqs:
   - question: "Is AUTH_SECRET the same as NEXTAUTH_SECRET?"
     answer: "Mostly yes. Auth.js prefers AUTH_SECRET. Older NextAuth.js used NEXTAUTH_SECRET. AUTH_SECRET is the preferred name going forward and works as the alias for the same job: encrypting cookies and JWTs on the server."
@@ -70,6 +71,8 @@ Never create any of these:
 Those prefixes put the value in the browser bundle. Our [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code) guide covers why.
 
 **Preview deploys:** if you use `AUTH_REDIRECT_PROXY_URL` so OAuth works on preview URLs, the [deployment docs](https://authjs.dev/getting-started/deployment) say `AUTH_SECRET` must be the same on the stable deployment and the preview deployments that need OAuth.
+
+Separately, do not pipe a raw `callbackUrl` or `redirectTo` from the query string into sign-in. Auth.js restricts same-host redirects by default, but custom code and loose redirect callbacks still create open redirects. See [fix open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
 
 ## Wrong patterns vibe apps hit
 

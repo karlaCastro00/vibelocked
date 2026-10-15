@@ -10,6 +10,7 @@ related:
   - supabase-rls-security-checklist
   - supabase-anon-key-vs-service-role-key
   - supabase-storage-bucket-security
+  - open-redirect-callbackurl-authjs-supabase-clerk
 faqs:
   - question: "Why do my Supabase confirmation emails link to localhost?"
     answer: "The Site URL in Auth, URL Configuration still points to http://localhost:3000. Set it to your production URL and add every real redirect destination to the Redirect URLs allowlist."
@@ -32,6 +33,8 @@ Under **URL Configuration**:
 - Avoid broad wildcards on domains you do not control. For Vercel previews, scope wildcards to your own team's preview URL pattern.
 
 If you use `redirectTo`, update email templates to use `{{ .RedirectTo }}` where needed, as the docs describe.
+
+Never copy an untrusted `next` or `redirectTo` query param into `signInWithOAuth` without validation. The dashboard allow list is required; your code still should not hand the client an arbitrary absolute URL. Full walkthrough: [fix open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
 
 ## 2. Keep email confirmation on
 

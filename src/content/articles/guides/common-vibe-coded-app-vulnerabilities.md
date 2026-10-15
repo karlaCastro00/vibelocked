@@ -12,6 +12,7 @@ related:
   - supabase-rls-security-checklist
   - firebase-security-rules-checklist
   - security-review-prompt-for-ai-coding-tools
+  - open-redirect-callbackurl-authjs-supabase-clerk
 faqs:
   - question: "Is a random id enough to stop IDOR?"
     answer: "No. An id that is hard to guess makes scanning slower. It is not a permission check. The handler still has to load the row only if it belongs to the signed-in user. OWASP calls the class of bug Broken Object Level Authorization."
@@ -156,6 +157,7 @@ Require a signed-in user when the feature is not public. Limit the size of the i
 7. Check your CORS headers. A reflected origin with credentials lets any site read your users' data. See [CORS misconfiguration in vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps).
 8. If the app has an AI feature, check that its tools use the user's permissions and its output is not rendered as raw HTML. See [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
 9. Check every dependency your AI tool added actually exists and is the real package. See [AI hallucinated packages (slopsquatting)](/guides/ai-hallucinated-packages-slopsquatting).
+10. After login, confirm `callbackUrl`, `redirectTo`, `next`, and `redirect_url` cannot send users to another site. See [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
 
 The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) puts these in launch order. If the app came from Lovable, Bolt, v0, or Replit, follow with the [pre-launch checklist for AI builders](/checklists/lovable-bolt-pre-launch-security-checklist).
 

@@ -12,6 +12,7 @@ related:
   - first-hour-after-an-api-key-leaks
   - check-if-api-key-leaked-on-github
   - environment-variables-cursor-bolt-lovable
+  - open-redirect-callbackurl-authjs-supabase-clerk
 faqs:
   - question: "Is the Clerk publishable key safe to put in my frontend?"
     answer: "Yes. Clerk's docs say the Publishable Key (pk_test_ or pk_live_) is safe to expose on the frontend, and you do not need to rotate it if it ends up in a public repo. Your security comes from the Secret Key staying on the server."
@@ -99,6 +100,8 @@ Do not delete the old key before the new one is live, or authentication breaks. 
 Signing secrets are per endpoint. On the **Webhooks** page, add a new endpoint with the same URL and events, copy its signing secret into `CLERK_WEBHOOK_SIGNING_SECRET`, redeploy, send a test event, then delete the old endpoint. While both exist, Clerk delivers events to both, and the old one simply fails verification.
 
 Deleting a key from your code is not enough. It stays in git history, so rotate first, then clean up. Our [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks) guide covers the rest.
+
+While you are in the Clerk env file, set sign-in redirect URLs to fixed relative paths (`NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`) rather than values built from `redirect_url` in the query string. Details: [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
 
 ## Checklist
 
