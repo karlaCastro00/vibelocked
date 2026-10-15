@@ -154,6 +154,7 @@ Require a signed-in user when the feature is not public. Limit the size of the i
 5. Paste the [review prompt](/guides/security-review-prompt-for-ai-coding-tools) into the tool that wrote the app, then open every file it names.
 6. Add a [Content-Security-Policy header](/guides/csp-content-security-policy-vibe-coded-apps) so an injected script has a harder time running, even if one of the bugs above slips through.
 7. Check your CORS headers. A reflected origin with credentials lets any site read your users' data. See [CORS misconfiguration in vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps).
+8. If the app has an AI feature, check that its tools use the user's permissions and its output is not rendered as raw HTML. See [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
 
 The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) puts these in launch order.
 

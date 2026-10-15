@@ -121,6 +121,8 @@ Log user id, token counts, and status for each call. Look at provider usage the 
 
 For server actions specifically, see [Next.js server actions security](/guides/nextjs-server-actions-security). They are public endpoints too.
 
+If your AI feature reads documents or calls tools, also read [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
+
 ## Sources
 
 - [OpenAI: Production best practices](https://platform.openai.com/docs/guides/production-best-practices)

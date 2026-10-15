@@ -267,6 +267,8 @@ Your code can have bugs, so set the backstop:
 
 If spend spikes and you think the key itself leaked, rotate it now and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
 
+Rate limits cap how much an attacker can spend. They do not stop someone from hijacking what the model does. For that, see [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
+
 ## Test it before you ship
 
 Test on your own deployment, with your own account:
