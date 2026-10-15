@@ -75,7 +75,7 @@ Run the vendor's own checker too. Supabase Security Advisor flags issues such as
 
 Generated handlers often look like this in spirit: read `userId` or `accountId` from the query or body, then fetch that row with a privileged key.
 
-The signed-in user has to come from the session, not from the body. Then the query filters to that user. The [common vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities) shows this as IDOR.
+The signed-in user has to come from the session, not from the body. Then the query filters to that user. The [common vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities) shows this as IDOR. For copy-paste Route Handler and RLS fixes plus a two-account test, see [fix IDOR in Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase).
 
 On Next.js, a page that redirects when you are logged out does not protect a Route Handler or a Server Action. Next.js tells you to verify the caller inside each of those. A login screen alone does not do it.
 

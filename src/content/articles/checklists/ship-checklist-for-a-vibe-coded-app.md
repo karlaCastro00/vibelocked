@@ -67,7 +67,7 @@ For each API route, Server Action, and Edge Function:
 - A Next.js page redirect is not the only check. Next.js says to verify Route Handlers and Server Actions on their own. Details are in the [vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities).
 - Self-hosted Next.js is on a version patched for the [middleware auth bypass, CVE-2025-29927](/guides/nextjs-middleware-auth-bypass-cve-2025-29927): 15.2.3, 14.2.25, 13.5.9, 12.3.5, or newer.
 
-Create two test users and request user A's id while signed in as user B.
+Create two test users and request user A's id while signed in as user B. The [IDOR fix guide for Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase) has the browser and curl steps, and what a passing result looks like.
 
 ## 5. Payments
 

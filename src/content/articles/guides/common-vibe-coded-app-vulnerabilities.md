@@ -71,7 +71,7 @@ The same bug exists in the database client. If the browser uses the Supabase pub
 
 On Firebase, the matching bug is a rule of `if request.auth != null` plus a client that can name any document id. The [rules checklist](/checklists/firebase-security-rules-checklist) shows the owner comparison.
 
-How to test: create two users. Copy an id from user A's network tab. Repeat the request with user B's session. You want no row, not A's row.
+How to test: create two users. Copy an id from user A's network tab. Repeat the request with user B's session. You want no row, not A's row. For full Route Handler code (read, update, delete, team membership), matching RLS policies, and a curl test, see [fix IDOR in Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase).
 
 ## The service role key in the frontend
 

@@ -58,6 +58,7 @@ The names `auth` and `db` are placeholders for your own auth library and databas
 ## Common mistakes to look for
 
 - **Trusting a hidden field.** A `userId` sent from the form can be changed by the caller. Read the user from the session instead.
+- **Looking up a row by id alone.** An action that updates or deletes `where id = ...` without the owner is IDOR. The [IDOR fix for Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase) shows the owner filter, the zero-row check, and how to test it.
 - **Only hiding the button.** Not rendering a delete button for non admins does not stop a direct request to the action.
 - **Returning too much.** Whatever an action returns is sent to the client. Return only the fields the UI needs.
 - **Auth only in middleware.** Keep checks in the action or in a shared data access layer. The [CVE-2025-29927 middleware auth bypass](/guides/nextjs-middleware-auth-bypass-cve-2025-29927) showed how a middleware check can be skipped entirely.

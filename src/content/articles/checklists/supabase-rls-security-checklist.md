@@ -172,4 +172,4 @@ If server code needs to bypass RLS for a job the user should not perform directl
 - [Advisors](https://supabase.com/docs/guides/observability/advisors)
 - [Postgres CREATE POLICY](https://www.postgresql.org/docs/current/sql-createpolicy.html)
 
-When you are ready to share the URL, run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) as well. The same missing owner check shows up as [IDOR](/guides/common-vibe-coded-app-vulnerabilities) if you query through a secret key on the server and forget to filter.
+When you are ready to share the URL, run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) as well. The same missing owner check shows up as [IDOR](/guides/common-vibe-coded-app-vulnerabilities) if you query through a secret key on the server and forget to filter. The [Next.js and Supabase IDOR guide](/guides/idor-broken-object-level-authorization-nextjs-supabase) shows the server side of that fix.
