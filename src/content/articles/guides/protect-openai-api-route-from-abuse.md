@@ -12,6 +12,7 @@ related:
   - keep-secrets-out-of-frontend-code
   - first-hour-after-an-api-key-leaks
   - nextjs-server-actions-security
+  - rate-limit-ai-api-routes-nextjs-supabase
 faqs:
   - question: "My OpenAI key is only on the server. Am I safe?"
     answer: "Not yet. If your API route forwards any prompt from any visitor, people can use your route as a free model endpoint. You need authentication, rate limits, and limits on what the route accepts."
@@ -68,6 +69,8 @@ const ratelimit = new Ratelimit({
 const { success } = await ratelimit.limit(`chat:${user.id}`);
 if (!success) return new Response('Too many requests', { status: 429 });
 ```
+
+For full Next.js and Supabase Edge Function code with per-IP limits and daily token budgets, see [rate limit AI API routes in Next.js and Supabase](/guides/rate-limit-ai-api-routes-nextjs-supabase).
 
 Add a daily quota per user too (for example in a `usage` table in your database) so one account cannot burn through your budget slowly.
 
