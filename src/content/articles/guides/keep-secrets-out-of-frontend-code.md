@@ -12,6 +12,7 @@ related:
   - first-hour-after-an-api-key-leaks
   - supabase-rls-security-checklist
   - firebase-security-rules-checklist
+  - vercel-cron-jobs-cron-secret
 faqs:
   - question: "Does a variable without NEXT_PUBLIC_ stay on the server?"
     answer: "Next.js only inlines variables with the NEXT_PUBLIC_ prefix into the browser bundle. Do not read any secret from a file marked use client. Put secrets in a module that imports server-only, which the data security guide recommends so a Client Component cannot import it."
@@ -39,6 +40,7 @@ Checked against the Next.js, Vite, Supabase, Firebase, and Stripe docs linked be
 | Stripe secret key (`sk_`), restricted key (`rk_`), webhook secret (`whsec_`) | No | Yes |
 | OpenAI, Anthropic, AWS, database URLs | No | Yes |
 | Auth.js `AUTH_SECRET` / NextAuth `NEXTAUTH_SECRET` | No | Yes ([guide](/guides/authjs-auth-secret-nextauth)) |
+| Vercel `CRON_SECRET` | No | Yes ([cron guide](/guides/vercel-cron-jobs-cron-secret)) |
 
 "Yes" for a browser key does not mean the data is public. It means the vendor designed that key to be public and put the real control somewhere else: Supabase RLS, Firebase Security Rules, or Stripe's rule that the secret key is the one that can charge and refund. Those controls are covered in the [RLS checklist](/checklists/supabase-rls-security-checklist) and the [Firebase checklist](/checklists/firebase-security-rules-checklist). For why the Firebase web `apiKey` is expected in the client and where App Check fits, see [is the Firebase API key safe to expose](/guides/firebase-api-key-public-app-check).
 
@@ -70,7 +72,7 @@ export function getStripeSecretKey() {
 
 Install the package the way the data security guide shows (`npm install server-only`, or the equivalent for your package manager). A file without `'use client'` is a Server Component by default in the App Router. Keep it that way if it touches secrets.
 
-Route Handlers are still public URLs. Putting the key on the server does not mean the route is authorized. That is a separate check, covered in the [vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities).
+Route Handlers are still public URLs. Putting the key on the server does not mean the route is authorized. That is a separate check, covered in the [vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities). Scheduled `/api/cron` routes need their own Bearer check with `CRON_SECRET` ([secure Vercel Cron jobs](/guides/vercel-cron-jobs-cron-secret)).
 
 `.env.local` is the usual local file and should stay gitignored. Commit a `.env.example` with the names and empty values. Next.js loads env files from the project root, not from a nested `src` folder. The environment variables guide mentions that.
 

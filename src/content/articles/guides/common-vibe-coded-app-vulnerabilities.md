@@ -13,6 +13,7 @@ related:
   - firebase-security-rules-checklist
   - security-review-prompt-for-ai-coding-tools
   - open-redirect-callbackurl-authjs-supabase-clerk
+  - vercel-cron-jobs-cron-secret
 faqs:
   - question: "Is a random id enough to stop IDOR?"
     answer: "No. An id that is hard to guess makes scanning slower. It is not a permission check. The handler still has to load the row only if it belongs to the signed-in user. OWASP calls the class of bug Broken Object Level Authorization."
@@ -117,6 +118,8 @@ export async function updateInvoice(id: string, title: string) {
 
 Search the repo for `route.ts`, `route.js`, and `'use server'`. For each one, point at the line that loads the session. If you cannot find that line, the route is open.
 
+Scheduled routes under `/api/cron` are the same problem with a different caller. Vercel can send `Authorization: Bearer` with `CRON_SECRET`, but only if you set the env var and check it. Without that check, a browser GET runs the job. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret).
+
 ## Trusting the user id in the body
 
 This is IDOR with an extra step. The UI sends `{ "userId": "<the signed-in user>" }` because that was easy to generate. The server believes it.
@@ -158,6 +161,7 @@ Require a signed-in user when the feature is not public. Limit the size of the i
 8. If the app has an AI feature, check that its tools use the user's permissions and its output is not rendered as raw HTML. See [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
 9. Check every dependency your AI tool added actually exists and is the real package. See [AI hallucinated packages (slopsquatting)](/guides/ai-hallucinated-packages-slopsquatting).
 10. After login, confirm `callbackUrl`, `redirectTo`, `next`, and `redirect_url` cannot send users to another site. See [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
+11. If you have Vercel Cron routes, confirm `CRON_SECRET` is set and unauthenticated GETs return 401. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret).
 
 The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) puts these in launch order. If the app came from Lovable, Bolt, v0, or Replit, follow with the [pre-launch checklist for AI builders](/checklists/lovable-bolt-pre-launch-security-checklist).
 

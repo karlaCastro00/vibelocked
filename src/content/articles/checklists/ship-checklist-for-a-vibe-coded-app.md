@@ -14,6 +14,7 @@ related:
   - first-hour-after-an-api-key-leaks
   - security-review-prompt-for-ai-coding-tools
   - open-redirect-callbackurl-authjs-supabase-clerk
+  - vercel-cron-jobs-cron-secret
 faqs:
   - question: "What should I do first if I find a live secret in the repo?"
     answer: "Revoke or rotate the key at the provider before you delete the file. Removing it from the latest commit does not make the old value useless. GitHub's remediation guide says revocation is the step that matters."
@@ -68,6 +69,7 @@ For each API route, Server Action, and Edge Function:
 - A Next.js page redirect is not the only check. Next.js says to verify Route Handlers and Server Actions on their own. Details are in the [vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities).
 - Self-hosted Next.js is on a version patched for the [middleware auth bypass, CVE-2025-29927](/guides/nextjs-middleware-auth-bypass-cve-2025-29927): 15.2.3, 14.2.25, 13.5.9, 12.3.5, or newer.
 - Post-login redirects (`callbackUrl`, `redirectTo`, `next`, `redirect_url`) only allow same-origin relative paths. Test with `?callbackUrl=https://evil.example` and confirm you stay on your app ([open redirect guide](/guides/open-redirect-callbackurl-authjs-supabase-clerk)).
+- Vercel Cron paths (`/api/cron/...`) reject requests without `Authorization: Bearer` matching `CRON_SECRET`. A bare browser GET must return 401 ([cron guide](/guides/vercel-cron-jobs-cron-secret)).
 
 Create two test users and request user A's id while signed in as user B. The [IDOR fix guide for Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase) has the browser and curl steps, and what a passing result looks like.
 

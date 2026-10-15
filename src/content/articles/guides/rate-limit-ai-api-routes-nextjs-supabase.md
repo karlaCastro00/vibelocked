@@ -15,6 +15,7 @@ related:
   - keep-secrets-out-of-frontend-code
   - nextjs-server-actions-security
   - supabase-anon-key-vs-service-role-key
+  - vercel-cron-jobs-cron-secret
 faqs:
   - question: "Why does an in-memory rate limiter not work on Vercel or Supabase?"
     answer: "Serverless functions run as many short-lived instances. A counter in a JavaScript Map lives in one instance only and is lost on a cold start, so an attacker spread across instances never hits the limit. Use a shared store such as Redis or your database so every instance reads the same count."
@@ -31,6 +32,8 @@ faqs:
 Your AI feature is the most expensive endpoint in your app. Every call to OpenAI, Anthropic, or Gemini costs real money, and an unprotected route will answer a script as happily as a user. This guide is the hands-on follow-up to [stop strangers from running up your OpenAI bill](/guides/protect-openai-api-route-from-abuse): actual rate limiting code for Next.js Route Handlers and Supabase Edge Functions, plus token budgets so one account cannot drain you slowly.
 
 If your model key is in the browser at all, rate limiting will not help, because attackers will call the provider directly. Fix that first with [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code).
+
+Scheduled `/api/cron` routes that call a model are another open door: protect them with [CRON_SECRET on Vercel Cron](/guides/vercel-cron-jobs-cron-secret), then rate limit the work inside the job if it fans out per user.
 
 ## The layers you want
 

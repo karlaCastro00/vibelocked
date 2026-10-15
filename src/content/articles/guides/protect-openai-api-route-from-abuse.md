@@ -13,6 +13,7 @@ related:
   - first-hour-after-an-api-key-leaks
   - nextjs-server-actions-security
   - rate-limit-ai-api-routes-nextjs-supabase
+  - vercel-cron-jobs-cron-secret
 faqs:
   - question: "My OpenAI key is only on the server. Am I safe?"
     answer: "Not yet. If your API route forwards any prompt from any visitor, people can use your route as a free model endpoint. You need authentication, rate limits, and limits on what the route accepts."
@@ -119,7 +120,7 @@ Log user id, token counts, and status for each call. Look at provider usage the 
 - [ ] One provider project and key per app, with budget and alerts
 - [ ] Usage logged and checked after launch
 
-For server actions specifically, see [Next.js server actions security](/guides/nextjs-server-actions-security). They are public endpoints too.
+For server actions specifically, see [Next.js server actions security](/guides/nextjs-server-actions-security). They are public endpoints too. Scheduled jobs that call the model need the same idea with a shared secret: [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret).
 
 If your AI feature reads documents or calls tools, also read [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
 

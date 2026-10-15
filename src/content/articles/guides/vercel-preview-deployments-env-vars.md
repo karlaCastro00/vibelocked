@@ -11,6 +11,7 @@ related:
   - environment-variables-cursor-bolt-lovable
   - keep-secrets-out-of-frontend-code
   - nextjs-server-actions-security
+  - vercel-cron-jobs-cron-secret
 faqs:
   - question: "Are Vercel preview URLs public?"
     answer: "It depends on your Deployment Protection settings. With Standard Protection, preview and generated deployment URLs require Vercel login or another protection method, while your production domain stays public. Check Settings, Deployment Protection for your project."
@@ -51,6 +52,7 @@ Each variable is assigned to **Production**, **Preview**, and or **Development**
 | `STRIPE_SECRET_KEY` | `sk_live_...` | `sk_test_...` |
 | `OPENAI_API_KEY` | production project key | separate key with a low budget |
 | `SUPABASE_SERVICE_ROLE_KEY` | production project | staging project |
+| `CRON_SECRET` | required for production cron auth ([guide](/guides/vercel-cron-jobs-cron-secret)) | optional; crons do not run on previews |
 
 Preview variables can also be scoped to a single branch. A branch specific value overrides the general Preview value with the same name.
 
@@ -85,6 +87,7 @@ See [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-
 - [ ] Deployment Protection on, at least Standard Protection
 - [ ] Preview uses its own database and test mode keys
 - [ ] Credentials stored as Secret variables
+- [ ] `CRON_SECRET` on Production if you use Vercel Cron ([secure cron jobs](/guides/vercel-cron-jobs-cron-secret))
 - [ ] No secret with a `NEXT_PUBLIC_` prefix
 - [ ] Public repo checked with the [VibeLocked scanner](/scan) for keys committed by mistake
 - [ ] If you set a [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps), preview deployments allow `vercel.live` so the Vercel Toolbar still loads
