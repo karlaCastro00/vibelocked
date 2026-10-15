@@ -87,6 +87,7 @@ See [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-
 - [ ] Credentials stored as Secret variables
 - [ ] No secret with a `NEXT_PUBLIC_` prefix
 - [ ] Public repo checked with the [VibeLocked scanner](/scan) for keys committed by mistake
+- [ ] If you set a [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps), preview deployments allow `vercel.live` so the Vercel Toolbar still loads
 
 ## Sources
 

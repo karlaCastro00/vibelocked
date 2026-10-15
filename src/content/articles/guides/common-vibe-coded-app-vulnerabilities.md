@@ -152,6 +152,7 @@ Require a signed-in user when the feature is not public. Limit the size of the i
 3. Call each API route with no cookie.
 4. POST an extra `role` field and confirm it is dropped.
 5. Paste the [review prompt](/guides/security-review-prompt-for-ai-coding-tools) into the tool that wrote the app, then open every file it names.
+6. Add a [Content-Security-Policy header](/guides/csp-content-security-policy-vibe-coded-apps) so an injected script has a harder time running, even if one of the bugs above slips through.
 
 The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) puts these in launch order.
 

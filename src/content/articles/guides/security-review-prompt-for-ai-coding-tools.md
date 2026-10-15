@@ -101,6 +101,8 @@ Run the test it names, then run the one it forgot: a second user, and a signed-o
 
 ## What the prompt will not do
 
+It will not check your response headers either. Whether production sends a Content-Security-Policy is something you confirm in the browser; the [CSP checklist](/guides/csp-content-security-policy-vibe-coded-apps) shows how.
+
 It will not see a hosted dashboard setting that is not in the repo. Deployed Firebase rules, a Supabase policy you clicked together in the dashboard, and a live Stripe endpoint secret are outside the files. Check those in the vendor console.
 
 It will not rotate a key. If it reports a live secret, stop and use the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Asking the model to "remove it from the code" while the key still works leaves the key working.

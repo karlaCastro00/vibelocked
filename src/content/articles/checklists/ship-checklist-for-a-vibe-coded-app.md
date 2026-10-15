@@ -77,6 +77,8 @@ If you take money, the browser does not get to say that a payment succeeded. The
 
 Build the app the way you deploy it. Search the output for secret prefixes. For Vite that is usually `dist/`. For Next.js it is usually `.next/`. A secret that appears there is already public, even if the source looks careful.
 
+While you have the production build open, check its response headers. If there is no `Content-Security-Policy`, the [CSP checklist](/guides/csp-content-security-policy-vibe-coded-apps) has a starter policy and a Report-Only rollout that will not break checkout or sign-in.
+
 ## 7. Ask the tool that wrote it, then read the diff
 
 Use the [review prompt](/guides/security-review-prompt-for-ai-coding-tools). Reject any change that disables RLS, opens a Firebase rule, or moves a secret into the client to make a request succeed.
