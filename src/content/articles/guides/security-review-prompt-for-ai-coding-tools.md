@@ -105,6 +105,8 @@ It will not check your response headers either. Whether production sends a Conte
 
 It will not see a hosted dashboard setting that is not in the repo. Deployed Firebase rules, a Supabase policy you clicked together in the dashboard, and a live Stripe endpoint secret are outside the files. Check those in the vendor console.
 
+It will not prove its own package suggestions are real. If the model added a dependency, look it up on npmjs.com or pypi.org yourself; the [hallucinated packages guide](/guides/ai-hallucinated-packages-slopsquatting) has a 2-minute check.
+
 It will not rotate a key. If it reports a live secret, stop and use the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Asking the model to "remove it from the code" while the key still works leaves the key working.
 
 It is not a pentest, a compliance review, or a promise that the app is safe to take payments. It is a way to make the tool show you the spots it usually gets wrong, so you can check them before you send the URL. The [pre-launch checklist](/checklists/lovable-bolt-pre-launch-security-checklist) is the same work, written as steps instead of a prompt.
