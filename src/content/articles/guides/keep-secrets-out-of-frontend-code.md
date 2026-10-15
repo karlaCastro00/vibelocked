@@ -42,6 +42,8 @@ Checked against the Next.js, Vite, Supabase, Firebase, and Stripe docs linked be
 
 "Yes" for a browser key does not mean the data is public. It means the vendor designed that key to be public and put the real control somewhere else: Supabase RLS, Firebase Security Rules, or Stripe's rule that the secret key is the one that can charge and refund. Those controls are covered in the [RLS checklist](/checklists/supabase-rls-security-checklist) and the [Firebase checklist](/checklists/firebase-security-rules-checklist).
 
+Secrets can also leak as whole files your server serves, like `/.env` or `/.git/config`. See [is your .env, .git folder, or source code public?](/guides/exposed-env-git-source-maps-deployed-app).
+
 ## Next.js
 
 The [environment variables guide](https://nextjs.org/docs/app/guides/environment-variables) says non-`NEXT_PUBLIC_` variables are only available in the Node.js environment. To put a value in the browser bundle, you prefix it with `NEXT_PUBLIC_`. Next.js then inlines that value at build time. Changing the env var later does not change an already built client bundle. You have to build again.

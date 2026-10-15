@@ -79,7 +79,7 @@ Build the app the way you deploy it. Search the output for secret prefixes. For 
 
 While you have the production build open, check its response headers. If there is no `Content-Security-Policy`, the [CSP checklist](/guides/csp-content-security-policy-vibe-coded-apps) has a starter policy and a Report-Only rollout that will not break checkout or sign-in.
 
-In the same headers, look for `Access-Control-Allow-Origin`. If it echoes back any origin you send, follow the [CORS misconfiguration guide](/guides/cors-misconfiguration-vibe-coded-apps).
+In the same headers, look for `Access-Control-Allow-Origin`. If it echoes back any origin you send, follow the [CORS misconfiguration guide](/guides/cors-misconfiguration-vibe-coded-apps). Also request `/.env` and `/.git/config` on the live domain; both should return 404 ([how to check](/guides/exposed-env-git-source-maps-deployed-app)).
 
 ## 7. Ask the tool that wrote it, then read the diff
 
