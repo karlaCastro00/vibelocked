@@ -65,6 +65,7 @@ For each API route, Server Action, and Edge Function:
 - The query is limited to that caller.
 - Admin behavior checks a role the user cannot edit.
 - A Next.js page redirect is not the only check. Next.js says to verify Route Handlers and Server Actions on their own. Details are in the [vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities).
+- Self-hosted Next.js is on a version patched for the [middleware auth bypass, CVE-2025-29927](/guides/nextjs-middleware-auth-bypass-cve-2025-29927): 15.2.3, 14.2.25, 13.5.9, 12.3.5, or newer.
 
 Create two test users and request user A's id while signed in as user B.
 

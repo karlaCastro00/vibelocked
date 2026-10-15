@@ -91,7 +91,7 @@ A Firebase service account file in the repo is the same class of mistake. The we
 
 A file at `app/api/orders/route.ts` is a URL. Next.js [authentication guide](https://nextjs.org/docs/app/guides/authentication) says to treat Route Handlers as public-facing API endpoints and to verify that the user is allowed to call them. The example checks the session, then checks the role, and returns 401 or 403.
 
-The same guide describes Proxy (older docs called a similar file Middleware) as an optional optimistic check. It reads the session cookie and can redirect. It is not the authorization boundary. The sample matcher in that guide skips `api`, so it does not run on those Route Handlers at all. Even if you change the matcher, verify inside the handler.
+The same guide describes Proxy (older docs called a similar file Middleware) as an optional optimistic check. It reads the session cookie and can redirect. It is not the authorization boundary. The sample matcher in that guide skips `api`, so it does not run on those Route Handlers at all. Even if you change the matcher, verify inside the handler. A real example of why: in [CVE-2025-29927](/guides/nextjs-middleware-auth-bypass-cve-2025-29927), one request header let attackers skip middleware on self-hosted Next.js apps.
 
 Server Actions are public in a different way. The [data security guide](https://nextjs.org/docs/app/guides/data-security) says an exported Server Action is reachable by a direct POST, not only from your UI. It also says a page-level auth check does not extend to Server Actions defined in that page. Re-check the session inside the action. Next.js has its own protections, including an Origin check against the Host header, and those do not replace your check of who the user is.
 
