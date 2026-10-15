@@ -11,6 +11,8 @@ related:
   - lovable-bolt-pre-launch-security-checklist
   - common-vibe-coded-app-vulnerabilities
   - ship-checklist-for-a-vibe-coded-app
+  - prompt-injection-ai-features-vibe-coded-apps
+  - securing-stripe-webhooks
 faqs:
   - question: "Will this prompt find every vulnerability?"
     answer: "No. It asks the model to look for a specific set of failures and to cite files. Models miss routes, invent line numbers, and sometimes suggest fixes that remove the control. You still have to open the files and retest."
@@ -108,6 +110,10 @@ It will not see a hosted dashboard setting that is not in the repo. Deployed Fir
 It will not prove its own package suggestions are real. If the model added a dependency, look it up on npmjs.com or pypi.org yourself; the [hallucinated packages guide](/guides/ai-hallucinated-packages-slopsquatting) has a 2-minute check.
 
 It will not rotate a key. If it reports a live secret, stop and use the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Asking the model to "remove it from the code" while the key still works leaves the key working.
+
+It will not prove your Stripe webhook is safe. If payments are in scope, read [securing Stripe webhooks](/guides/securing-stripe-webhooks) and confirm the handler verifies the signature on the raw body before it fulfills.
+
+It will not catch prompt injection by itself. If the app sends user text, documents, or tool calls to a model, follow [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
 
 It is not a pentest, a compliance review, or a promise that the app is safe to take payments. It is a way to make the tool show you the spots it usually gets wrong, so you can check them before you send the URL. The [pre-launch checklist](/checklists/lovable-bolt-pre-launch-security-checklist) is the same work, written as steps instead of a prompt.
 

@@ -12,6 +12,7 @@ related:
   - ship-checklist-for-a-vibe-coded-app
   - securing-stripe-webhooks
   - remove-api-key-from-github-history
+  - check-if-api-key-leaked-on-github
 faqs:
   - question: "If I delete the key from the latest commit, is the leak over?"
     answer: "No. GitHub says removing a secret from the codebase, pushing a new commit, or deleting the repository does not stop the secret from being used. Revoke it with the provider. History, forks, and clones can still contain the old value."
@@ -36,7 +37,7 @@ Where to do it, for the stack vibe-coded apps usually use:
 | Secret | Where to revoke | Doc |
 | --- | --- | --- |
 | Stripe secret, restricted, or publishable key | Dashboard, API keys. Roll the key. | [Keys](https://docs.stripe.com/keys) and [best practices](https://docs.stripe.com/keys-best-practices) |
-| Stripe webhook signing secret | Roll the endpoint secret. Stripe lets you expire the old one immediately or delay up to 24 hours. | [Webhooks](https://docs.stripe.com/webhooks) |
+| Stripe webhook signing secret | Roll the endpoint secret. Stripe lets you expire the old one immediately or delay up to 24 hours. After you roll it, confirm the handler still verifies signatures ([securing Stripe webhooks](/guides/securing-stripe-webhooks)). | [Webhooks](https://docs.stripe.com/webhooks) |
 | Supabase secret or legacy service_role | Project settings, API keys. Rotate, then update only the server env. | [API keys](https://supabase.com/docs/guides/getting-started/api-keys) |
 | Firebase or Google Cloud service account key | Delete the key in Google Cloud IAM. The web `apiKey` is not this secret. | [IAM keys](https://docs.cloud.google.com/iam/docs/keys-create-delete) and [Firebase API keys](https://firebase.google.com/docs/projects/api-keys) |
 | AWS access key | Deactivate the access key, then delete it after you confirm nothing you own still needs it. | [Access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) |
@@ -91,7 +92,7 @@ If you still need the value gone, follow GitHub's removal guide. It points at `g
 
 ## 6. Turn on the check that would have caught it
 
-On GitHub, secret scanning for public repositories is free, and it scans history. Push protection can block a push that contains a detected secret. The leakage-risks page describes both. Turn them on for the repo you just cleaned. They will not see every custom token format. They do see a lot of the keys in the table above, which is why the partner program exists.
+On GitHub, secret scanning for public repositories is free, and it scans history. Push protection can block a push that contains a detected secret. The leakage-risks page describes both. Turn them on for the repo you just cleaned. They will not see every custom token format. They do see a lot of the keys in the table above, which is why the partner program exists. If you are still unsure whether the key landed in git, use [how to check if your API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github).
 
 Add a habit to the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app): search the build output, and keep secrets out of the coding-agent chat.
 

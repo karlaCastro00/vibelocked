@@ -14,6 +14,7 @@ related:
   - nextjs-server-actions-security
   - rate-limit-ai-api-routes-nextjs-supabase
   - vercel-cron-jobs-cron-secret
+  - prompt-injection-ai-features-vibe-coded-apps
 faqs:
   - question: "My OpenAI key is only on the server. Am I safe?"
     answer: "Not yet. If your API route forwards any prompt from any visitor, people can use your route as a free model endpoint. You need authentication, rate limits, and limits on what the route accepts."

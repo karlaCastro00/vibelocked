@@ -32,7 +32,7 @@ This is not a pentest. It is the pass that catches the failures these apps actua
 
 If you find a live secret in git, in a screenshot, in a chat, or in the built JavaScript, stop and follow the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Delete the file after the provider has revoked the key, not before.
 
-If you do not find one, still search. The strings to look for are in the [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code).
+If you do not find one, still search. The strings to look for are in the [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code). For a public GitHub repo, also run through [how to check if your API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github).
 
 ## 2. Sort keys into public and secret
 

@@ -26,7 +26,7 @@ faqs:
     answer: "Run git rm --cached .env, add .env to .gitignore, and commit. The --cached option removes the file from git's index only and leaves your working copy alone. That stops future commits from including it. It does not remove old copies from history, so rotate anything that was in it."
 ---
 
-Gitleaks flagged a key, GitHub sent a secret scanning alert, or you noticed `.env` sitting in your public repo. Deleting the file in a new commit does not fix it, because every earlier commit still has the value. Here is the order that works: rotate the key, stop tracking the file, rewrite history only if you need to, force-push carefully, and then clean up the copies you do not control.
+Gitleaks flagged a key, GitHub sent a secret scanning alert, or you noticed `.env` sitting in your public repo. Deleting the file in a new commit does not fix it, because every earlier commit still has the value. If you have not confirmed the leak yet, start with [how to check if your API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github). Here is the order that works: rotate the key, stop tracking the file, rewrite history only if you need to, force-push carefully, and then clean up the copies you do not control.
 
 Checked against GitHub's docs, the git filter-repo manual, and the BFG Repo-Cleaner docs linked below on October 14, 2026. The git filter-repo commands were tested on a throwaway repo with fake keys.
 

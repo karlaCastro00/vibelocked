@@ -13,6 +13,8 @@ related:
   - supabase-rls-security-checklist
   - firebase-security-rules-checklist
   - vercel-cron-jobs-cron-secret
+  - check-if-api-key-leaked-on-github
+  - securing-stripe-webhooks
 faqs:
   - question: "Does a variable without NEXT_PUBLIC_ stay on the server?"
     answer: "Next.js only inlines variables with the NEXT_PUBLIC_ prefix into the browser bundle. Do not read any secret from a file marked use client. Put secrets in a module that imports server-only, which the data security guide recommends so a Client Component cannot import it."
@@ -37,7 +39,7 @@ Checked against the Next.js, Vite, Supabase, Firebase, and Stripe docs linked be
 | Clerk publishable key (`pk_`) | Yes | Also fine |
 | Clerk secret key (`sk_`) | No | Yes |
 | Stripe publishable key (`pk_`) | Yes | Also fine |
-| Stripe secret key (`sk_`), restricted key (`rk_`), webhook secret (`whsec_`) | No | Yes |
+| Stripe secret key (`sk_`), restricted key (`rk_`), webhook secret (`whsec_`) | No | Yes ([verify webhooks](/guides/securing-stripe-webhooks)) |
 | OpenAI, Anthropic, AWS, database URLs | No | Yes |
 | Auth.js `AUTH_SECRET` / NextAuth `NEXTAUTH_SECRET` | No | Yes ([guide](/guides/authjs-auth-secret-nextauth)) |
 | Vercel `CRON_SECRET` | No | Yes ([cron guide](/guides/vercel-cron-jobs-cron-secret)) |
@@ -112,7 +114,7 @@ Source can look fine while a previous build, or a shared client file, still cont
 2. Search it for `sk_live_`, `sk_test_`, `rk_live_`, `whsec_`, `sb_secret_`, `service_role`, and `BEGIN PRIVATE KEY`.
 3. Search for the secret's variable name too, in case the value was inlined next to it.
 
-For Vite, look under `dist/`. For Next.js, look under `.next/`. If you find the value, rotate it using the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Deleting the source line does not help the people who already downloaded the bundle, and it does not help if the value is in git history. Rotate first, then [remove it from GitHub history](/guides/remove-api-key-from-github-history) if you need the old commits clean.
+For Vite, look under `dist/`. For Next.js, look under `.next/`. If you find the value, rotate it using the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Deleting the source line does not help the people who already downloaded the bundle, and it does not help if the value is in git history. Rotate first, then [remove it from GitHub history](/guides/remove-api-key-from-github-history) if you need the old commits clean. Also [check whether the same key is in GitHub](/guides/check-if-api-key-leaked-on-github), including history and secret scanning alerts.
 
 Also view source on the running page. A secret rendered into an HTML response is as public as a bundle.
 
