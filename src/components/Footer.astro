@@ -30,6 +30,16 @@ const links = [
       <p class="footer-meta">
         Sponsors: <a href={`mailto:${SITE.sponsorEmail}`}>{SITE.sponsorEmail}</a>
       </p>
+      <p class="footer-meta footer-badge">
+        <span>Listed on</span>
+        <a href="https://thedevtoolsindex.com/product/vibelocked-scan?ref=badge" rel="dofollow"><img src="https://thedevtoolsindex.com/badge/vibelocked-scan.svg" alt="Featured on TheDevToolsIndex" width="182" height="46" loading="lazy" /></a>
+      </p>
     </div>
   </div>
 </footer>
+
+<style>
+  .footer-badge { display: flex; flex-direction: column; gap: 0.3rem; align-items: flex-start; }
+  .footer-badge img { width: 137px; height: auto; opacity: 0.85; display: block; }
+  .footer-badge a:hover img { opacity: 1; }
+</style>
