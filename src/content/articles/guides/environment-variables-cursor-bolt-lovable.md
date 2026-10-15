@@ -84,7 +84,7 @@ git grep -nE "sk-|sk_live_|rk_live_|sb_secret_|service_role|AKIA|-----BEGIN"
 npm run build && grep -rnE "sk-|sk_live_|sb_secret_|service_role" dist/
 ```
 
-Then run [/scan](/scan) on the public repo. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+Then run [/scan](/scan) on the public repo. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks). If you committed a `.env` file, [this guide shows how to untrack it and remove it from git history](/guides/remove-api-key-from-github-history).
 
 ## Sources
 

@@ -11,6 +11,7 @@ related:
   - keep-secrets-out-of-frontend-code
   - ship-checklist-for-a-vibe-coded-app
   - securing-stripe-webhooks
+  - remove-api-key-from-github-history
 faqs:
   - question: "If I delete the key from the latest commit, is the leak over?"
     answer: "No. GitHub says removing a secret from the codebase, pushing a new commit, or deleting the repository does not stop the secret from being used. Revoke it with the provider. History, forks, and clones can still contain the old value."
@@ -85,7 +86,7 @@ GitHub's page on [removing sensitive data](https://docs.github.com/en/authentica
 
 The [secret leakage risks](https://docs.github.com/en/code-security/concepts/secret-security/secret-leakage-risks) page says a committed secret stays in history after you remove it from the latest commit. Forks and other clones keep their copies. Force-pushing your branch does not edit those copies.
 
-If you still need the value gone, follow GitHub's removal guide. It points at `git filter-repo` and at GitHub Support for cached views. That is cleanup. It is not what stops the key. Do not spend the first hour on a history rewrite while the old key still works.
+If you still need the value gone, follow GitHub's removal guide. It points at `git filter-repo` and at GitHub Support for cached views. Our [step by step guide to removing a leaked key from GitHub history](/guides/remove-api-key-from-github-history) covers the commands, the force-push, and cleaning up clones. That is cleanup. It is not what stops the key. Do not spend the first hour on a history rewrite while the old key still works.
 
 ## 6. Turn on the check that would have caught it
 

@@ -11,6 +11,7 @@ related:
   - first-hour-after-an-api-key-leaks
   - keep-secrets-out-of-frontend-code
   - supabase-anon-key-vs-service-role-key
+  - remove-api-key-from-github-history
 faqs:
   - question: "If I delete the file with the key, is it safe?"
     answer: "No. The key stays in git history and in any clone or fork made before the deletion. Rotate the key first, then clean history if you want to."
@@ -64,7 +65,7 @@ A key can leak without ever being in git, for example through a `NEXT_PUBLIC_` o
 
 ## Found one? Rotate first
 
-Revoke or rotate the key at the provider before anything else. Rewriting history with `git filter-repo` does not remove copies other people already have. Then follow the [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+Revoke or rotate the key at the provider before anything else. Rewriting history with `git filter-repo` does not remove copies other people already have. Then follow the [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks). If you also want the dead value out of old commits, see [how to remove a leaked API key from GitHub history](/guides/remove-api-key-from-github-history).
 
 ## Official docs
 

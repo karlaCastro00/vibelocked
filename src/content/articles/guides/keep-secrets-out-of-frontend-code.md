@@ -107,7 +107,7 @@ Source can look fine while a previous build, or a shared client file, still cont
 2. Search it for `sk_live_`, `sk_test_`, `rk_live_`, `whsec_`, `sb_secret_`, `service_role`, and `BEGIN PRIVATE KEY`.
 3. Search for the secret's variable name too, in case the value was inlined next to it.
 
-For Vite, look under `dist/`. For Next.js, look under `.next/`. If you find the value, rotate it using the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Deleting the source line does not help the people who already downloaded the bundle, and it does not help if the value is in git history.
+For Vite, look under `dist/`. For Next.js, look under `.next/`. If you find the value, rotate it using the [first hour guide](/guides/first-hour-after-an-api-key-leaks). Deleting the source line does not help the people who already downloaded the bundle, and it does not help if the value is in git history. Rotate first, then [remove it from GitHub history](/guides/remove-api-key-from-github-history) if you need the old commits clean.
 
 Also view source on the running page. A secret rendered into an HTML response is as public as a bundle.
 
