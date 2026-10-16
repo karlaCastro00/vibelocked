@@ -11,6 +11,7 @@ related:
   - keep-secrets-out-of-frontend-code
   - first-hour-after-an-api-key-leaks
   - common-vibe-coded-app-vulnerabilities
+  - supabase-edge-functions-auth-verify-jwt
 faqs:
   - question: "Can I verify a Stripe webhook after I parse the JSON?"
     answer: "No. Stripe signs the exact raw body. The signature docs say frameworks that reformat the body, including parsing it as JSON, make verification fail. Read the raw body first and pass that string to constructEvent."
@@ -65,6 +66,8 @@ export async function POST(request: Request) {
 ```
 
 Use `request.text()`, not `request.json()`. Stripe says any change to the body, including parsing JSON, adding whitespace, or reordering keys, makes the signature check fail. In Express, the [signature docs](https://docs.stripe.com/webhooks/signature) say to mount `express.raw({ type: 'application/json' })` on the webhook route and to place `express.json()` after that route, not before it.
+
+If the webhook runs as a Supabase Edge Function, set `verify_jwt = false` for that function (Stripe sends no Supabase token) and use `constructEventAsync` with Stripe's SubtleCryptoProvider, because Deno has no synchronous crypto. [Supabase Edge Function auth](/guides/supabase-edge-functions-auth-verify-jwt/) has the full Deno handler.
 
 The endpoint secret is `whsec_` followed by the secret. It is not the Stripe secret API key. Keep it in a server env var. The [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code/) covers why it must not use a `NEXT_PUBLIC_` or `VITE_` prefix.
 

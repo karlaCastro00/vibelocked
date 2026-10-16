@@ -13,6 +13,7 @@ related:
   - common-vibe-coded-app-vulnerabilities
   - sql-injection-prisma-drizzle-supabase-nextjs
   - supabase-views-security-definer-bypass-rls
+  - supabase-edge-functions-auth-verify-jwt
 faqs:
   - question: "Is the Supabase publishable key a secret?"
     answer: "No. Supabase says the publishable key is safe to ship in a browser because it only reaches what Row Level Security allows. The secret key bypasses RLS and must stay on a server you control."
@@ -162,7 +163,7 @@ From the browser, signed out, call the Data API for the table with the publishab
 
 Generated apps often "fix" an empty list by turning RLS off or by swapping in the secret key. Both moves publish the table. The empty list is the database saying no. Add the policy that matches the product, grant only that operation, and test again.
 
-If server code needs to bypass RLS for a job the user should not perform directly, keep the secret key in the server environment. Supabase documents [Edge Function secrets](https://supabase.com/docs/guides/functions/secrets) for that. The function still has to decide which user it is acting for. The key will not do that for you.
+If server code needs to bypass RLS for a job the user should not perform directly, keep the secret key in the server environment. Supabase documents [Edge Function secrets](https://supabase.com/docs/guides/functions/secrets) for that. The function still has to decide which user it is acting for. The key will not do that for you. [Supabase Edge Function auth](/guides/supabase-edge-functions-auth-verify-jwt/) shows how to verify the caller's token and check ownership before using the admin client.
 
 ## Official docs
 

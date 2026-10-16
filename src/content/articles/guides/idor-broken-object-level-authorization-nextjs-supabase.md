@@ -16,6 +16,7 @@ related:
   - ship-checklist-for-a-vibe-coded-app
   - sql-injection-prisma-drizzle-supabase-nextjs
   - supabase-views-security-definer-bypass-rls
+  - supabase-edge-functions-auth-verify-jwt
 faqs:
   - question: "What is IDOR in a Next.js app?"
     answer: "IDOR (insecure direct object reference), which OWASP calls broken object level authorization, is when a Route Handler or Server Action takes an id from the URL, query string, or body and reads or changes that row without checking that the signed-in user is allowed to. Changing the id in the request returns someone else's data."
@@ -244,7 +245,7 @@ export const adminDb = createClient(
 );
 ```
 
-A handler that uses `adminDb` must still verify the caller and filter by owner, or confirm the caller is an admin from data they cannot edit. Supabase warns that `user_metadata` in the JWT can be changed by the user, so do not base roles on it. Use `app_metadata` or a server-written table.
+A handler that uses `adminDb` must still verify the caller and filter by owner, or confirm the caller is an admin from data they cannot edit. Supabase warns that `user_metadata` in the JWT can be changed by the user, so do not base roles on it. Use `app_metadata` or a server-written table. The same rule applies to `ctx.supabaseAdmin` and the secret key inside Supabase Edge Functions; see [Supabase Edge Function auth](/guides/supabase-edge-functions-auth-verify-jwt/).
 
 ## How to test your own app for IDOR
 

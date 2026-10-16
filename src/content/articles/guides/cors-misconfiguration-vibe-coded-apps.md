@@ -14,6 +14,7 @@ related:
   - nextjs-server-actions-security
   - common-vibe-coded-app-vulnerabilities
   - ship-checklist-for-a-vibe-coded-app
+  - supabase-edge-functions-auth-verify-jwt
 faqs:
   - question: "Is Access-Control-Allow-Origin: * a security hole?"
     answer: "Not by itself. Browsers do not send cookies on requests that get a wildcard response, and they block the response if the request included credentials. A wildcard is fine for public data and for APIs that use a bearer token the attacker's page cannot read. It becomes a problem only when the response contains private data that is protected by something the browser attaches automatically, such as cookies or network location."
@@ -152,7 +153,7 @@ app.use(
 
 If you use the `withSupabase` wrapper, CORS and preflight are handled for you. If you write headers by hand, Supabase recommends importing `corsHeaders` from `npm:@supabase/supabase-js@^2/cors` (v2.95.0 or later) so the allowed headers stay in sync with the client library ([Supabase: CORS](https://supabase.com/docs/guides/functions/cors)).
 
-The default wildcard origin is acceptable for functions that require a user JWT. If you want to lock it down further, replace `Access-Control-Allow-Origin` with your exact origin. Either way, CORS is not what protects the function. Keep `verify_jwt` on and check the user inside the handler, as in [rate limit AI API routes in Next.js and Supabase](/guides/rate-limit-ai-api-routes-nextjs-supabase/).
+The default wildcard origin is acceptable for functions that require a user JWT. If you want to lock it down further, replace `Access-Control-Allow-Origin` with your exact origin. Either way, CORS is not what protects the function. Keep `verify_jwt` on and check the user inside the handler, as in [rate limit AI API routes in Next.js and Supabase](/guides/rate-limit-ai-api-routes-nextjs-supabase/). [Supabase Edge Function auth](/guides/supabase-edge-functions-auth-verify-jwt/) shows an exact-origin allow-list, a preflight that runs before the auth check, and CORS headers on error responses.
 
 ## CORS is not CSRF protection
 

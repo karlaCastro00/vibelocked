@@ -12,6 +12,7 @@ related:
   - keep-secrets-out-of-frontend-code
   - first-hour-after-an-api-key-leaks
   - supabase-views-security-definer-bypass-rls
+  - supabase-edge-functions-auth-verify-jwt
 faqs:
   - question: "Is the Supabase anon key a secret?"
     answer: "No. Supabase designs the anon key (and the newer publishable key) to be used in the browser. It is only safe when Row Level Security is enabled and has correct policies on every table exposed through the API."
@@ -42,7 +43,7 @@ The anon key identifies your project and maps requests to the `anon` Postgres ro
 
 ## Why the service role key is dangerous
 
-The service role key maps to a role that bypasses RLS. That is useful for admin jobs, webhooks, and background work where your own server code decides who is allowed to do what. It is a disaster in a browser bundle, a public repo, or a mobile app, because anyone can extract it.
+The service role key maps to a role that bypasses RLS. That is useful for admin jobs, webhooks, and background work where your own server code decides who is allowed to do what. It is a disaster in a browser bundle, a public repo, or a mobile app, because anyone can extract it. Supabase Edge Functions get the key in their environment by default, so a function has to verify who is calling and check ownership before it touches the admin client ([Supabase Edge Function auth](/guides/supabase-edge-functions-auth-verify-jwt/)).
 
 ## How to check your app right now
 

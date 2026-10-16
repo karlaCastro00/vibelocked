@@ -17,6 +17,7 @@ related:
   - supabase-anon-key-vs-service-role-key
   - vercel-cron-jobs-cron-secret
   - prompt-injection-ai-features-vibe-coded-apps
+  - supabase-edge-functions-auth-verify-jwt
 faqs:
   - question: "Why does an in-memory rate limiter not work on Vercel or Supabase?"
     answer: "Serverless functions run as many short-lived instances. A counter in a JavaScript Map lives in one instance only and is lost on a cold start, so an attacker spread across instances never hits the limit. Use a shared store such as Redis or your database so every instance reads the same count."
@@ -182,7 +183,7 @@ Store the secrets in your project, not in the code:
 supabase secrets set UPSTASH_REDIS_REST_URL=your-rest-url UPSTASH_REDIS_REST_TOKEN=your-rest-token OPENAI_API_KEY=your-openai-key
 ```
 
-Keep `verify_jwt` on (the default) for user-facing functions, so the platform checks the JWT before your code runs ([Supabase: securing Edge Functions](https://supabase.com/docs/guides/functions/auth)). Then rate limit by the user id in the verified token:
+Keep `verify_jwt` on (the default) for user-facing functions, so the platform checks the JWT before your code runs ([Supabase: securing Edge Functions](https://supabase.com/docs/guides/functions/auth)). That platform check also accepts your public publishable key, so it does not prove a user on its own ([Supabase Edge Function auth](/guides/supabase-edge-functions-auth-verify-jwt/) explains why). `auth: 'user'` verifies the token in code. Then rate limit by the user id in the verified token:
 
 ```ts
 // supabase/functions/chat/index.ts
