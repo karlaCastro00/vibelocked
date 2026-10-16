@@ -219,6 +219,8 @@ $$;
 
 For identifiers, do not concatenate the request. Allow-list in SQL or in TypeScript first. Postgres `format('%I', name)` quotes an identifier safely only after you have already rejected unexpected names.
 
+To list every `SECURITY DEFINER` function in your project and who can execute it, use the queries in [Supabase views and functions that bypass RLS](/guides/supabase-views-security-definer-bypass-rls/).
+
 Also avoid shipping a generic `run_sql(sql text)` RPC. That is remote code execution against your database with whatever role the function uses.
 
 ## Next.js patterns that keep the hole closed

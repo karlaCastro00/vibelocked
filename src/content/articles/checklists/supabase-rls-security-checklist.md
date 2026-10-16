@@ -12,6 +12,7 @@ related:
   - keep-secrets-out-of-frontend-code
   - common-vibe-coded-app-vulnerabilities
   - sql-injection-prisma-drizzle-supabase-nextjs
+  - supabase-views-security-definer-bypass-rls
 faqs:
   - question: "Is the Supabase publishable key a secret?"
     answer: "No. Supabase says the publishable key is safe to ship in a browser because it only reaches what Row Level Security allows. The secret key bypasses RLS and must stay on a server you control."
@@ -125,7 +126,7 @@ On Postgres 15 and above, Supabase says to set `security_invoker` so the queryin
 alter view public.public_profiles set (security_invoker = true);
 ```
 
-Confirm the Postgres version in the project. If you cannot set `security_invoker`, revoke `anon` and `authenticated` from the view, or put the view in a schema the Data API does not expose. The views guide and the "Expose a view safely" section of the RLS guide are the two pages to follow.
+Confirm the Postgres version in the project. If you cannot set `security_invoker`, revoke `anon` and `authenticated` from the view, or put the view in a schema the Data API does not expose. The views guide and the "Expose a view safely" section of the RLS guide are the two pages to follow. For SQL that lists every view without `security_invoker`, plus materialized views and `security definer` functions, see [Supabase views and functions that bypass RLS](/guides/supabase-views-security-definer-bypass-rls/).
 
 ## Storage is a second set of policies
 

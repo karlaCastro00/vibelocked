@@ -59,7 +59,7 @@ If the app uses Supabase:
 - RLS is enabled on every exposed table.
 - `anon` does not have write grants on private tables.
 - Policies use `auth.uid()`, not a user id from the request body.
-- Views set `security_invoker` on Postgres 15 and above, or they are not exposed.
+- Views set `security_invoker` on Postgres 15 and above, or they are not exposed. `SECURITY DEFINER` functions are not callable by `anon`. See [Supabase views and functions that bypass RLS](/guides/supabase-views-security-definer-bypass-rls/).
 - Storage buckets for user files are private, and `storage.objects` has owner policies. See [Supabase Storage bucket security](/guides/supabase-storage-bucket-security/). Upload handlers validate type, size, and filenames, and prefer direct-to-storage for large files ([secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)).
 - The secret key appears only in server code.
 - Server code does not concatenate request data into SQL (`$queryRawUnsafe`, `sql.raw`, or a DIY `run_sql` rpc). See [SQL injection in Prisma, Drizzle, and Supabase](/guides/sql-injection-prisma-drizzle-supabase-nextjs/).

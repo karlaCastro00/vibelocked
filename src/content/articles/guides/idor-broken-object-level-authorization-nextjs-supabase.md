@@ -15,6 +15,7 @@ related:
   - nextjs-server-actions-security
   - ship-checklist-for-a-vibe-coded-app
   - sql-injection-prisma-drizzle-supabase-nextjs
+  - supabase-views-security-definer-bypass-rls
 faqs:
   - question: "What is IDOR in a Next.js app?"
     answer: "IDOR (insecure direct object reference), which OWASP calls broken object level authorization, is when a Route Handler or Server Action takes an id from the URL, query string, or body and reads or changes that row without checking that the signed-in user is allowed to. Changing the id in the request returns someone else's data."
@@ -224,7 +225,7 @@ What the docs say that matters for IDOR:
 - **Grants and policies are separate.** On existing projects, new tables in `public` start with full grants to `anon` and `authenticated`, and adding policies does not take those grants back. Revoke, then grant only what the app needs.
 - **`with check` on insert and update** stops a user from creating a row for someone else or reassigning `user_id`.
 - **One policy per operation,** each with `to authenticated`.
-- **Views bypass RLS by default.** Use `security_invoker = true` on Postgres 15+ or keep views out of exposed schemas.
+- **Views bypass RLS by default.** Use `security_invoker = true` on Postgres 15+ or keep views out of exposed schemas. The same goes for `SECURITY DEFINER` functions; [Supabase views and functions that bypass RLS](/guides/supabase-views-security-definer-bypass-rls/) shows how to find and fix both.
 - **The secret key (and the legacy `service_role` key) bypasses RLS** when the request carries no user access token. Supabase says never to use it in the browser or expose it to customers. If a `NEXT_PUBLIC_` variable holds it, you have a bigger problem than IDOR. See [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key/).
 
 **Browser queries need this most.** When a Lovable or Bolt app calls `supabase.from('invoices').select()` straight from the client with the publishable key, there is no Route Handler at all. RLS is the only check, and anyone can rerun that query from the console with a different `id`. The [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/) walks through every table.
