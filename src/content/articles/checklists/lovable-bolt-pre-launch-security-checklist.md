@@ -13,6 +13,7 @@ related:
   - ship-checklist-for-a-vibe-coded-app
   - supabase-rls-security-checklist
   - security-review-prompt-for-ai-coding-tools
+  - sql-injection-prisma-drizzle-supabase-nextjs
 faqs:
   - question: "Is a Lovable or Bolt preview URL private?"
     answer: "Treat it as a public site. The preview runs the same client code and calls the same backend as the link you might send later. Open rules and leaked keys are live on that URL."
@@ -61,6 +62,7 @@ If the app uses Supabase:
 - Views set `security_invoker` on Postgres 15 and above, or they are not exposed.
 - Storage buckets for user files are private, and `storage.objects` has owner policies. See [Supabase Storage bucket security](/guides/supabase-storage-bucket-security/). Upload handlers validate type, size, and filenames, and prefer direct-to-storage for large files ([secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)).
 - The secret key appears only in server code.
+- Server code does not concatenate request data into SQL (`$queryRawUnsafe`, `sql.raw`, or a DIY `run_sql` rpc). See [SQL injection in Prisma, Drizzle, and Supabase](/guides/sql-injection-prisma-drizzle-supabase-nextjs/).
 
 If the app uses Firebase:
 

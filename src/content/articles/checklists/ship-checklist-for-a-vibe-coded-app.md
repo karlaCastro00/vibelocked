@@ -16,6 +16,7 @@ related:
   - open-redirect-callbackurl-authjs-supabase-clerk
   - vercel-cron-jobs-cron-secret
   - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
+  - sql-injection-prisma-drizzle-supabase-nextjs
 faqs:
   - question: "What should I do first if I find a live secret in the repo?"
     answer: "Revoke or rotate the key at the provider before you delete the file. Removing it from the latest commit does not make the old value useless. GitHub's remediation guide says revocation is the step that matters."
@@ -59,6 +60,8 @@ Supabase: run the [RLS checklist](/checklists/supabase-rls-security-checklist/).
 Firebase: run the [rules checklist](/checklists/firebase-security-rules-checklist/). No test-mode rule, no `if true`, owner checks on private documents, queries that match the rules, separate rules for Storage and Realtime Database.
 
 If the generator used both, do both. They do not protect each other.
+
+Also search the server for raw SQL escapes (`$queryRawUnsafe`, Drizzle `sql.raw`, string-built `rpc` filters). The [SQL injection guide for Prisma, Drizzle, and Supabase](/guides/sql-injection-prisma-drizzle-supabase-nextjs/) shows the safe tagged-template patterns.
 
 ## 4. Check every way in, not just the pages
 

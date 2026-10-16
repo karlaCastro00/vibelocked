@@ -14,6 +14,7 @@ related:
   - supabase-rls-security-checklist
   - nextjs-server-actions-security
   - ship-checklist-for-a-vibe-coded-app
+  - sql-injection-prisma-drizzle-supabase-nextjs
 faqs:
   - question: "What is IDOR in a Next.js app?"
     answer: "IDOR (insecure direct object reference), which OWASP calls broken object level authorization, is when a Route Handler or Server Action takes an id from the URL, query string, or body and reads or changes that row without checking that the signed-in user is allowed to. Changing the id in the request returns someone else's data."

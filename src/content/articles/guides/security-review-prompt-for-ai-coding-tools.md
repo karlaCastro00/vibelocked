@@ -14,6 +14,7 @@ related:
   - prompt-injection-ai-features-vibe-coded-apps
   - securing-stripe-webhooks
   - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
+  - sql-injection-prisma-drizzle-supabase-nextjs
 faqs:
   - question: "Will this prompt find every vulnerability?"
     answer: "No. It asks the model to look for a specific set of failures and to cite files. Models miss routes, invent line numbers, and sometimes suggest fixes that remove the control. You still have to open the files and retest."
@@ -66,7 +67,9 @@ Look for these, in this order:
 
 6. Mass assignment. Flag updates that spread a request body into a database write. Flag Firestore updates that let the owner write a role field.
 
-7. Paid third-party APIs. Flag routes that call a model provider or other metered API with a server key and do not check who the caller is.
+7. SQL injection. Flag Prisma `$queryRawUnsafe` / `$executeRawUnsafe`, `Prisma.raw` with request data, Drizzle `sql.raw`, string-concatenated SQL, and Postgres `EXECUTE` that builds statements from arguments. Prefer tagged templates and typed `rpc` args. Details: [SQL injection in Prisma, Drizzle, and Supabase](/guides/sql-injection-prisma-drizzle-supabase-nextjs/).
+
+8. Paid third-party APIs. Flag routes that call a model provider or other metered API with a server key and do not check who the caller is.
 
 Output format:
 - Critical: exploitable without an account, or a secret in the client.

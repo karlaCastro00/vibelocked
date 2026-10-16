@@ -11,6 +11,7 @@ related:
   - ship-checklist-for-a-vibe-coded-app
   - keep-secrets-out-of-frontend-code
   - common-vibe-coded-app-vulnerabilities
+  - sql-injection-prisma-drizzle-supabase-nextjs
 faqs:
   - question: "Is the Supabase publishable key a secret?"
     answer: "No. Supabase says the publishable key is safe to ship in a browser because it only reaches what Row Level Security allows. The secret key bypasses RLS and must stay on a server you control."
@@ -138,7 +139,7 @@ If a bucket is meant to be public, assume anyone with the object URL can read th
 
 RLS does not protect a function the way it protects a table. Supabase's securing-your-API guide says to grant `execute` only to the roles that should call a function, and to review every `security definer` function.
 
-A `security definer` function runs as its owner. On Supabase that owner is often `postgres`, which has `bypassrls`. A policy that calls that function can end up trusting a path around RLS. The RLS guide walks through this. If you add a helper function, set an empty `search_path` (the user-management guide does this on its signup trigger) and do not grant `execute` to `anon` unless signed-out visitors should run it.
+A `security definer` function runs as its owner. On Supabase that owner is often `postgres`, which has `bypassrls`. A policy that calls that function can end up trusting a path around RLS. The RLS guide walks through this. If you add a helper function, set an empty `search_path` (the user-management guide does this on its signup trigger) and do not grant `execute` to `anon` unless signed-out visitors should run it. Also reject functions that build SQL with string concatenation; bind values with `EXECUTE ... USING` and allow-list identifiers ([SQL injection in Prisma, Drizzle, and Supabase](/guides/sql-injection-prisma-drizzle-supabase-nextjs/)).
 
 Do not store a role in user metadata and then trust it in a policy. The user-management guide shows signup `options.data` stored as user metadata, and that object comes from the client. A person can pass `role` there. For a real role, use a custom access token hook as described in the [custom claims guide](https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac), or a column the user cannot update.
 

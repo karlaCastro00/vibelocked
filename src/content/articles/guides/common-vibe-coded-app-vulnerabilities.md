@@ -17,6 +17,7 @@ related:
   - securing-stripe-webhooks
   - prompt-injection-ai-features-vibe-coded-apps
   - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
+  - sql-injection-prisma-drizzle-supabase-nextjs
 faqs:
   - question: "Is a random id enough to stop IDOR?"
     answer: "No. An id that is hard to guess makes scanning slower. It is not a permission check. The handler still has to load the row only if it belongs to the signed-in user. OWASP calls the class of bug Broken Object Level Authorization."
@@ -168,6 +169,7 @@ Require a signed-in user when the feature is not public. Limit the size of the i
 10. After login, confirm `callbackUrl`, `redirectTo`, `next`, and `redirect_url` cannot send users to another site. See [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk/).
 11. If you have Vercel Cron routes, confirm `CRON_SECRET` is set and unauthenticated GETs return 401. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret/).
 12. If you take payments with Stripe, confirm the webhook verifies `Stripe-Signature` on the raw body before it grants access. See [securing Stripe webhooks](/guides/securing-stripe-webhooks/).
+13. Search for `$queryRawUnsafe`, `sql.raw`, and string-built SQL passed to `rpc` or `EXECUTE`. Parameterize values; allow-list identifiers. See [SQL injection in Prisma, Drizzle, and Supabase](/guides/sql-injection-prisma-drizzle-supabase-nextjs/).
 
 The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) puts these in launch order. If the app came from Lovable, Bolt, v0, or Replit, follow with the [pre-launch checklist for AI builders](/checklists/lovable-bolt-pre-launch-security-checklist/).
 
