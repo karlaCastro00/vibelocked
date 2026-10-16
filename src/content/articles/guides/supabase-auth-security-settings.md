@@ -1,6 +1,6 @@
 ---
-title: "Supabase Auth security settings to check before launch"
-description: "Site URL, redirect allowlist, email confirmation, password rules, leaked password protection, and reauthentication. The Supabase Auth settings AI-built apps usually leave on defaults."
+title: "Supabase Auth security settings before launch"
+description: "Supabase Auth settings AI-built apps leave on defaults: Site URL, redirects, email confirmation, password rules, leaked password checks, and reauthentication."
 pubDate: 2026-10-14
 category: guide
 tags:

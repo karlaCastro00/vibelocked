@@ -1,6 +1,6 @@
 ---
-title: "Secure Vercel Cron jobs with CRON_SECRET (Next.js)"
-description: "AI-generated apps often leave /api/cron routes open. How Vercel sends Authorization Bearer CRON_SECRET, how to reject unauthenticated calls with 401, vercel.json schedules, local curl tests, and fail-open mistakes."
+title: "Secure Vercel Cron jobs with CRON_SECRET"
+description: "AI-generated apps often leave /api/cron routes open. How Vercel sends CRON_SECRET as a Bearer token, how to return 401 to other callers, and fail-open bugs."
 pubDate: 2026-10-15
 category: guide
 tags:

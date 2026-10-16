@@ -1,6 +1,6 @@
 ---
-title: "Fix open redirects in Auth.js, Supabase, and Clerk (callbackUrl, redirect_to, next)"
-description: "After login, AI-generated apps often redirect to whatever callbackUrl, redirectTo, next, or redirect_url is in the query string. That can send a signed-in user to a phishing site. How to allow-list redirects in Auth.js, Supabase Auth, and Clerk."
+title: "Fix open redirects in Auth.js, Supabase, and Clerk"
+description: "AI-built login flows often redirect to any callbackUrl, redirectTo, or next value in the URL, sending users to phishing sites. How to allow-list redirects."
 pubDate: 2026-10-15
 category: guide
 tags:

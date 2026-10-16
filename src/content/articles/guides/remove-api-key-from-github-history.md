@@ -1,5 +1,5 @@
 ---
-title: "How to remove a leaked API key from GitHub history"
+title: "Remove a leaked API key from GitHub history"
 description: "Rotate the key first, then purge it from every commit with git filter-repo or BFG, force-push carefully, and clean up clones, forks, and GitHub's cached views."
 pubDate: 2026-10-14
 category: guide

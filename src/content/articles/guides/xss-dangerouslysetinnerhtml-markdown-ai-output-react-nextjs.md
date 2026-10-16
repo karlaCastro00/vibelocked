@@ -1,6 +1,6 @@
 ---
-title: "XSS in React and Next.js: dangerouslySetInnerHTML, markdown, and AI chat output"
-description: "React escapes text in JSX, but dangerouslySetInnerHTML, rehype-raw, user-supplied links, JSON-LD script tags, and AI chat output can still run an attacker's script. How to sanitize HTML with DOMPurify, render markdown and LLM output safely, and allow-list URLs in Next.js."
+title: "XSS in React and Next.js: dangerouslySetInnerHTML"
+description: "React escapes JSX text, but dangerouslySetInnerHTML, rehype-raw, and AI chat output can still run attacker scripts. Sanitize with DOMPurify and allow-list URLs."
 pubDate: 2026-10-15
 category: guide
 tags:

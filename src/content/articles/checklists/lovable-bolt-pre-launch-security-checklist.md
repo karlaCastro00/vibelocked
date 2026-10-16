@@ -1,6 +1,6 @@
 ---
 title: "Lovable and Bolt pre-launch security checklist"
-description: "A pre-launch pass for Lovable, Bolt, v0, Cursor, and Replit apps: keys, rules, auth, storage, and payments."
+description: "A pre-launch security pass for Lovable, Bolt, v0, Cursor, and Replit apps: exposed keys, database rules, auth, storage, and payments before you share the URL."
 pubDate: 2026-10-11
 category: checklist
 tags:

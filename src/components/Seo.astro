@@ -25,7 +25,9 @@ const {
   jsonLd,
 } = Astro.props;
 
-const documentTitle = absoluteTitle ? title : `${title} | ${SITE.name}`;
+// Keep SERP titles at 60 characters or less: drop the brand suffix when it would push a long title over.
+const suffixed = `${title} | ${SITE.name}`;
+const documentTitle = absoluteTitle || suffixed.length > 60 ? title : suffixed;
 const canonical = absUrl(path);
 const image = absUrl('/og.png');
 const graph = jsonLd

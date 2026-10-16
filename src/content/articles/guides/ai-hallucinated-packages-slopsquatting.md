@@ -1,6 +1,6 @@
 ---
-title: "AI hallucinated packages (slopsquatting): check before you npm install"
-description: "AI coding tools sometimes suggest npm or PyPI packages that do not exist, and attackers can register those names. How the attack works, what the research found, and a 2-minute check before you install anything your AI suggested."
+title: "AI hallucinated packages and slopsquatting"
+description: "AI coding tools sometimes suggest npm or PyPI packages that do not exist, and attackers register the names. How it works, and a quick check before you install."
 pubDate: 2026-10-15
 category: guide
 tags:

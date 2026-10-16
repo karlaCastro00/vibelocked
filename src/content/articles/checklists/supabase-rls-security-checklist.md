@@ -1,6 +1,6 @@
 ---
 title: "Supabase RLS security checklist"
-description: "Enable RLS, fix grants, write one policy per operation, and test as anon before you ship a Supabase app."
+description: "Enable RLS, fix table grants, write one policy per operation, and test as the anon role before you ship a Supabase app built with Lovable, Bolt, or Cursor."
 pubDate: 2026-10-06
 category: checklist
 tags:

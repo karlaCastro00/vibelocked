@@ -1,6 +1,6 @@
 ---
-title: "AUTH_SECRET and NEXTAUTH_SECRET: what they are and how to rotate"
-description: "Auth.js needs AUTH_SECRET (older NextAuth used NEXTAUTH_SECRET) on the server only. What it encrypts, why NEXT_PUBLIC_ is wrong, how to generate a strong value, and how to rotate without killing every session."
+title: "AUTH_SECRET and NEXTAUTH_SECRET: set and rotate"
+description: "Auth.js needs AUTH_SECRET (NEXTAUTH_SECRET in older NextAuth) on the server only. What it encrypts, how to generate a strong value, and how to rotate it safely."
 pubDate: 2026-10-15
 category: guide
 tags:

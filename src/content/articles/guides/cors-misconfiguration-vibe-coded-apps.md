@@ -1,6 +1,6 @@
 ---
-title: "CORS misconfiguration in vibe-coded apps: what to fix and what to leave"
-description: "When AI tools 'fix' a CORS error they often allow every origin, reflect the Origin header, or turn on credentials. Here is what is actually dangerous in Next.js, Express, and Supabase Edge Functions, and safe configs to copy."
+title: "CORS misconfiguration in vibe-coded apps"
+description: "AI tools often 'fix' CORS errors by allowing every origin or turning on credentials. What is dangerous in Next.js, Express, and Supabase, plus safe configs."
 pubDate: 2026-10-15
 category: guide
 tags:

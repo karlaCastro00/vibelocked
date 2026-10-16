@@ -1,6 +1,6 @@
 ---
-title: "Env variables in Cursor, Bolt.new, and Lovable, safely"
-description: "Which env vars end up in the browser, how to keep .env files away from AI agents and git, and where server secrets belong in Cursor, Bolt.new, and Lovable projects."
+title: "Env variables in Cursor, Bolt.new, and Lovable"
+description: "Which env vars end up in the browser, how to keep .env files away from AI agents and git, and where server secrets belong in Cursor, Bolt.new, and Lovable."
 pubDate: 2026-10-13
 category: guide
 tags:

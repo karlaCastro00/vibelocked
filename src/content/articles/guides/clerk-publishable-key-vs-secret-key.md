@@ -1,6 +1,6 @@
 ---
-title: "Clerk publishable key vs secret key: what is safe to expose"
-description: "Your Clerk pk_ key is fine in frontend code. Your sk_ key and webhook whsec_ secret are not. The right env var names for Next.js and Vite, and how to rotate a leaked Clerk secret key with zero downtime."
+title: "Clerk publishable key vs secret key"
+description: "Your Clerk pk_ key is fine in frontend code; your sk_ key and whsec_ secret are not. The right env var names for Next.js and Vite, and how to rotate a leak."
 pubDate: 2026-10-14
 category: guide
 tags:

@@ -1,6 +1,6 @@
 ---
-title: "Is your .env, .git folder, or source code public? Check your deployed app"
-description: "How vibe-coded apps end up serving .env files, .git folders, and full source maps to anyone who asks, how to check your own site in five minutes, and how to fix it on Vercel, Netlify, static hosts, and VPS servers."
+title: "Is your .env, .git, or source code public?"
+description: "How vibe-coded apps end up serving .env files, .git folders, and source maps to anyone, a five-minute check for your site, and fixes for Vercel and Netlify."
 pubDate: 2026-10-15
 category: guide
 tags:

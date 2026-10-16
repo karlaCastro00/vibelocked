@@ -1,6 +1,6 @@
 ---
-title: "Prompt injection in vibe-coded AI features: a practical defense guide"
-description: "If your app sends user text, documents, or web pages to an LLM, someone can hijack it. How prompt injection works in chatbots, RAG, and AI agents, and the design fixes that actually limit the damage in Next.js and Supabase apps."
+title: "Prompt injection defense for vibe-coded AI apps"
+description: "If your app sends user text, files, or web pages to an LLM, someone can hijack it. How prompt injection hits chatbots, RAG, and agents, and how to limit it."
 pubDate: 2026-10-15
 category: guide
 tags:

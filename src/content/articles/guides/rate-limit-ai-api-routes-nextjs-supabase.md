@@ -1,6 +1,6 @@
 ---
-title: "Rate limit AI API routes in Next.js and Supabase Edge Functions"
-description: "Copyable rate limiting for OpenAI and other LLM routes in vibe-coded apps: per-user and per-IP limits with Upstash, daily token budgets, Supabase Edge Function setup, and provider spend caps."
+title: "Rate limit AI API routes: Next.js and Supabase"
+description: "Rate limiting for OpenAI and other LLM routes: per-user and per-IP limits with Upstash, daily token budgets, Supabase Edge Functions, and provider spend caps."
 pubDate: 2026-10-15
 category: guide
 tags:

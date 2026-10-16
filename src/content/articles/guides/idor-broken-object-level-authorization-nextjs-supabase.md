@@ -1,6 +1,6 @@
 ---
-title: "Fix IDOR in Next.js and Supabase (broken object level authorization)"
-description: "A practical fix for IDOR in Next.js Route Handlers and Supabase: take the user from a verified session, scope every query by owner, back it with RLS on auth.uid(), and test it with a second account before you ship."
+title: "Fix IDOR (BOLA) in Next.js and Supabase"
+description: "Fix IDOR in Next.js Route Handlers and Supabase: get the user from a verified session, scope every query by owner, add RLS, and test with a second account."
 pubDate: 2026-10-15
 category: guide
 tags:

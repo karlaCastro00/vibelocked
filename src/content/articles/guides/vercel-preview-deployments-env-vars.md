@@ -1,6 +1,6 @@
 ---
-title: "Vercel preview deployments: protect URLs and env vars"
-description: "Preview URLs can expose unfinished features and production data. How to set Deployment Protection, split Preview and Production env vars, and use Secret variables on Vercel."
+title: "Secure Vercel preview deployments and env vars"
+description: "Preview URLs can expose unfinished features and production data. Set Deployment Protection, split Preview and Production env vars, and use Secret variables."
 pubDate: 2026-10-14
 category: guide
 tags:

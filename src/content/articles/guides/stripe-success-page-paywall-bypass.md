@@ -1,6 +1,6 @@
 ---
-title: "Stripe paywall bypass: don't unlock on the success page"
-description: "If your app grants paid access when someone lands on ?success=true, anyone can type that URL. How to unlock features only from verified Stripe data, with webhooks and a server side session check."
+title: "Stripe paywall bypass on the success page"
+description: "If your app grants paid access when someone lands on ?success=true, anyone can type that URL. Unlock features only from verified Stripe data, using webhooks."
 pubDate: 2026-10-14
 category: guide
 tags:

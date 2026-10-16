@@ -1,6 +1,6 @@
 ---
-title: "Content-Security-Policy for vibe-coded apps: a practical checklist"
-description: "A CSP header tells the browser which scripts, styles, frames, and forms your app is allowed to use. Where to set it on Next.js, Vercel, and static hosts, a starter policy, the directive checklist, what breaks with Stripe, Clerk, Supabase, and fonts, and how to roll it out with Report-Only first."
+title: "Content-Security-Policy for vibe-coded apps"
+description: "Where to set a CSP header on Next.js, Vercel, and static hosts, a starter policy, what breaks with Stripe, Clerk, and Supabase, and a safe Report-Only rollout."
 pubDate: 2026-10-15
 category: guide
 tags:

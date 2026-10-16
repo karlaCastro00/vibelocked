@@ -1,6 +1,6 @@
 ---
-title: "Secure file uploads in Next.js (Supabase Storage and Vercel Blob)"
-description: "Stop vibe-coded avatar and document uploads from trusting file.type, skipping auth, or dumping files into public/. Direct-to-storage uploads, MIME allow-lists, filename sanitizing, and private buckets with signed URLs."
+title: "Secure file uploads in Next.js and Supabase"
+description: "Stop uploads that trust file.type, skip auth, or land in public/. Use direct-to-storage uploads, MIME allow-lists, safe filenames, and private storage buckets."
 pubDate: 2026-10-15
 category: guide
 tags:

@@ -1,5 +1,5 @@
 ---
-title: "Supabase Storage security: buckets and RLS policies"
+title: "Supabase Storage security: buckets and RLS"
 description: "Stop strangers from listing, downloading, or overwriting files in Supabase Storage, with policies for per-user folders and signed URLs."
 pubDate: 2026-10-13
 category: guide
