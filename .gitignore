@@ -29,3 +29,8 @@ distribution.md
 .sprint-lock
 sponsors.md
 affiliates.md
+
+# Live scan worker
+worker/node_modules/
+worker/dist/
+worker/.wrangler/

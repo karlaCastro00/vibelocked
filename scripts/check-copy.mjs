@@ -42,7 +42,7 @@ for (const file of files) {
     }
   }
   // Pages are served at /path/ on GitHub Pages; /path answers with a 301, so links must end in a slash.
-  const slashless = /(?:\]\(|href=["']|href: ["'])(\/(?:guides|checklists|scan|newsletter|sponsor|about|privacy)(?:\/[a-z0-9-]+)?)(?=[#"')])/g;
+  const slashless = /(?:\]\(|href=["']|href: ["'])(\/(?:guides|checklists|scan|live-scan|newsletter|sponsor|about|privacy)(?:\/[a-z0-9-]+)?)(?=[#"')])/g;
   for (const match of text.matchAll(slashless)) {
     const line = text.slice(0, match.index).split('\n').length;
     console.error(`${file}:${line} internal link ${match[1]} needs a trailing slash`);

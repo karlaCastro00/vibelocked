@@ -5,6 +5,8 @@ export const SITE = {
     'Ship your AI-built app without leaking data or keys. Practical security notes for people building with AI coding tools.',
   sponsorEmail: 'sponsors@vibelocked.com',
   helloEmail: 'hello@vibelocked.com',
+  /** Free-tier Cloudflare Worker that runs live app scans (SSRF-hardened). */
+  liveScanWorker: 'https://vibelocked-live-scan.karlacastropro.workers.dev',
 } as const;
 
 export function absUrl(path: string) {

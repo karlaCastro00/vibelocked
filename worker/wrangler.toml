@@ -1,0 +1,13 @@
+name = "vibelocked-live-scan"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "20b42f11c51049c285a3ee598e65621a"
+preview_id = "20b42f11c51049c285a3ee598e65621a"
+
+[vars]
+ALLOWED_ORIGINS = "https://vibelocked.com,http://localhost:4321,http://127.0.0.1:4321"

@@ -36,6 +36,9 @@ const jsonLd = {
       <p class="scan-note">
         Needs nothing private: no login, no token. Your browser reads the repo from GitHub's public API and raw.githubusercontent.com, then checks up to 150 text files locally (skipping node_modules, lockfiles, binaries, and files over 200 KB). GitHub allows about 60 API calls per hour per network without login, and a scan uses three.
       </p>
+      <p class="scan-note">
+        Already deployed? Use the <a href="/live-scan/">live app scanner</a> to probe the public URL for shipped secrets, open Supabase tables, and exposed .env or .git files.
+      </p>
       <p id="repo-status" class="scan-note" aria-live="polite"></p>
     </section>
 

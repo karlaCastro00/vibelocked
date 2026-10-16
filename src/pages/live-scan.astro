@@ -1,0 +1,242 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+
+const description =
+  'Free live app scanner for vibe coders. Probe a deployed URL for leaked keys in JavaScript, open Supabase tables, exposed .env or .git, and weak headers. Read only.';
+
+const jsonLd = {
+  '@type': 'WebApplication',
+  name: 'VibeLocked live app scanner',
+  url: 'https://vibelocked.com/live-scan/',
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  description,
+};
+
+const workerUrl = SITE.liveScanWorker;
+---
+
+<Base title="Live app scanner" description={description} path="/live-scan/" jsonLd={jsonLd}>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="kicker">Free tool</p>
+      <h1 class="page-title">Probe your deployed app like an attacker</h1>
+      <p class="lede">
+        Enter the public URL of an app you shipped with Lovable, Bolt, v0, Cursor, or similar. We fetch it from the outside, look for secrets in shipped JavaScript, check common Supabase and Firebase misconfigs, and probe for exposed .env, .git, and source maps. Read only. We never ask you to paste code or secrets.
+      </p>
+    </header>
+
+    <section class="panel scan-panel" id="panel-live">
+      <form id="live-form">
+        <label for="live-url"><strong>Deployed app URL</strong></label>
+        <div class="scan-actions">
+          <input id="live-url" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://your-app.lovable.app" required />
+          <button class="button" type="submit" id="live-run">Scan live app</button>
+        </div>
+      </form>
+      <p class="scan-note">
+        Scans run on a Cloudflare Worker (not in your browser) so we can reach the site the way a stranger would. Free limit: 5 scans per 10 minutes per network. We only send GET, HEAD, and OPTIONS. We never write to your app.
+      </p>
+      <p class="scan-note">
+        Looking for keys in a GitHub repo instead? Use the <a href="/scan/">repo scanner</a>.
+      </p>
+      <p id="live-status" class="scan-note" aria-live="polite"></p>
+      <div id="live-progress" class="live-progress" hidden>
+        <div class="live-progress-bar" id="live-progress-bar"></div>
+      </div>
+    </section>
+
+    <div id="live-results" class="scan-results" aria-live="polite"></div>
+
+    <article class="prose">
+      <h2>What it checks</h2>
+      <ul>
+        <li>Secrets in HTML and same-origin JavaScript bundles (Stripe sk_live, OpenAI, Anthropic, Supabase service_role / sb_secret, AWS, GitHub tokens, private keys, database URLs with passwords), with values masked</li>
+        <li>Supabase public config: then read-only REST probes of common tables (profiles, users, todos, and similar) with the anon key</li>
+        <li>Firebase web config, plus open Realtime Database or Firestore when detectable over public REST</li>
+        <li>Exposed /.env, /.git/HEAD, /.git/config, and JavaScript source maps</li>
+        <li>CORS that allows a foreign Origin, and missing security headers (CSP, X-Frame-Options, HSTS, nosniff)</li>
+      </ul>
+      <h2>How to use a finding</h2>
+      <p>
+        Each result includes a plain-language explanation and a ready prompt you can paste into Cursor or Lovable. The prompt never includes the secret value. Rotate real secrets at the provider first, then apply the fix.
+      </p>
+      <h2>Limits</h2>
+      <p>
+        This is an outside read of a public URL. It does not log in as a user, does not prove ownership, and does not replace a full review. Private apps, auth-gated pages, and secrets that only appear after login are out of scope. Cap: about 20 same-origin scripts, about 1.5 MB each, short timeouts. A clean result is not a guarantee.
+      </p>
+      <p>
+        Related: <a href="/guides/exposed-env-git-source-maps-deployed-app/">exposed .env, .git, and source maps</a>, <a href="/guides/supabase-anon-key-vs-service-role-key/">anon vs service role</a>, <a href="/guides/cors-misconfiguration-vibe-coded-apps/">CORS misconfiguration</a>, <a href="/guides/csp-content-security-policy-vibe-coded-apps/">CSP for vibe-coded apps</a>.
+      </p>
+    </article>
+  </div>
+</Base>
+
+<style>
+  .scan-panel { padding: 1.1rem 1.15rem; margin-top: 1rem; }
+  .scan-panel input {
+    flex: 1 1 18rem; min-width: 0;
+    width: 100%; box-sizing: border-box; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85rem; padding: 0.75rem; border-radius: 6px; border: 1px solid currentColor; background: transparent; color: inherit;
+  }
+  .scan-actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 0.7rem; }
+  .scan-note { font-size: 0.85rem; opacity: 0.75; }
+  .scan-results { margin: 1.4rem 0; max-width: 52rem; }
+  .scan-results :global(.finding) { border-left: 4px solid #c0392b; padding: 0.5rem 0.8rem; margin: 0.6rem 0; background: color-mix(in srgb, var(--bg) 92%, #c0392b); }
+  .scan-results :global(.finding.critical) { border-color: #8b0000; }
+  .scan-results :global(.finding.high) { border-color: #c0392b; }
+  .scan-results :global(.finding.medium),
+  .scan-results :global(.finding.warn) { border-color: #d48806; }
+  .scan-results :global(.finding.low) { border-color: #5b7c8d; }
+  .scan-results :global(.finding.info) { border-color: #2e8b57; }
+  .scan-results :global(code) { word-break: break-all; }
+  .scan-results :global(.sum) { font-weight: 600; }
+  .scan-results :global(.fix-box) {
+    margin-top: 0.5rem; padding: 0.6rem 0.7rem; border-radius: 6px;
+    border: 1px dashed color-mix(in srgb, currentColor 35%, transparent);
+    font-size: 0.82rem; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .scan-results :global(.fix-actions) { margin-top: 0.4rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .scan-results :global(.fix-actions button) {
+    font: inherit; font-size: 0.8rem; padding: 0.35rem 0.7rem; border-radius: 6px;
+    border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer;
+  }
+  .live-progress { height: 4px; background: color-mix(in srgb, currentColor 15%, transparent); border-radius: 2px; margin-top: 0.8rem; overflow: hidden; }
+  .live-progress-bar { height: 100%; width: 15%; background: #0e4f48; animation: live-pulse 1.2s ease-in-out infinite; }
+  :global([data-theme='dark']) .live-progress-bar { background: #7eb6ad; }
+  @keyframes live-pulse { 0% { transform: translateX(-20%); } 50% { transform: translateX(120%); } 100% { transform: translateX(-20%); } }
+</style>
+
+<script define:vars={{ workerUrl }}>
+  const out = document.getElementById('live-results');
+  const status = document.getElementById('live-status');
+  const runBtn = document.getElementById('live-run');
+  const progress = document.getElementById('live-progress');
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  function sevLabel(s) {
+    if (s === 'critical' || s === 'high') return 'Secret / risk';
+    if (s === 'medium') return 'Review';
+    if (s === 'low') return 'Harden';
+    return 'Note';
+  }
+
+  function renderFinding(f) {
+    const box = el('div', 'finding ' + f.severity, null);
+    const head = el('strong', '', `${sevLabel(f.severity)}: ${f.title}`);
+    box.append(head);
+    if (f.where) box.append(el('div', '', 'Where: ' + f.where));
+    if (f.evidence) {
+      const code = el('code', '', f.evidence);
+      box.append(el('div', '', null), code);
+    }
+    box.append(el('p', '', f.detail));
+    if (f.fixPrompt) {
+      const pre = el('div', 'fix-box', f.fixPrompt);
+      const actions = el('div', 'fix-actions', null);
+      const copy = el('button', '', 'Copy fix prompt');
+      copy.type = 'button';
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(f.fixPrompt);
+          copy.textContent = 'Copied';
+          setTimeout(() => { copy.textContent = 'Copy fix prompt'; }, 1500);
+        } catch {
+          copy.textContent = 'Select and copy manually';
+        }
+      });
+      actions.append(copy);
+      box.append(pre, actions);
+    }
+    return box;
+  }
+
+  function renderSummary(summary, findings) {
+    out.replaceChildren();
+    const crit = summary.critical + summary.high;
+    const line =
+      findings.length === 0
+        ? `No issues found on this pass (${summary.scriptsScanned} script${summary.scriptsScanned === 1 ? '' : 's'} checked). That is not a guarantee.`
+        : `${crit} high-severity finding${crit === 1 ? '' : 's'}, ${summary.medium} to review, ${summary.low + summary.info} lower priority. Values are masked.`;
+    out.append(el('p', 'sum', line));
+    for (const f of findings) out.append(renderFinding(f));
+  }
+
+  document.getElementById('live-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = document.getElementById('live-url').value.trim();
+    out.replaceChildren();
+    runBtn.disabled = true;
+    progress.hidden = false;
+    status.textContent = 'Starting scan...';
+    const findings = [];
+    try {
+      const res = await fetch(workerUrl + '/scan', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'text/event-stream' },
+        body: JSON.stringify({ url, stream: true }),
+      });
+      if (!res.ok) {
+        let msg = 'Scan failed. Try again in a minute.';
+        try {
+          const j = await res.json();
+          if (j && j.error) msg = j.error;
+        } catch {}
+        status.textContent = msg;
+        return;
+      }
+      const ctype = res.headers.get('content-type') || '';
+      if (ctype.includes('application/json')) {
+        const data = await res.json();
+        if (data.error) {
+          status.textContent = data.error;
+          return;
+        }
+        status.textContent = `Done in ${Math.round((data.summary && data.summary.durationMs) || 0)} ms.`;
+        renderSummary(data.summary, data.findings || []);
+        return;
+      }
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '';
+      let summary = null;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const parts = buf.split('\n\n');
+        buf = parts.pop() || '';
+        for (const part of parts) {
+          const line = part.split('\n').find((l) => l.startsWith('data: '));
+          if (!line) continue;
+          let ev;
+          try { ev = JSON.parse(line.slice(6)); } catch { continue; }
+          if (ev.type === 'status') status.textContent = ev.message;
+          else if (ev.type === 'finding') {
+            findings.push(ev.finding);
+            out.append(renderFinding(ev.finding));
+          } else if (ev.type === 'done') {
+            summary = ev.summary;
+            status.textContent = `Done in ${Math.round(summary.durationMs)} ms. Checked ${summary.scriptsScanned} script${summary.scriptsScanned === 1 ? '' : 's'}.`;
+            renderSummary(summary, findings);
+          } else if (ev.type === 'error') {
+            status.textContent = ev.message;
+          }
+        }
+      }
+    } catch {
+      status.textContent = 'Could not reach the scanner. Check your connection and try again.';
+    } finally {
+      runBtn.disabled = false;
+      progress.hidden = true;
+    }
+  });
+</script>
