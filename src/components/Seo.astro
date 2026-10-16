@@ -28,6 +28,7 @@ const {
 // Keep SERP titles at 60 characters or less: drop the brand suffix when it would push a long title over.
 const suffixed = `${title} | ${SITE.name}`;
 const documentTitle = absoluteTitle || suffixed.length > 60 ? title : suffixed;
+// A noindex page (the 404) is served at whatever URL was missing, so it gets no canonical or og:url.
 const canonical = absUrl(path);
 const image = absUrl('/og.png');
 const graph = jsonLd
@@ -45,7 +46,7 @@ const json = graph ? JSON.stringify(graph).replace(/</g, '\\u003c') : '';
 <meta name="generator" content={Astro.generator} />
 <title>{documentTitle}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={canonical} />
+{!noindex && <link rel="canonical" href={canonical} />}
 <meta name="robots" content={noindex ? 'noindex,follow' : 'index,follow'} />
 <meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#101311" media="(prefers-color-scheme: dark)" />
@@ -53,7 +54,7 @@ const json = graph ? JSON.stringify(graph).replace(/</g, '\\u003c') : '';
 <meta property="og:title" content={documentTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:type" content={ogType} />
-<meta property="og:url" content={canonical} />
+{!noindex && <meta property="og:url" content={canonical} />}
 <meta property="og:image" content={image} />
 <meta property="og:locale" content="en_US" />
 {published && <meta property="article:published_time" content={published.toISOString()} />}
