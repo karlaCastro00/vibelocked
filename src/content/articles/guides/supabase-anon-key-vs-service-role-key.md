@@ -14,6 +14,7 @@ related:
   - first-hour-after-an-api-key-leaks
   - supabase-views-security-definer-bypass-rls
   - supabase-edge-functions-auth-verify-jwt
+  - supabase-realtime-authorization
 faqs:
   - question: "Is the Supabase anon key a secret?"
     answer: "No. Supabase designs the anon key (and the newer publishable key) to be used in the browser. It is only safe when Row Level Security is enabled and has correct policies on every table exposed through the API."
@@ -40,7 +41,7 @@ Supabase now also offers newer key formats, publishable keys (`sb_publishable_..
 
 ## Why the anon key is fine to ship
 
-The anon key identifies your project and maps requests to the `anon` Postgres role (or the `authenticated` role once a user signs in). What a request can actually read or write is decided by Row Level Security policies in Postgres. If RLS is off on a table in an exposed schema, the anon key can read and write that table. So the question is never "is my anon key hidden", it is "are my policies correct". Use the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/) to check. Views and `SECURITY DEFINER` functions can skip those policies even with the anon key, so audit them too ([views and functions that bypass RLS](/guides/supabase-views-security-definer-bypass-rls/)). Also review [Supabase Auth security settings](/guides/supabase-auth-security-settings/) (email confirm, signup limits, redirect allowlists), because open auth weakens every policy.
+The anon key identifies your project and maps requests to the `anon` Postgres role (or the `authenticated` role once a user signs in). What a request can actually read or write is decided by Row Level Security policies in Postgres. If RLS is off on a table in an exposed schema, the anon key can read and write that table. So the question is never "is my anon key hidden", it is "are my policies correct". Use the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/) to check. Views and `SECURITY DEFINER` functions can skip those policies even with the anon key, so audit them too ([views and functions that bypass RLS](/guides/supabase-views-security-definer-bypass-rls/)). Also review [Supabase Auth security settings](/guides/supabase-auth-security-settings/) (email confirm, signup limits, redirect allowlists), because open auth weakens every policy. The same anon key opens Realtime topics: use [private channels and Realtime authorization](/guides/supabase-realtime-authorization/) for chat, presence, and live feeds.
 
 ## Why the service role key is dangerous
 

@@ -17,6 +17,7 @@ related:
   - vercel-cron-jobs-cron-secret
   - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
   - sql-injection-prisma-drizzle-supabase-nextjs
+  - supabase-realtime-authorization
 faqs:
   - question: "What should I do first if I find a live secret in the repo?"
     answer: "Revoke or rotate the key at the provider before you delete the file. Removing it from the latest commit does not make the old value useless. GitHub's remediation guide says revocation is the step that matters."
@@ -55,7 +56,7 @@ A `NEXT_PUBLIC_` or `VITE_` prefix means the value is for the browser. A secret 
 
 ## 3. Lock the database the client can reach
 
-Supabase: run the [RLS checklist](/checklists/supabase-rls-security-checklist/). RLS on, grants tightened, one policy per operation, views checked, storage policies written ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security/)), upload routes validated ([secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)), tests run as `anon` and `authenticated` ([test Supabase RLS policies in CI](/guides/test-supabase-rls-policies-ci/)).
+Supabase: run the [RLS checklist](/checklists/supabase-rls-security-checklist/). RLS on, grants tightened, one policy per operation, views checked, storage policies written ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security/)), upload routes validated ([secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)), tests run as `anon` and `authenticated` ([test Supabase RLS policies in CI](/guides/test-supabase-rls-policies-ci/)). If you use Realtime, lock private channels too ([Supabase Realtime authorization](/guides/supabase-realtime-authorization/)).
 
 Firebase: run the [rules checklist](/checklists/firebase-security-rules-checklist/). No test-mode rule, no `if true`, owner checks on private documents, queries that match the rules, separate rules for Storage and Realtime Database.
 

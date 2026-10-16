@@ -15,6 +15,7 @@ related:
   - sql-injection-prisma-drizzle-supabase-nextjs
   - supabase-views-security-definer-bypass-rls
   - supabase-edge-functions-auth-verify-jwt
+  - supabase-realtime-authorization
 faqs:
   - question: "Is the Supabase publishable key a secret?"
     answer: "No. Supabase says the publishable key is safe to ship in a browser because it only reaches what Row Level Security allows. The secret key bypasses RLS and must stay on a server you control."
@@ -147,6 +148,8 @@ A `security definer` function runs as its owner. On Supabase that owner is often
 Do not store a role in user metadata and then trust it in a policy. The user-management guide shows signup `options.data` stored as user metadata, and that object comes from the client. A person can pass `role` there. For a real role, use a custom access token hook as described in the [custom claims guide](https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac), or a column the user cannot update.
 
 ## Test as the browser, not as postgres
+
+If the app also uses Realtime (chat, presence, live dashboards), private channels need their own policies on `realtime.messages`. See [Supabase Realtime authorization](/guides/supabase-realtime-authorization/).
 
 A query that works in the SQL editor does not prove the policy works. The editor often runs as a privileged role that bypasses RLS.
 

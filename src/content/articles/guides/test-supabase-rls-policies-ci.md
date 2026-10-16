@@ -18,6 +18,7 @@ related:
   - supabase-anon-key-vs-service-role-key
   - security-review-prompt-for-ai-coding-tools
   - ship-checklist-for-a-vibe-coded-app
+  - supabase-realtime-authorization
 faqs:
   - question: "How do I test Supabase RLS policies?"
     answer: "Write pgTAP tests in SQL files under supabase/tests/database/ and run them with supabase test db against your local Supabase database. Each file opens a transaction, inserts test users and rows, switches to the anon or authenticated role with set local role, sets the user's JWT claims, asserts what that user can and cannot see or change, and rolls back. Run the same command in CI on every pull request."

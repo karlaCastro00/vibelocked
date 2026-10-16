@@ -18,6 +18,7 @@ related:
   - vercel-cron-jobs-cron-secret
   - prompt-injection-ai-features-vibe-coded-apps
   - supabase-edge-functions-auth-verify-jwt
+  - supabase-realtime-authorization
 faqs:
   - question: "Why does an in-memory rate limiter not work on Vercel or Supabase?"
     answer: "Serverless functions run as many short-lived instances. A counter in a JavaScript Map lives in one instance only and is lost on a cold start, so an attacker spread across instances never hits the limit. Use a shared store such as Redis or your database so every instance reads the same count."

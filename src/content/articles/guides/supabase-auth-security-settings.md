@@ -11,6 +11,7 @@ related:
   - supabase-anon-key-vs-service-role-key
   - supabase-storage-bucket-security
   - open-redirect-callbackurl-authjs-supabase-clerk
+  - supabase-realtime-authorization
 faqs:
   - question: "Why do my Supabase confirmation emails link to localhost?"
     answer: "The Site URL in Auth, URL Configuration still points to http://localhost:3000. Set it to your production URL and add every real redirect destination to the Redirect URLs allowlist."
@@ -20,7 +21,7 @@ faqs:
     answer: "Supabase's docs list leaked password protection on the Pro plan and above. Minimum length and required character settings are available to configure in Auth settings."
 ---
 
-Row Level Security protects your tables. Auth settings decide who gets a session in the first place. Lovable, Bolt, and other AI builders wire up Supabase Auth in minutes and rarely touch these settings. Walk through them in the dashboard under **Authentication**.
+Row Level Security protects your tables. Auth settings decide who gets a session in the first place. Lovable, Bolt, and other AI builders wire up Supabase Auth in minutes and rarely touch these settings. Walk through them in the dashboard under **Authentication**. Anyone who can mint a session can also join private Realtime topics your RLS allows, so weak Auth settings widen chat and live feeds too ([Supabase Realtime authorization](/guides/supabase-realtime-authorization/)).
 
 Checked against the Supabase docs linked below on October 14, 2026.
 
