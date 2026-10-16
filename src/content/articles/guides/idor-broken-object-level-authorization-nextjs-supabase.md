@@ -19,6 +19,7 @@ related:
   - supabase-views-security-definer-bypass-rls
   - supabase-edge-functions-auth-verify-jwt
   - supabase-realtime-authorization
+  - supabase-realtime-broadcast-from-database
 faqs:
   - question: "What is IDOR in a Next.js app?"
     answer: "IDOR (insecure direct object reference), which OWASP calls broken object level authorization, is when a Route Handler or Server Action takes an id from the URL, query string, or body and reads or changes that row without checking that the signed-in user is allowed to. Changing the id in the request returns someone else's data."
@@ -32,7 +33,7 @@ faqs:
 
 IDOR, short for insecure direct object reference, is what OWASP's API list calls [Broken Object Level Authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/) (API1:2023). It happens when your API takes an id from the request, like `/api/invoices/42`, and returns or changes that row without checking that the caller is allowed to. Anyone signed in can swap `42` for `43` and see someone else's invoice. The fix is always the same pattern: **get the user from a verified session on the server, then scope the query to that user**, so a row that is not theirs simply does not come back. With Supabase, back that up with Row Level Security that compares `auth.uid()` to the owner column.
 
-This page is the hands-on version for Next.js Route Handlers and Supabase. For a survey of IDOR next to the other bugs AI tools tend to write, see [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities/). Live subscriptions have the same shape of bug: a public Realtime topic or a `postgres_changes` feed without RLS lets another user watch your rows ([Supabase Realtime authorization](/guides/supabase-realtime-authorization/)).
+This page is the hands-on version for Next.js Route Handlers and Supabase. For a survey of IDOR next to the other bugs AI tools tend to write, see [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities/). Live subscriptions have the same shape of bug: a public Realtime topic or a `postgres_changes` feed without RLS lets another user watch your rows ([Supabase Realtime authorization](/guides/supabase-realtime-authorization/)). Database Broadcast payloads are notifications too, not proof of access ([Broadcast from the database](/guides/supabase-realtime-broadcast-from-database/)).
 
 Checked against the OWASP, Next.js, and Supabase docs linked below on October 15, 2026. Product names are here to help you find your stack. VibeLocked is independent and not affiliated with any of them.
 

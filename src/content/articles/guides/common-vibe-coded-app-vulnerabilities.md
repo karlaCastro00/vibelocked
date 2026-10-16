@@ -19,6 +19,7 @@ related:
   - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
   - sql-injection-prisma-drizzle-supabase-nextjs
   - supabase-realtime-authorization
+  - supabase-realtime-broadcast-from-database
 faqs:
   - question: "Is a random id enough to stop IDOR?"
     answer: "No. An id that is hard to guess makes scanning slower. It is not a permission check. The handler still has to load the row only if it belongs to the signed-in user. OWASP calls the class of bug Broken Object Level Authorization."
@@ -82,7 +83,7 @@ How to test: create two users. Copy an id from user A's network tab. Repeat the 
 
 ## Open Supabase Realtime channels
 
-Chat rooms, presence, and live dashboards often subscribe with the public anon key and a guessable topic name. Without private channels and RLS on `realtime.messages`, strangers can join and read events. `postgres_changes` still needs table RLS; a client-side filter is not enough. Fix pattern: [Supabase Realtime authorization](/guides/supabase-realtime-authorization/).
+Chat rooms, presence, and live dashboards often subscribe with the public anon key and a guessable topic name. Without private channels and RLS on `realtime.messages`, strangers can join and read events. `postgres_changes` still needs table RLS; a client-side filter is not enough. Fix pattern: [Supabase Realtime authorization](/guides/supabase-realtime-authorization/). If changes are pushed from Postgres triggers with `realtime.send` or `broadcast_changes`, harden that path too ([Broadcast from the database](/guides/supabase-realtime-broadcast-from-database/)).
 
 ## The service role key in the frontend
 

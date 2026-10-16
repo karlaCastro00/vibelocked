@@ -18,6 +18,7 @@ related:
   - rate-limit-ai-api-routes-nextjs-supabase
   - common-vibe-coded-app-vulnerabilities
   - ship-checklist-for-a-vibe-coded-app
+  - supabase-realtime-broadcast-from-database
   - supabase-edge-functions-auth-verify-jwt
   - supabase-auth-security-settings
 faqs:
@@ -101,7 +102,7 @@ That means:
 
 Enable replication for the tables you listen to (Dashboard Publications / `supabase_realtime`, or `alter publication supabase_realtime add table ...`). Without publication, there is nothing to subscribe to; with publication and weak RLS, you stream too much.
 
-For high fan-out, Supabase's Postgres Changes docs recommend Broadcast from the database instead of per-subscriber authorization at large scale. Authorization for those Broadcast topics still uses the private-channel rules above.
+For high fan-out, Supabase's Postgres Changes docs recommend Broadcast from the database instead of per-subscriber authorization at large scale. Authorization for those Broadcast topics still uses the private-channel rules above. For triggers, `realtime.send`, `broadcast_changes`, and payload leakage, see [Broadcast from the database](/guides/supabase-realtime-broadcast-from-database/).
 
 ## Broadcast and Presence on private channels
 

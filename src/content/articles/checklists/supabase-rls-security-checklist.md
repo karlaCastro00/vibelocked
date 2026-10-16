@@ -16,6 +16,7 @@ related:
   - supabase-views-security-definer-bypass-rls
   - supabase-edge-functions-auth-verify-jwt
   - supabase-realtime-authorization
+  - supabase-realtime-broadcast-from-database
 faqs:
   - question: "Is the Supabase publishable key a secret?"
     answer: "No. Supabase says the publishable key is safe to ship in a browser because it only reaches what Row Level Security allows. The secret key bypasses RLS and must stay on a server you control."
@@ -149,7 +150,7 @@ Do not store a role in user metadata and then trust it in a policy. The user-man
 
 ## Test as the browser, not as postgres
 
-If the app also uses Realtime (chat, presence, live dashboards), private channels need their own policies on `realtime.messages`. See [Supabase Realtime authorization](/guides/supabase-realtime-authorization/).
+If the app also uses Realtime (chat, presence, live dashboards), private channels need their own policies on `realtime.messages`. See [Supabase Realtime authorization](/guides/supabase-realtime-authorization/). Triggers that broadcast row changes from Postgres are covered in [Broadcast from the database](/guides/supabase-realtime-broadcast-from-database/).
 
 A query that works in the SQL editor does not prove the policy works. The editor often runs as a privileged role that bypasses RLS.
 

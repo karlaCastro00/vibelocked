@@ -18,6 +18,7 @@ related:
   - rate-limit-ai-api-routes-nextjs-supabase
   - supabase-rls-security-checklist
   - supabase-realtime-authorization
+  - supabase-realtime-broadcast-from-database
 faqs:
   - question: "Does verify_jwt = true mean only signed-in users can call my Edge Function?"
     answer: "No. The platform check rejects requests without a valid token, but Supabase's Authorization headers page says that for migration compatibility it also accepts publishable and secret API keys on either header, and the legacy anon key is itself a valid JWT. Your frontend ships the publishable key, so anyone can get past the check. Verify the user inside the function with withSupabase({ auth: 'user' }) or supabase.auth.getClaims(), and require a sub claim."
@@ -33,7 +34,7 @@ faqs:
 
 A Supabase Edge Function is a public HTTPS endpoint at `https://<project-ref>.supabase.co/functions/v1/<name>`. Anyone who knows your project ref can call it, and your project ref is in your frontend bundle. What stands between that URL and your data is two layers: a platform check called `verify_jwt` that runs before your code, and whatever your handler does with the credentials it receives. Supabase's [Authorization headers page](https://supabase.com/docs/guides/functions/auth-headers) describes exactly those two layers.
 
-Vibe-coded apps tend to get the second layer wrong. Cursor, Lovable, Bolt, or v0 generates a function that reads a `userId` from the request body, creates a client with the service role key, and returns whatever it finds. When the first call fails with a 401, the tool "fixes" it with `--no-verify-jwt`. This guide covers what the platform check really proves after Supabase's move to publishable and secret API keys, how to verify the caller in code, and how to handle webhooks, CORS, secrets, and abuse. Browser Realtime clients must never use the secret key either; authorize private channels with RLS instead ([Supabase Realtime authorization](/guides/supabase-realtime-authorization/)).
+Vibe-coded apps tend to get the second layer wrong. Cursor, Lovable, Bolt, or v0 generates a function that reads a `userId` from the request body, creates a client with the service role key, and returns whatever it finds. When the first call fails with a 401, the tool "fixes" it with `--no-verify-jwt`. This guide covers what the platform check really proves after Supabase's move to publishable and secret API keys, how to verify the caller in code, and how to handle webhooks, CORS, secrets, and abuse. Browser Realtime clients must never use the secret key either; authorize private channels with RLS instead ([Supabase Realtime authorization](/guides/supabase-realtime-authorization/)). Server-side row fan-out belongs in Postgres with `realtime.send` or `broadcast_changes`, not a secret key in the browser ([Broadcast from the database](/guides/supabase-realtime-broadcast-from-database/)).
 
 Checked against the Supabase, Stripe, MDN, and OWASP docs linked below on October 16, 2026. Product names are here to help you find your stack. VibeLocked is independent and not affiliated with any of them.
 

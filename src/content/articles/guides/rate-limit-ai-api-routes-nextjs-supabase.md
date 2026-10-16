@@ -19,6 +19,7 @@ related:
   - prompt-injection-ai-features-vibe-coded-apps
   - supabase-edge-functions-auth-verify-jwt
   - supabase-realtime-authorization
+  - supabase-realtime-broadcast-from-database
 faqs:
   - question: "Why does an in-memory rate limiter not work on Vercel or Supabase?"
     answer: "Serverless functions run as many short-lived instances. A counter in a JavaScript Map lives in one instance only and is lost on a cold start, so an attacker spread across instances never hits the limit. Use a shared store such as Redis or your database so every instance reads the same count."
@@ -36,7 +37,7 @@ Your AI feature is the most expensive endpoint in your app. Every call to OpenAI
 
 If your model key is in the browser at all, rate limiting will not help, because attackers will call the provider directly. Fix that first with [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/).
 
-Scheduled `/api/cron` routes that call a model are another open door: protect them with [CRON_SECRET on Vercel Cron](/guides/vercel-cron-jobs-cron-secret/), then rate limit the work inside the job if it fans out per user.
+Scheduled `/api/cron` routes that call a model are another open door: protect them with [CRON_SECRET on Vercel Cron](/guides/vercel-cron-jobs-cron-secret/), then rate limit the work inside the job if it fans out per user. Noisy writes that fan out through Supabase Realtime Broadcast from the database can also burn connection and message quotas; keep those topics private and scoped ([Broadcast from the database](/guides/supabase-realtime-broadcast-from-database/)).
 
 ## The layers you want
 
