@@ -1,7 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
+import RuledList from '../components/RuledList.astro';
+import { publishedArticles } from '../lib/articles';
 
 const description = 'That page is not on VibeLocked. Try the security checklists, the guides for AI-built apps, or the free public repo scanner to find what you need.';
+const latest = (await publishedArticles()).slice(0, 6);
 ---
 
 <Base title="Page not found" description={description} path="/404" noindex>
@@ -9,11 +12,17 @@ const description = 'That page is not on VibeLocked. Try the security checklists
     <header class="page-intro">
       <p class="kicker">404</p>
       <h1 class="page-title">That page is not here</h1>
-      <p class="lede">The link may be old, or the article may have moved. The checklists and guides are the useful part of the site.</p>
+      <p class="lede">The link may be old, or the article may have moved. The checklists, the guides, and the free public repo scanner are the useful part of the site.</p>
       <div class="hero-actions">
-        <a class="button" href="/checklists/">Checklists</a>
+        <a class="button" href="/scan/">Scan a public repo</a>
+        <a class="button button-ghost" href="/checklists/">Checklists</a>
         <a class="button button-ghost" href="/guides/">Guides</a>
       </div>
     </header>
+    <section aria-labelledby="latest-heading">
+      <h2 id="latest-heading">Latest from VibeLocked</h2>
+      <RuledList articles={latest} />
+      <p class="muted">Want one useful security note every two weeks? <a href="/newsletter/">Get the newsletter</a>.</p>
+    </section>
   </div>
 </Base>
