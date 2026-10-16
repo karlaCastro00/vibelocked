@@ -152,7 +152,7 @@ app.use(
 
 If you use the `withSupabase` wrapper, CORS and preflight are handled for you. If you write headers by hand, Supabase recommends importing `corsHeaders` from `npm:@supabase/supabase-js@^2/cors` (v2.95.0 or later) so the allowed headers stay in sync with the client library ([Supabase: CORS](https://supabase.com/docs/guides/functions/cors)).
 
-The default wildcard origin is acceptable for functions that require a user JWT. If you want to lock it down further, replace `Access-Control-Allow-Origin` with your exact origin. Either way, CORS is not what protects the function. Keep `verify_jwt` on and check the user inside the handler, as in [rate limit AI API routes in Next.js and Supabase](/guides/rate-limit-ai-api-routes-nextjs-supabase).
+The default wildcard origin is acceptable for functions that require a user JWT. If you want to lock it down further, replace `Access-Control-Allow-Origin` with your exact origin. Either way, CORS is not what protects the function. Keep `verify_jwt` on and check the user inside the handler, as in [rate limit AI API routes in Next.js and Supabase](/guides/rate-limit-ai-api-routes-nextjs-supabase/).
 
 ## CORS is not CSRF protection
 
@@ -160,7 +160,7 @@ Form posts and other simple requests reach your server without a preflight, even
 
 - Set session cookies with `SameSite=Lax` or `Strict`, plus `Secure` and `HttpOnly` ([MDN: Set-Cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie)).
 - Require a JSON content type, or a CSRF token, on state-changing routes. See the [OWASP CSRF cheat sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
-- Next.js Server Actions compare the Origin and Host headers for you, but custom Route Handlers do not. More in [Next.js server actions security](/guides/nextjs-server-actions-security).
+- Next.js Server Actions compare the Origin and Host headers for you, but custom Route Handlers do not. More in [Next.js server actions security](/guides/nextjs-server-actions-security/).
 
 ## Check your own app
 

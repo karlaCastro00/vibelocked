@@ -15,7 +15,7 @@ const jsonLd = {
 };
 ---
 
-<Base title="Secret leak scanner" description={description} path="/scan" jsonLd={jsonLd}>
+<Base title="Secret leak scanner" description={description} path="/scan/" jsonLd={jsonLd}>
   <div class="wrap">
     <header class="page-intro">
       <p class="kicker">Free tool</p>
@@ -52,11 +52,11 @@ const jsonLd = {
         <li>Generic secret assignments, such as SECRET=, TOKEN=, or PASSWORD= with a long value</li>
       </ul>
       <p>
-        Publishable values like a Stripe pk_ key, a Supabase anon key, or a Firebase web config are reported as safe to ship, so you can tell them apart from real secrets. See <a href="/guides/supabase-anon-key-vs-service-role-key">anon key vs service role key</a>.
+        Publishable values like a Stripe pk_ key, a Supabase anon key, or a Firebase web config are reported as safe to ship, so you can tell them apart from real secrets. See <a href="/guides/supabase-anon-key-vs-service-role-key/">anon key vs service role key</a>.
       </p>
       <h2>If it finds a live secret</h2>
       <p>
-        Rotate the key at the provider first, then remove it from code and <a href="/guides/remove-api-key-from-github-history">git history</a>. Deleting the line is not enough once it was pushed or deployed. Follow <a href="/guides/first-hour-after-an-api-key-leaks">the first hour after an API key leaks</a> and <a href="/guides/check-if-api-key-leaked-on-github">check your GitHub history</a>.
+        Rotate the key at the provider first, then remove it from code and <a href="/guides/remove-api-key-from-github-history/">git history</a>. Deleting the line is not enough once it was pushed or deployed. Follow <a href="/guides/first-hour-after-an-api-key-leaks/">the first hour after an API key leaks</a> and <a href="/guides/check-if-api-key-leaked-on-github/">check your GitHub history</a>.
       </p>
       <h2>Limits</h2>
       <p>

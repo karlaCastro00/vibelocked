@@ -41,10 +41,17 @@ for (const file of files) {
       failed = true;
     }
   }
+  // Pages are served at /path/ on GitHub Pages; /path answers with a 301, so links must end in a slash.
+  const slashless = /(?:\]\(|href=["']|href: ["'])(\/(?:guides|checklists|scan|newsletter|sponsor|about|privacy)(?:\/[a-z0-9-]+)?)(?=[#"')])/g;
+  for (const match of text.matchAll(slashless)) {
+    const line = text.slice(0, match.index).split('\n').length;
+    console.error(`${file}:${line} internal link ${match[1]} needs a trailing slash`);
+    failed = true;
+  }
 }
 
 if (failed) {
-  console.error('Copy check failed. Use a hyphen, a comma, or a new sentence instead.');
+  console.error('Copy check failed. Replace dashes with a hyphen, a comma, or a new sentence, and end internal page links with a slash.');
   process.exit(1);
 }
 

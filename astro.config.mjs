@@ -6,7 +6,7 @@ import { satteri } from '@astrojs/markdown-satteri';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://vibelocked.com',
-  trailingSlash: 'never',
+  trailingSlash: 'always',
   output: 'static',
   integrations: [sitemap()],
   build: {

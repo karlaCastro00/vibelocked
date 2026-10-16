@@ -28,7 +28,7 @@ Checked against the Firebase and Google Cloud docs linked below on October 14, 2
 
 A Firebase API key **identifies** your project. It does not **authorize** anything. Firebase's own docs say keys restricted to Firebase services do not need to be treated as secrets and are safe in code and config files. Your data is protected by **Firebase Security Rules** and **App Check**, not by hiding the key.
 
-That is why the [VibeLocked scanner](/scan) reports an `AIza...` key as "review", not "secret". It is safe only when the conditions below hold.
+That is why the [VibeLocked scanner](/scan/) reports an `AIza...` key as "review", not "secret". It is safe only when the conditions below hold.
 
 ## When the key becomes a real problem
 
@@ -56,7 +56,7 @@ match /users/{userId}/{document=**} {
 }
 ```
 
-Run the full [Firebase security rules checklist](/checklists/firebase-security-rules-checklist) before launch, including the test mode rules that expire after 30 days.
+Run the full [Firebase security rules checklist](/checklists/firebase-security-rules-checklist/) before launch, including the test mode rules that expire after 30 days.
 
 ## What protects your backend from abuse: App Check
 
@@ -91,7 +91,7 @@ App Check raises the cost of abuse. It is not authentication. Keep Security Rule
 - [ ] Separate, restricted keys for Maps or Gemini, with Gemini called from a server
 - [ ] No `if true` rules in Firestore, Realtime Database, or Storage
 - [ ] App Check registered and enforced for the products you use
-- [ ] Repo scanned with [/scan](/scan) for service account JSON (`-----BEGIN PRIVATE KEY-----`), which is a real secret
+- [ ] Repo scanned with [/scan](/scan/) for service account JSON (`-----BEGIN PRIVATE KEY-----`), which is a real secret
 
 ## Sources
 

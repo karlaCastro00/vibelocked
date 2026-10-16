@@ -157,7 +157,7 @@ Other markdown libraries that output an HTML string (marked, markdown-it, remark
 
 ## AI chat output is untrusted input
 
-LLM output is not your code. It is text that a prompt can steer, including text the user never typed: a web page the model read, a support ticket, a PDF, or another user's profile. That is [prompt injection](/guides/prompt-injection-ai-features-vibe-coded-apps). The [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/) lists "Improper Output Handling" separately, and one of its examples is exactly this: the model returns JavaScript or Markdown, and the browser interprets it, resulting in XSS. OWASP's advice is to treat the model like any other user and encode its output for where it is shown.
+LLM output is not your code. It is text that a prompt can steer, including text the user never typed: a web page the model read, a support ticket, a PDF, or another user's profile. That is [prompt injection](/guides/prompt-injection-ai-features-vibe-coded-apps/). The [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/) lists "Improper Output Handling" separately, and one of its examples is exactly this: the model returns JavaScript or Markdown, and the browser interprets it, resulting in XSS. OWASP's advice is to treat the model like any other user and encode its output for where it is shown.
 
 For a chat UI that means:
 
@@ -213,7 +213,7 @@ export function ChatMessage({ text }: { text: string }) {
 }
 ```
 
-`href` here has already passed react-markdown's default URL transform, so `javascript:` links are stripped before your component sees them. A CSP `img-src` that lists only your own hosts is a second backstop for the same leak ([CSP guide](/guides/csp-content-security-policy-vibe-coded-apps)).
+`href` here has already passed react-markdown's default URL transform, so `javascript:` links are stripped before your component sees them. A CSP `img-src` that lists only your own hosts is a second backstop for the same leak ([CSP guide](/guides/csp-content-security-policy-vibe-coded-apps/)).
 
 ## User-supplied URLs: allow-list http and https
 
@@ -247,7 +247,7 @@ const website = safeHttpUrl(profile.website);
 ) : null}
 ```
 
-Do not use string checks like `startsWith('http')` or "does not contain javascript". Mixed case, whitespace, and encoded characters get around them. The parser handles that. If the URL is a post-login redirect instead of a profile link, use the same-origin rules in the [open redirect guide](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
+Do not use string checks like `startsWith('http')` or "does not contain javascript". Mixed case, whitespace, and encoded characters get around them. The parser handles that. If the URL is a post-login redirect instead of a profile link, use the same-origin rules in the [open redirect guide](/guides/open-redirect-callbackurl-authjs-supabase-clerk/).
 
 ## JSON in script tags and JSON-LD
 
@@ -276,13 +276,13 @@ XSS runs as your site, so it can read whatever your own JavaScript can read. Wit
 
 So one stored XSS on a page other users visit can copy their access and refresh tokens and act as them from anywhere until the session ends. Your RLS policies still apply, but to the attacker the victim's rows now look like their own. The same is true for any SPA that keeps a JWT in `localStorage`.
 
-`HttpOnly` cookies help but are not a fix. OWASP notes that cookie attributes limit the impact of XSS but do not stop the malicious script from running. A script running in the victim's tab can still call your API with their session. Preventing the XSS is the fix. Settings that stop a stolen session from becoming a stolen account (reauthentication before password changes) are in [Supabase Auth security settings](/guides/supabase-auth-security-settings).
+`HttpOnly` cookies help but are not a fix. OWASP notes that cookie attributes limit the impact of XSS but do not stop the malicious script from running. A script running in the victim's tab can still call your API with their session. Preventing the XSS is the fix. Settings that stop a stolen session from becoming a stolen account (reauthentication before password changes) are in [Supabase Auth security settings](/guides/supabase-auth-security-settings/).
 
 ## CSP is the second layer
 
 A Content-Security-Policy tells the browser which scripts may run and which hosts it may load from. With a nonce- or hash-based `script-src` and no `'unsafe-inline'`, an injected `<script>` or `onerror=` handler is blocked even if your sanitizer misses it. A tight `img-src` stops the markdown image leak above. OWASP's LLM output guidance recommends a strict CSP for exactly this case.
 
-OWASP's XSS cheat sheet also lists "sole reliance on CSP" as an anti-pattern. Ship the fixes above first, then add a policy. The [CSP guide for vibe-coded apps](/guides/csp-content-security-policy-vibe-coded-apps) has a starter policy, the Next.js setup, and a Report-Only rollout that will not break Stripe or Clerk.
+OWASP's XSS cheat sheet also lists "sole reliance on CSP" as an anti-pattern. Ship the fixes above first, then add a policy. The [CSP guide for vibe-coded apps](/guides/csp-content-security-policy-vibe-coded-apps/) has a starter policy, the Next.js setup, and a Report-Only rollout that will not break Stripe or Clerk.
 
 If you want to go further, OWASP and the React docs both mention Trusted Types, which make `innerHTML`-style sinks reject plain strings unless they go through a policy you define (for example one that calls DOMPurify).
 
@@ -317,7 +317,7 @@ JSON in script tags, and image host allow-lists for chat output.
 Do not print, move, or log any secrets or env values.
 ```
 
-Then read every file it names. It may miss sinks in third-party components, so search the repo for `dangerouslySetInnerHTML` and `rehype-raw` yourself. The [security review prompt](/guides/security-review-prompt-for-ai-coding-tools) covers the rest of the app.
+Then read every file it names. It may miss sinks in third-party components, so search the repo for `dangerouslySetInnerHTML` and `rehype-raw` yourself. The [security review prompt](/guides/security-review-prompt-for-ai-coding-tools/) covers the rest of the app.
 
 ## Checklist
 
@@ -330,9 +330,9 @@ Then read every file it names. It may miss sinks in third-party components, so s
 - [ ] User-supplied URLs are parsed with `new URL()` and limited to `http:` and `https:` on save and on render
 - [ ] JSON inside `<script>` tags escapes `<` as `\u003c`
 - [ ] You know where your Supabase session lives (local storage or cookies) and treat any XSS as session theft
-- [ ] A Content-Security-Policy is live ([CSP guide](/guides/csp-content-security-policy-vibe-coded-apps))
-- [ ] Prompt injection reviewed for AI features ([prompt injection guide](/guides/prompt-injection-ai-features-vibe-coded-apps))
-- [ ] Folded into your [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) and the [common vulnerabilities](/guides/common-vibe-coded-app-vulnerabilities) review
+- [ ] A Content-Security-Policy is live ([CSP guide](/guides/csp-content-security-policy-vibe-coded-apps/))
+- [ ] Prompt injection reviewed for AI features ([prompt injection guide](/guides/prompt-injection-ai-features-vibe-coded-apps/))
+- [ ] Folded into your [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) and the [common vulnerabilities](/guides/common-vibe-coded-app-vulnerabilities/) review
 
 ## Sources
 

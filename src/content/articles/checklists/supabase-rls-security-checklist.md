@@ -26,7 +26,7 @@ Checked against the Supabase docs linked at the bottom on October 14, 2026. Thos
 
 ## Know which key you shipped
 
-Every request carries an API key. Supabase Auth, when someone is signed in, identifies who is calling. The key identifies what is calling. RLS is only as strong as your sign up rules, so also review your [Supabase Auth security settings](/guides/supabase-auth-security-settings).
+Every request carries an API key. Supabase Auth, when someone is signed in, identifies who is calling. The key identifies what is calling. RLS is only as strong as your sign up rules, so also review your [Supabase Auth security settings](/guides/supabase-auth-security-settings/).
 
 | Where the code runs | Key | Why |
 | --- | --- | --- |
@@ -37,7 +37,7 @@ The older JWT keys, `anon` and `service_role`, are the legacy pair. Supabase's A
 
 A secret key bypasses RLS only when the request carries no user access token. If the request also carries a user access token, Supabase says it runs under that user's RLS policies, even if the client was created with the secret key. On a server that must bypass RLS, use the secret key and do not attach the user's access token. Then enforce ownership in your own code, because the database will not.
 
-Never put a secret key in frontend code, in a `NEXT_PUBLIC_` or `VITE_` variable, or in a chat with a coding agent. The [secrets guide](/guides/keep-secrets-out-of-frontend-code) shows how those prefixes end up in the bundle.
+Never put a secret key in frontend code, in a `NEXT_PUBLIC_` or `VITE_` variable, or in a chat with a coding agent. The [secrets guide](/guides/keep-secrets-out-of-frontend-code/) shows how those prefixes end up in the bundle.
 
 ## Turn on RLS, then fix grants
 
@@ -132,7 +132,7 @@ Supabase Storage uses RLS on `storage.objects`. By default, Storage does not all
 
 The service key bypasses Storage RLS too. Supabase's storage access control page says not to share it.
 
-If a bucket is meant to be public, assume anyone with the object URL can read the file. Open a private window, signed out, and request the URL. For user uploads, keep the bucket private and write policies that match the owner. The [Supabase Storage bucket security guide](/guides/supabase-storage-bucket-security) has example policies.
+If a bucket is meant to be public, assume anyone with the object URL can read the file. Open a private window, signed out, and request the URL. For user uploads, keep the bucket private and write policies that match the owner. The [Supabase Storage bucket security guide](/guides/supabase-storage-bucket-security/) has example policies.
 
 ## Functions and triggers
 
@@ -172,4 +172,4 @@ If server code needs to bypass RLS for a job the user should not perform directl
 - [Advisors](https://supabase.com/docs/guides/observability/advisors)
 - [Postgres CREATE POLICY](https://www.postgresql.org/docs/current/sql-createpolicy.html)
 
-When you are ready to share the URL, run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) as well. The same missing owner check shows up as [IDOR](/guides/common-vibe-coded-app-vulnerabilities) if you query through a secret key on the server and forget to filter. The [Next.js and Supabase IDOR guide](/guides/idor-broken-object-level-authorization-nextjs-supabase) shows the server side of that fix.
+When you are ready to share the URL, run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) as well. The same missing owner check shows up as [IDOR](/guides/common-vibe-coded-app-vulnerabilities/) if you query through a secret key on the server and forget to filter. The [Next.js and Supabase IDOR guide](/guides/idor-broken-object-level-authorization-nextjs-supabase/) shows the server side of that fix.

@@ -34,7 +34,7 @@ Under **URL Configuration**:
 
 If you use `redirectTo`, update email templates to use `{{ .RedirectTo }}` where needed, as the docs describe.
 
-Never copy an untrusted `next` or `redirectTo` query param into `signInWithOAuth` without validation. The dashboard allow list is required; your code still should not hand the client an arbitrary absolute URL. Full walkthrough: [fix open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
+Never copy an untrusted `next` or `redirectTo` query param into `signInWithOAuth` without validation. The dashboard allow list is required; your code still should not hand the client an arbitrary absolute URL. Full walkthrough: [fix open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk/).
 
 ## 2. Keep email confirmation on
 
@@ -70,7 +70,7 @@ Enable **multi factor authentication** (TOTP) and require it for any admin or bi
 
 ## 7. Keys still matter
 
-None of this helps if the service role key is in your frontend. It bypasses Auth and RLS entirely. Scan your public repo with the [VibeLocked scanner](/scan) and read [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
+None of this helps if the service role key is in your frontend. It bypasses Auth and RLS entirely. Scan your public repo with the [VibeLocked scanner](/scan/) and read [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key/).
 
 ## Checklist
 
@@ -80,8 +80,8 @@ None of this helps if the service role key is in your frontend. It bypasses Auth
 - [ ] Reauthentication for password changes
 - [ ] Signups off if invite only, CAPTCHA on public forms, custom SMTP set
 - [ ] MFA for admins
-- [ ] RLS checked with the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist)
-- [ ] Storage buckets for user files are private with owner policies ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security))
+- [ ] RLS checked with the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/)
+- [ ] Storage buckets for user files are private with owner policies ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security/))
 
 ## Sources
 

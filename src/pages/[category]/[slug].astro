@@ -43,7 +43,7 @@ const path = articlePath(entry);
 const url = absUrl(path);
 const minutes = readingMinutes(entry.body);
 const sectionLabel = entry.data.category === 'checklist' ? 'Checklists' : 'Guides';
-const sectionHref = `/${categoryPath(entry.data.category)}`;
+const sectionHref = `/${categoryPath(entry.data.category)}/`;
 const modified = entry.data.updatedDate ?? entry.data.pubDate;
 const toc = headings.filter((heading) => heading.depth === 2);
 

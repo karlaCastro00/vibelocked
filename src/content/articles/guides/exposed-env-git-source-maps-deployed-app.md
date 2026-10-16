@@ -35,7 +35,7 @@ The good news: you can check your own site in five minutes, from your own termin
 - **`.env` in `public/`.** In Next.js, everything in `public/` is served from the site root ([Next.js docs](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder)). Vite copies `public/` into the build as-is ([Vite docs](https://vite.dev/guide/assets)). An AI tool that "puts config where the browser can read it" can drop a secret there.
 - **Whole folder uploaded.** Dragging the project folder (not `dist/` or `out/`) to a static host, FTP, or an S3 bucket ships `.env` and `.git` along with it.
 - **Server root is the project folder.** On a VPS, an nginx or Apache root pointed at the repo checkout serves `.git/` and dotfiles unless you block them.
-- **Secret baked into the build.** Any `NEXT_PUBLIC_` or `VITE_` variable is written into the client JavaScript ([Next.js](https://nextjs.org/docs/app/guides/environment-variables), [Vite](https://vite.dev/guide/env-and-mode)). This is the most common case, covered in [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code).
+- **Secret baked into the build.** Any `NEXT_PUBLIC_` or `VITE_` variable is written into the client JavaScript ([Next.js](https://nextjs.org/docs/app/guides/environment-variables), [Vite](https://vite.dev/guide/env-and-mode)). This is the most common case, covered in [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/).
 - **Source maps turned on for production.** Next.js disables browser source maps in production unless you set `productionBrowserSourceMaps: true` ([Next.js docs](https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps)). Vite's `build.sourcemap` defaults to `false` ([Vite build options](https://vite.dev/config/build-options)). AI tools sometimes turn them on to debug a production error and never turn them off.
 
 ## Check your own site
@@ -56,7 +56,7 @@ How to read it:
 
 Then check for source maps. Open your site, open dev tools, go to the **Sources** tab, and look for your original folder names (like `src/components`) with readable code. Or look at the last line of a JavaScript file for `//# sourceMappingURL=`, and request that `.map` URL. A 200 means anyone can read your original frontend code.
 
-While you are in the Sources tab, search the bundle for `sk_live`, `sk-`, `service_role`, and `eyJ`. The [VibeLocked scanner](/scan) checks a public GitHub repo for the same patterns.
+While you are in the Sources tab, search the bundle for `sk_live`, `sk-`, `service_role`, and `eyJ`. The [VibeLocked scanner](/scan/) checks a public GitHub repo for the same patterns.
 
 ## Fix it
 
@@ -66,7 +66,7 @@ These platforms serve the build output, so `.env` and `.git` are not served from
 
 - No secret file is inside `public/` (or `static/`).
 - The output directory in project settings is the framework's build folder (`.next`, `dist`, `out`), not `.` or the repo root.
-- Secrets are set in the platform's environment variable settings, without a `NEXT_PUBLIC_` or `VITE_` prefix unless they are truly public. See [environment variables in Cursor, Bolt, and Lovable](/guides/environment-variables-cursor-bolt-lovable).
+- Secrets are set in the platform's environment variable settings, without a `NEXT_PUBLIC_` or `VITE_` prefix unless they are truly public. See [environment variables in Cursor, Bolt, and Lovable](/guides/environment-variables-cursor-bolt-lovable/).
 
 ### Static hosting, S3, FTP
 
@@ -89,9 +89,9 @@ If you need readable stack traces, upload source maps privately to your error tr
 
 ## If something was exposed
 
-1. **Rotate first.** Every secret in an exposed `.env`, or ever committed to an exposed `.git`, should be treated as leaked. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+1. **Rotate first.** Every secret in an exposed `.env`, or ever committed to an exposed `.git`, should be treated as leaked. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/).
 2. **Remove and redeploy.** Delete the file from the served folder or fix the server root, redeploy, and run the check again.
-3. **Clean history if needed.** If secrets were committed to git, see [remove an API key from GitHub history](/guides/remove-api-key-from-github-history), and [check if your key leaked on GitHub](/guides/check-if-api-key-leaked-on-github).
+3. **Clean history if needed.** If secrets were committed to git, see [remove an API key from GitHub history](/guides/remove-api-key-from-github-history/), and [check if your key leaked on GitHub](/guides/check-if-api-key-leaked-on-github/).
 4. **Look at logs.** If your host keeps access logs, search for requests to `/.env` or `/.git/` to see whether anyone fetched them.
 
 ## Checklist

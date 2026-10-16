@@ -72,15 +72,15 @@ If your AI tool suggested one, rename it, update your code to read it only on th
 
 Reading `process.env.CLERK_SECRET_KEY` (or letting Clerk's SDK read it) inside a Route Handler like `app/api/.../route.ts`, a Server Action, middleware, or a Server Component is fine. That code runs on the server.
 
-The risk is a shared helper file that touches the secret and then gets imported into a component marked `'use client'`. Keep secret using code in server only modules, and do not import them from client components. In Next.js you can add `import 'server-only'` at the top of such a module so the build fails if a client component imports it. See our guide on [Next.js Server Actions security](/guides/nextjs-server-actions-security) for more.
+The risk is a shared helper file that touches the secret and then gets imported into a component marked `'use client'`. Keep secret using code in server only modules, and do not import them from client components. In Next.js you can add `import 'server-only'` at the top of such a module so the build fails if a client component imports it. See our guide on [Next.js Server Actions security](/guides/nextjs-server-actions-security/) for more.
 
 ## Check for a leak
 
-1. Search your repo for `sk_live_`, `sk_test_`, and `whsec_`, including old commits. The [VibeLocked scanner](/scan) checks public GitHub repos for `sk_` and `whsec_` strings. The scanner labels shared `sk_` and `whsec_` prefixes as Stripe or Clerk, since both products use them. Either way it is a secret.
+1. Search your repo for `sk_live_`, `sk_test_`, and `whsec_`, including old commits. The [VibeLocked scanner](/scan/) checks public GitHub repos for `sk_` and `whsec_` strings. The scanner labels shared `sk_` and `whsec_` prefixes as Stripe or Clerk, since both products use them. Either way it is a secret.
 2. Open your deployed site, view the JavaScript files in DevTools, and search for `sk_`.
 3. Check your host (Vercel, Netlify, and so on) for any `NEXT_PUBLIC_` or `VITE_` variable holding a secret.
 
-More detail in [how to check if an API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github).
+More detail in [how to check if an API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github/).
 
 ## Rotate a leaked Clerk secret key
 
@@ -99,9 +99,9 @@ Do not delete the old key before the new one is live, or authentication breaks. 
 
 Signing secrets are per endpoint. On the **Webhooks** page, add a new endpoint with the same URL and events, copy its signing secret into `CLERK_WEBHOOK_SIGNING_SECRET`, redeploy, send a test event, then delete the old endpoint. While both exist, Clerk delivers events to both, and the old one simply fails verification.
 
-Deleting a key from your code is not enough. It stays in git history, so rotate first, then clean up. Our [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks) guide covers the rest.
+Deleting a key from your code is not enough. It stays in git history, so rotate first, then clean up. Our [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/) guide covers the rest.
 
-While you are in the Clerk env file, set sign-in redirect URLs to fixed relative paths (`NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`) rather than values built from `redirect_url` in the query string. Details: [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
+While you are in the Clerk env file, set sign-in redirect URLs to fixed relative paths (`NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`) rather than values built from `redirect_url` in the query string. Details: [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk/).
 
 ## Checklist
 
@@ -109,7 +109,7 @@ While you are in the Clerk env file, set sign-in redirect URLs to fixed relative
 - [ ] `CLERK_SECRET_KEY` and `CLERK_WEBHOOK_SIGNING_SECRET` have no public prefix
 - [ ] Secret using modules are never imported into `'use client'` components
 - [ ] `.env` files are in `.gitignore`
-- [ ] No `sk_` or `whsec_` in your repo or its history (check with [/scan](/scan))
+- [ ] No `sk_` or `whsec_` in your repo or its history (check with [/scan](/scan/))
 - [ ] No `sk_` in your deployed JavaScript
 - [ ] Any exposed secret key or signing secret has been rotated and the old one deleted
 

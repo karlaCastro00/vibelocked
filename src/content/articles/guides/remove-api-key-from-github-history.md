@@ -26,7 +26,7 @@ faqs:
     answer: "Run git rm --cached .env, add .env to .gitignore, and commit. The --cached option removes the file from git's index only and leaves your working copy alone. That stops future commits from including it. It does not remove old copies from history, so rotate anything that was in it."
 ---
 
-Gitleaks flagged a key, GitHub sent a secret scanning alert, or you noticed `.env` sitting in your public repo. Deleting the file in a new commit does not fix it, because every earlier commit still has the value. If you have not confirmed the leak yet, start with [how to check if your API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github). Here is the order that works: rotate the key, stop tracking the file, rewrite history only if you need to, force-push carefully, and then clean up the copies you do not control.
+Gitleaks flagged a key, GitHub sent a secret scanning alert, or you noticed `.env` sitting in your public repo. Deleting the file in a new commit does not fix it, because every earlier commit still has the value. If you have not confirmed the leak yet, start with [how to check if your API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github/). Here is the order that works: rotate the key, stop tracking the file, rewrite history only if you need to, force-push carefully, and then clean up the copies you do not control.
 
 Checked against GitHub's docs, the git filter-repo manual, and the BFG Repo-Cleaner docs linked below on October 14, 2026. The git filter-repo commands were tested on a throwaway repo with fake keys.
 
@@ -43,7 +43,7 @@ Checked against GitHub's docs, the git filter-repo manual, and the BFG Repo-Clea
 
 GitHub's [removing sensitive data](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository) guide puts this before anything else. Once the secret is revoked or rotated, "it can no longer be used for access," and GitHub says rewriting history may not be warranted at all. The git filter-repo manual says the same thing.
 
-A history rewrite does not reach copies that bots and other people already pulled. Rotation is what makes those copies useless. Open the provider's dashboard (Stripe, Supabase, OpenAI, AWS, and so on), create a new key, put it in your host's secret settings, redeploy, then delete the old key. Our [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks) guide has a table of where to rotate each common key.
+A history rewrite does not reach copies that bots and other people already pulled. Rotation is what makes those copies useless. Open the provider's dashboard (Stripe, Supabase, OpenAI, AWS, and so on), create a new key, put it in your host's secret settings, redeploy, then delete the old key. Our [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/) guide has a table of where to rotate each common key.
 
 Do not paste the new key into a chat with your AI coding tool, and do not commit it.
 
@@ -58,7 +58,7 @@ git add .gitignore
 git commit -m "Stop tracking .env"
 ```
 
-The [git rm docs](https://git-scm.com/docs/git-rm) say `--cached` removes paths from the index only and leaves working tree files alone. Check that nothing else is tracked with `git ls-files | grep -i env`. Do the same for `.env.local`, `.env.production`, key files, and service account JSON. Our [environment variables guide for Cursor, Bolt, and Lovable](/guides/environment-variables-cursor-bolt-lovable) has a full `.gitignore` setup.
+The [git rm docs](https://git-scm.com/docs/git-rm) say `--cached` removes paths from the index only and leaves working tree files alone. Check that nothing else is tracked with `git ls-files | grep -i env`. Do the same for `.env.local`, `.env.production`, key files, and service account JSON. Our [environment variables guide for Cursor, Bolt, and Lovable](/guides/environment-variables-cursor-bolt-lovable/) has a full `.gitignore` setup.
 
 This only affects new commits. The old value is still in history.
 
@@ -152,7 +152,7 @@ A force-push changes your repo on GitHub. It does not change anything else. GitH
 - **GitHub cached views and pull requests:** open a ticket on the [GitHub Support portal](https://support.github.com/) with the owner and repo name, the number of affected pull requests, and the First Changed Commit(s). GitHub says Support can dereference affected pull requests, run garbage collection, and remove cached views. Support only helps when rotating the credential cannot fix the risk, which is one more reason to rotate first.
 - **Forks:** the old commits stay in any fork that has them. GitHub cannot give you fork owners' contact details, so you have to ask them yourself to clean up or delete the fork.
 - **Collaborators:** the easiest fix is for everyone to delete their clone and re-clone. Anyone who keeps an old clone must not run `git pull` and then `git push`. The git filter-repo manual has the full steps (delete tags, rebase their work onto the new history, expire reflogs, run `git gc`). GitHub says to rebase, not merge, branches made from the old history.
-- **Deploys and builds:** if the key was in frontend code, old build output and preview deployments may still contain it. Rotation already made that copy useless. Redeploy so you stop serving it. See [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code) and [Vercel preview deployments and env vars](/guides/vercel-preview-deployments-env-vars).
+- **Deploys and builds:** if the key was in frontend code, old build output and preview deployments may still contain it. Rotation already made that copy useless. Redeploy so you stop serving it. See [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/) and [Vercel preview deployments and env vars](/guides/vercel-preview-deployments-env-vars/).
 
 ## The BFG alternative
 
@@ -190,7 +190,7 @@ GitHub's guide suggests:
 - Stage files by name instead of `git add .` or `git commit -a`, and read `git diff --cached` before you commit.
 - Turn on push protection so GitHub blocks supported secrets before they land.
 
-AI coding tools are fast at writing config files, so this matters more for vibe coded projects. Our [security review prompt for AI coding tools](/guides/security-review-prompt-for-ai-coding-tools) asks the model to flag secrets in client code. If your repo is public, the optional [VibeLocked scanner](/scan) checks the current branch for common key formats in your browser. It never asks you to paste a key, and it does not read old commits, so use Gitleaks for full history.
+AI coding tools are fast at writing config files, so this matters more for vibe coded projects. Our [security review prompt for AI coding tools](/guides/security-review-prompt-for-ai-coding-tools/) asks the model to flag secrets in client code. If your repo is public, the optional [VibeLocked scanner](/scan/) checks the current branch for common key formats in your browser. It never asks you to paste a key, and it does not read old commits, so use Gitleaks for full history.
 
 ## Checklist
 

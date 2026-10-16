@@ -49,7 +49,7 @@ If your rules contain `allow read, write: if request.time < timestamp.date(...)`
 
 ## The client config is not the lock
 
-Google's [API keys](https://firebase.google.com/docs/projects/api-keys) page says security of Realtime Database, Cloud Firestore, and Cloud Storage is enforced with Firebase Security Rules and App Check, not by keeping the Firebase API key secret. It is normal for `apiKey`, `authDomain`, and `projectId` to be in the app. Our guide on [why the Firebase API key is public and what App Check adds](/guides/firebase-api-key-public-app-check) covers what to lock down instead.
+Google's [API keys](https://firebase.google.com/docs/projects/api-keys) page says security of Realtime Database, Cloud Firestore, and Cloud Storage is enforced with Firebase Security Rules and App Check, not by keeping the Firebase API key secret. It is normal for `apiKey`, `authDomain`, and `projectId` to be in the app. Our guide on [why the Firebase API key is public and what App Check adds](/guides/firebase-api-key-public-app-check/) covers what to lock down instead.
 
 The same page says not to rely only on restricting or hiding API keys. Restricting a key in Google Cloud is a useful extra limit. It does not replace rules.
 
@@ -128,7 +128,7 @@ The UI hides requests that fail. Rules do not.
 - Add unit tests with the emulator. Firebase documents this in [unit tests for rules](https://firebase.google.com/docs/rules/unit-tests).
 - Deploy rules before you share the hosting URL. A local emulator ruleset is not the production ruleset until you deploy it.
 
-Firebase also publishes a short prompt on the Firestore get started page for asking a coding agent to write rules. Pair it with the [review prompt](/guides/security-review-prompt-for-ai-coding-tools) on this site, then read the rules file yourself. An agent that "makes the app work" will sometimes do that by opening access.
+Firebase also publishes a short prompt on the Firestore get started page for asking a coding agent to write rules. Pair it with the [review prompt](/guides/security-review-prompt-for-ai-coding-tools/) on this site, then read the rules file yourself. An agent that "makes the app work" will sometimes do that by opening access.
 
 ## A pass you can run in order
 
@@ -138,11 +138,11 @@ Firebase also publishes a short prompt on the Firestore get started page for ask
 4. Limit writable fields with `request.resource.data`.
 5. Make sure client queries include the same constraints as the rules.
 6. Confirm admin paths use custom claims or a server you control, not a client field.
-7. Confirm the Admin SDK is not imported into client code. See the [secrets guide](/guides/keep-secrets-out-of-frontend-code).
+7. Confirm the Admin SDK is not imported into client code. See the [secrets guide](/guides/keep-secrets-out-of-frontend-code/).
 8. Run the playground as two different users.
 9. Deploy the rules you just tested.
 
-If you also have a Supabase project in the same app, the matching pass is the [RLS checklist](/checklists/supabase-rls-security-checklist). The failure mode is the same: the client key is public, and the rules are the product.
+If you also have a Supabase project in the same app, the matching pass is the [RLS checklist](/checklists/supabase-rls-security-checklist/). The failure mode is the same: the client key is public, and the rules are the product.
 
 ## Official docs
 

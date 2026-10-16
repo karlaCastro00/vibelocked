@@ -37,7 +37,7 @@ Supabase now also offers newer key formats, publishable keys (`sb_publishable_..
 
 ## Why the anon key is fine to ship
 
-The anon key identifies your project and maps requests to the `anon` Postgres role (or the `authenticated` role once a user signs in). What a request can actually read or write is decided by Row Level Security policies in Postgres. If RLS is off on a table in an exposed schema, the anon key can read and write that table. So the question is never "is my anon key hidden", it is "are my policies correct". Use the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist) to check. Also review [Supabase Auth security settings](/guides/supabase-auth-security-settings) (email confirm, signup limits, redirect allowlists), because open auth weakens every policy.
+The anon key identifies your project and maps requests to the `anon` Postgres role (or the `authenticated` role once a user signs in). What a request can actually read or write is decided by Row Level Security policies in Postgres. If RLS is off on a table in an exposed schema, the anon key can read and write that table. So the question is never "is my anon key hidden", it is "are my policies correct". Use the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/) to check. Also review [Supabase Auth security settings](/guides/supabase-auth-security-settings/) (email confirm, signup limits, redirect allowlists), because open auth weakens every policy.
 
 ## Why the service role key is dangerous
 
@@ -51,7 +51,7 @@ The service role key maps to a role that bypasses RLS. That is useful for admin 
 4. In Lovable or Bolt projects, check which key the generated client uses. It should be the anon or publishable key.
 5. Open the Supabase dashboard and confirm RLS is enabled on every table in the `public` schema. The Security Advisor flags tables without it.
 
-If you find a secret key anywhere public, follow the [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+If you find a secret key anywhere public, follow the [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/).
 
 ## Official docs
 

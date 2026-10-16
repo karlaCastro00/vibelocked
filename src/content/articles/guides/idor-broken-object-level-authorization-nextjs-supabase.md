@@ -27,7 +27,7 @@ faqs:
 
 IDOR, short for insecure direct object reference, is what OWASP's API list calls [Broken Object Level Authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/) (API1:2023). It happens when your API takes an id from the request, like `/api/invoices/42`, and returns or changes that row without checking that the caller is allowed to. Anyone signed in can swap `42` for `43` and see someone else's invoice. The fix is always the same pattern: **get the user from a verified session on the server, then scope the query to that user**, so a row that is not theirs simply does not come back. With Supabase, back that up with Row Level Security that compares `auth.uid()` to the owner column.
 
-This page is the hands-on version for Next.js Route Handlers and Supabase. For a survey of IDOR next to the other bugs AI tools tend to write, see [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities).
+This page is the hands-on version for Next.js Route Handlers and Supabase. For a survey of IDOR next to the other bugs AI tools tend to write, see [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities/).
 
 Checked against the OWASP, Next.js, and Supabase docs linked below on October 15, 2026. Product names are here to help you find your stack. VibeLocked is independent and not affiliated with any of them.
 
@@ -116,7 +116,7 @@ Why each piece matters:
 - **Same 404 for missing and forbidden.** The cheat sheet suggests mapping both cases to one public response when existence is sensitive.
 - **The user's client, not the secret key.** Because this client carries the user's access token, RLS also applies. The `.eq('user_id', userId)` and the policy protect you twice.
 
-The Next.js authentication guide says to treat Route Handlers with the same security considerations as public-facing API endpoints and to verify that the user may access them. It also says Proxy (the file older versions called Middleware) should not be your only line of defense. Put the check in the handler. The [CVE-2025-29927 middleware bypass](/guides/nextjs-middleware-auth-bypass-cve-2025-29927) is a real example of why.
+The Next.js authentication guide says to treat Route Handlers with the same security considerations as public-facing API endpoints and to verify that the user may access them. It also says Proxy (the file older versions called Middleware) should not be your only line of defense. Put the check in the handler. The [CVE-2025-29927 middleware bypass](/guides/nextjs-middleware-auth-bypass-cve-2025-29927/) is a real example of why.
 
 ## Updates and deletes: check the row count
 
@@ -157,7 +157,7 @@ export async function PATCH(
 Two traps this avoids:
 
 - **Spreading the body.** `.update(body)` lets the caller send `{ "user_id": "<someone else>" }` or `{ "status": "paid" }`. Pick the fields you allow.
-- **Owner from the body on insert.** On create, set `user_id: userId` from the session, not from `body.userId`. The [Stripe paywall bypass guide](/guides/stripe-success-page-paywall-bypass) is the same lesson for paid flags.
+- **Owner from the body on insert.** On create, set `user_id: userId` from the session, not from `body.userId`. The [Stripe paywall bypass guide](/guides/stripe-success-page-paywall-bypass/) is the same lesson for paid flags.
 
 `DELETE` follows the same shape: `.delete().eq('id', id).eq('user_id', userId).select('id')`, then 404 on zero rows.
 
@@ -224,9 +224,9 @@ What the docs say that matters for IDOR:
 - **`with check` on insert and update** stops a user from creating a row for someone else or reassigning `user_id`.
 - **One policy per operation,** each with `to authenticated`.
 - **Views bypass RLS by default.** Use `security_invoker = true` on Postgres 15+ or keep views out of exposed schemas.
-- **The secret key (and the legacy `service_role` key) bypasses RLS** when the request carries no user access token. Supabase says never to use it in the browser or expose it to customers. If a `NEXT_PUBLIC_` variable holds it, you have a bigger problem than IDOR. See [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
+- **The secret key (and the legacy `service_role` key) bypasses RLS** when the request carries no user access token. Supabase says never to use it in the browser or expose it to customers. If a `NEXT_PUBLIC_` variable holds it, you have a bigger problem than IDOR. See [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key/).
 
-**Browser queries need this most.** When a Lovable or Bolt app calls `supabase.from('invoices').select()` straight from the client with the publishable key, there is no Route Handler at all. RLS is the only check, and anyone can rerun that query from the console with a different `id`. The [Supabase RLS checklist](/checklists/supabase-rls-security-checklist) walks through every table.
+**Browser queries need this most.** When a Lovable or Bolt app calls `supabase.from('invoices').select()` straight from the client with the publishable key, there is no Route Handler at all. RLS is the only check, and anyone can rerun that query from the console with a different `id`. The [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/) walks through every table.
 
 ### When you really need the secret key
 
@@ -288,9 +288,9 @@ Do not paste real session cookies into chats, tickets, or AI tools. Treat them l
 - [ ] Views use `security_invoker = true` or are not exposed
 - [ ] The secret or `service_role` key is only in server-only files and has no `NEXT_PUBLIC_` or `VITE_` prefix
 - [ ] Two-account test passed for read, update, and delete, in the browser and with curl
-- [ ] Server Actions get the same treatment; see [Next.js Server Actions security](/guides/nextjs-server-actions-security)
+- [ ] Server Actions get the same treatment; see [Next.js Server Actions security](/guides/nextjs-server-actions-security/)
 
-Then run the full [ship checklist for a vibe-coded app](/checklists/ship-checklist-for-a-vibe-coded-app) before you share the URL.
+Then run the full [ship checklist for a vibe-coded app](/checklists/ship-checklist-for-a-vibe-coded-app/) before you share the URL.
 
 ## Ask your AI tool to find it
 
@@ -298,7 +298,7 @@ A prompt that works well in Cursor, Bolt, Lovable, or v0:
 
 > List every Route Handler, Server Action, and client-side Supabase query in this project that takes an id from the URL, query string, or body. For each one, show the line that gets the user from a verified session and the line that restricts the query to that user or their team. Flag any that use the Supabase secret or service_role key, any that spread the request body into an update, and any table without RLS policies on auth.uid(). Do not change code yet.
 
-Then read the list yourself. Models miss things, especially handlers that call a helper which calls the database. More prompts are in the [security review prompt guide](/guides/security-review-prompt-for-ai-coding-tools).
+Then read the list yourself. Models miss things, especially handlers that call a helper which calls the database. More prompts are in the [security review prompt guide](/guides/security-review-prompt-for-ai-coding-tools/).
 
 ## Sources
 

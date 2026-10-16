@@ -48,7 +48,7 @@ const session = await stripe.checkout.sessions.create({
 });
 ```
 
-2. Handle `checkout.session.completed` in a webhook that **verifies the signature**, then writes the entitlement to your database with server credentials. See [securing Stripe webhooks](/guides/securing-stripe-webhooks).
+2. Handle `checkout.session.completed` in a webhook that **verifies the signature**, then writes the entitlement to your database with server credentials. See [securing Stripe webhooks](/guides/securing-stripe-webhooks/).
 
 ```ts
 async function fulfillCheckout(sessionId: string) {
@@ -80,7 +80,7 @@ If the entitlement is not there yet, show "Finishing setup..." and poll your dat
 
 ## Lock the column
 
-With Supabase, make sure users cannot write their own plan. Keep entitlements in a separate table with **no** insert or update policy for `authenticated`, and write it only with the service role key from the webhook. Then test: sign in as a free user and try `supabase.from('entitlements').insert(...)` from the console. It should fail. The [Supabase RLS checklist](/checklists/supabase-rls-security-checklist) covers the rest.
+With Supabase, make sure users cannot write their own plan. Keep entitlements in a separate table with **no** insert or update policy for `authenticated`, and write it only with the service role key from the webhook. Then test: sign in as a free user and try `supabase.from('entitlements').insert(...)` from the console. It should fail. The [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/) covers the rest.
 
 ## Checklist
 
@@ -90,7 +90,7 @@ With Supabase, make sure users cannot write their own plan. Keep entitlements in
 - [ ] Subscription updates and cancellations handled
 - [ ] Success page verifies the session on the server and matches the user
 - [ ] Users cannot write their own plan or entitlement rows
-- [ ] `sk_live_` and `whsec_` keys not in the repo (check with [/scan](/scan))
+- [ ] `sk_live_` and `whsec_` keys not in the repo (check with [/scan](/scan/))
 
 ## Sources
 

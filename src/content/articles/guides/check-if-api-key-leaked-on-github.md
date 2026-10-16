@@ -61,11 +61,11 @@ TruffleHog's `--only-verified` flag tries the key against the provider to see if
 
 ## 4. Check the deployed app too
 
-A key can leak without ever being in git, for example through a `NEXT_PUBLIC_` or `VITE_` variable baked into the browser bundle. See [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code). Also request `/.env`, `/.git/config`, and a sample `.js.map` on the live domain; env and git paths should return 404 ([exposed .env, .git, and source maps on a deployed app](/guides/exposed-env-git-source-maps-deployed-app)).
+A key can leak without ever being in git, for example through a `NEXT_PUBLIC_` or `VITE_` variable baked into the browser bundle. See [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/). Also request `/.env`, `/.git/config`, and a sample `.js.map` on the live domain; env and git paths should return 404 ([exposed .env, .git, and source maps on a deployed app](/guides/exposed-env-git-source-maps-deployed-app/)).
 
 ## Found one? Rotate first
 
-Revoke or rotate the key at the provider before anything else. Rewriting history with `git filter-repo` does not remove copies other people already have. Then follow the [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks). If you also want the dead value out of old commits, see [how to remove a leaked API key from GitHub history](/guides/remove-api-key-from-github-history).
+Revoke or rotate the key at the provider before anything else. Rewriting history with `git filter-repo` does not remove copies other people already have. Then follow the [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/). If you also want the dead value out of old commits, see [how to remove a leaked API key from GitHub history](/guides/remove-api-key-from-github-history/).
 
 ## Official docs
 

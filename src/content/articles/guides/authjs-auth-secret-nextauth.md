@@ -38,7 +38,7 @@ Checked against the Auth.js and NextAuth docs linked below on October 15, 2026.
 | OAuth client ID | Provider-specific id | Often public-ish (depends on provider) | Usually low urgency; still avoid shipping secrets |
 | OAuth client secret | Provider secret | Server only | Rotate at the provider |
 
-Clerk gives you a public `pk_` and a secret `sk_`. Auth.js gives you one app secret for cookies and JWTs. Treat `AUTH_SECRET` like a password for your sessions, not like a publishable frontend key. See [Clerk publishable key vs secret key](/guides/clerk-publishable-key-vs-secret-key) for that contrast.
+Clerk gives you a public `pk_` and a secret `sk_`. Auth.js gives you one app secret for cookies and JWTs. Treat `AUTH_SECRET` like a password for your sessions, not like a publishable frontend key. See [Clerk publishable key vs secret key](/guides/clerk-publishable-key-vs-secret-key/) for that contrast.
 
 ## What AUTH_SECRET does
 
@@ -68,11 +68,11 @@ Never create any of these:
 - `VITE_AUTH_SECRET`
 - `VITE_NEXTAUTH_SECRET`
 
-Those prefixes put the value in the browser bundle. Our [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code) guide covers why.
+Those prefixes put the value in the browser bundle. Our [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/) guide covers why.
 
 **Preview deploys:** if you use `AUTH_REDIRECT_PROXY_URL` so OAuth works on preview URLs, the [deployment docs](https://authjs.dev/getting-started/deployment) say `AUTH_SECRET` must be the same on the stable deployment and the preview deployments that need OAuth.
 
-Separately, do not pipe a raw `callbackUrl` or `redirectTo` from the query string into sign-in. Auth.js restricts same-host redirects by default, but custom code and loose redirect callbacks still create open redirects. See [fix open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
+Separately, do not pipe a raw `callbackUrl` or `redirectTo` from the query string into sign-in. Auth.js restricts same-host redirects by default, but custom code and loose redirect callbacks still create open redirects. See [fix open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk/).
 
 ## Wrong patterns vibe apps hit
 
@@ -81,7 +81,7 @@ Separately, do not pipe a raw `callbackUrl` or `redirectTo` from the query strin
 3. The secret is copied into a shared helper that a `'use client'` file imports.
 4. Production and preview get different secrets while using the redirect proxy, so OAuth or sessions break in confusing ways.
 
-Keep the secret in host env settings (Vercel, Netlify, and so on), read it only in server code, and keep `.env` gitignored. More habits for Cursor, Bolt, and Lovable live in the [environment variables guide](/guides/environment-variables-cursor-bolt-lovable).
+Keep the secret in host env settings (Vercel, Netlify, and so on), read it only in server code, and keep `.env` gitignored. More habits for Cursor, Bolt, and Lovable live in the [environment variables guide](/guides/environment-variables-cursor-bolt-lovable/).
 
 ## How to generate a good secret
 
@@ -106,9 +106,9 @@ Put the value in your host's secret store and in a local gitignored `.env`. Do n
 1. Search the repo (including history) for `AUTH_SECRET`, `NEXTAUTH_SECRET`, `NEXT_PUBLIC_AUTH_SECRET`, and `VITE_NEXTAUTH_SECRET`.
 2. Confirm `.env` is not tracked: `git ls-files | grep -i env`.
 3. Check your host for any public-prefixed copy of the secret.
-4. Run the [VibeLocked scanner](/scan) on a public GitHub repo for related patterned keys (OAuth client secrets, Stripe, Clerk, and so on). `AUTH_SECRET` itself is a random string, so scanners may not flag the value the way they flag `sk_live_` keys. Variable-name search still matters.
+4. Run the [VibeLocked scanner](/scan/) on a public GitHub repo for related patterned keys (OAuth client secrets, Stripe, Clerk, and so on). `AUTH_SECRET` itself is a random string, so scanners may not flag the value the way they flag `sk_live_` keys. Variable-name search still matters.
 
-If the secret was in a public place, rotate it. Order of operations is in [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks). Cleaning git history is optional cleanup after rotation; see [remove a leaked key from GitHub history](/guides/remove-api-key-from-github-history).
+If the secret was in a public place, rotate it. Order of operations is in [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/). Cleaning git history is optional cleanup after rotation; see [remove a leaked key from GitHub history](/guides/remove-api-key-from-github-history/).
 
 ## How to rotate
 

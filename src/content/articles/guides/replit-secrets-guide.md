@@ -52,7 +52,7 @@ Failing loudly when a secret is missing (as `os.environ[...]` does) is better th
 
 ## If a key leaked
 
-Revoke or rotate it at the provider, update the value in Secrets, and restart. Then follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+Revoke or rotate it at the provider, update the value in Secrets, and restart. Then follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/).
 
 ## Official docs
 

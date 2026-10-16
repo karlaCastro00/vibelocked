@@ -28,7 +28,7 @@ Checked against the Stripe docs linked below on October 14, 2026.
 
 Your handler will mark an order paid, grant a subscription, or store a customer id. If it does that for an unsigned body, anyone can POST a fake `checkout.session.completed` and grant themselves the thing you sell.
 
-The browser success page is not proof either. The customer can close the tab. Fulfill from the verified webhook, or by retrieving the Checkout Session or PaymentIntent with your secret key on the server. Do not fulfill from a query parameter the client can edit. The [Stripe success page paywall bypass guide](/guides/stripe-success-page-paywall-bypass) shows the fix in full.
+The browser success page is not proof either. The customer can close the tab. Fulfill from the verified webhook, or by retrieving the Checkout Session or PaymentIntent with your secret key on the server. Do not fulfill from a query parameter the client can edit. The [Stripe success page paywall bypass guide](/guides/stripe-success-page-paywall-bypass/) shows the fix in full.
 
 ## Verify the signature on the raw body
 
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
 Use `request.text()`, not `request.json()`. Stripe says any change to the body, including parsing JSON, adding whitespace, or reordering keys, makes the signature check fail. In Express, the [signature docs](https://docs.stripe.com/webhooks/signature) say to mount `express.raw({ type: 'application/json' })` on the webhook route and to place `express.json()` after that route, not before it.
 
-The endpoint secret is `whsec_` followed by the secret. It is not the Stripe secret API key. Keep it in a server env var. The [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code) covers why it must not use a `NEXT_PUBLIC_` or `VITE_` prefix.
+The endpoint secret is `whsec_` followed by the secret. It is not the Stripe secret API key. Keep it in a server env var. The [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code/) covers why it must not use a `NEXT_PUBLIC_` or `VITE_` prefix.
 
 The CLI secret and the Dashboard secret are different, even though both start with `whsec_`. Stripe says the CLI prints its secret when you run `stripe listen`. Do not mix them. Test mode and live mode each have their own endpoint secret. If you point a live endpoint at a handler configured with the test secret, every event will fail the check, or you will be tempted to skip the check. Do not skip it.
 
@@ -96,7 +96,7 @@ Do not trust `event.type` from a request that failed `constructEvent`. The verif
 
 Stripe recommends rolling endpoint signing secrets periodically, or when you think one leaked. In the webhook settings you can expire the current secret immediately or delay expiration for up to 24 hours. During the delay, Stripe signs with both secrets so you can deploy the new value without dropping events. The [webhooks guide](https://docs.stripe.com/webhooks) has the steps.
 
-If `whsec_` showed up in a frontend bundle or a git repo, roll it now and follow the [first hour guide](/guides/first-hour-after-an-api-key-leaks). A leaked signing secret lets someone forge events that pass the check, until you roll it.
+If `whsec_` showed up in a frontend bundle or a git repo, roll it now and follow the [first hour guide](/guides/first-hour-after-an-api-key-leaks/). A leaked signing secret lets someone forge events that pass the check, until you roll it.
 
 The Stripe secret API key (`sk_`) is a different secret with a bigger blast radius. Stripe's [best practices](https://docs.stripe.com/keys-best-practices) say never to put it in source code or in a client app. A restricted key is often enough for the server calls you make. The webhook secret is still required for verification, and it is still server-only.
 

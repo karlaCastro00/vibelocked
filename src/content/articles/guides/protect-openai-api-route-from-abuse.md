@@ -26,7 +26,7 @@ faqs:
 
 Moving the OpenAI key out of the frontend is step one. Step two is the one AI generated apps usually skip: the server route that holds the key will happily answer anyone on the internet. Bots find these routes, and you pay for every token.
 
-First, make sure the key really is off the client. Open your live app, view its JavaScript files in the browser dev tools Sources tab, and search for `sk-`. If the code is in a public repo, run the [VibeLocked scanner](/scan) on it too. If it finds an `sk-` key, stop here and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+First, make sure the key really is off the client. Open your live app, view its JavaScript files in the browser dev tools Sources tab, and search for `sk-`. If the code is in a public repo, run the [VibeLocked scanner](/scan/) on it too. If it finds an `sk-` key, stop here and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/).
 
 ## What abuse looks like
 
@@ -53,7 +53,7 @@ const { data: { user } } = await supabase.auth.getUser();
 if (!user) return new Response('Unauthorized', { status: 401 });
 ```
 
-If you want a free demo for anonymous visitors, give it a separate, much smaller limit and add a bot check such as Cloudflare Turnstile. Open signups mean anyone can get a valid JWT, so also review [Supabase Auth security settings](/guides/supabase-auth-security-settings) if that is your auth stack.
+If you want a free demo for anonymous visitors, give it a separate, much smaller limit and add a bot check such as Cloudflare Turnstile. Open signups mean anyone can get a valid JWT, so also review [Supabase Auth security settings](/guides/supabase-auth-security-settings/) if that is your auth stack.
 
 ## 2. Rate limit per user and per IP
 
@@ -72,7 +72,7 @@ const { success } = await ratelimit.limit(`chat:${user.id}`);
 if (!success) return new Response('Too many requests', { status: 429 });
 ```
 
-For full Next.js and Supabase Edge Function code with per-IP limits and daily token budgets, see [rate limit AI API routes in Next.js and Supabase](/guides/rate-limit-ai-api-routes-nextjs-supabase).
+For full Next.js and Supabase Edge Function code with per-IP limits and daily token budgets, see [rate limit AI API routes in Next.js and Supabase](/guides/rate-limit-ai-api-routes-nextjs-supabase/).
 
 Add a daily quota per user too (for example in a `usage` table in your database) so one account cannot burn through your budget slowly.
 
@@ -113,7 +113,7 @@ Log user id, token counts, and status for each call. Look at provider usage the 
 
 ## Checklist
 
-- [ ] No model key in the repo ([scan it](/scan)) or the browser bundle
+- [ ] No model key in the repo ([scan it](/scan/)) or the browser bundle
 - [ ] Route requires a session, or a separate tiny limit for anonymous use
 - [ ] Shared rate limit per user and per IP, plus a daily quota
 - [ ] Model, system prompt, and max tokens fixed on the server
@@ -121,9 +121,9 @@ Log user id, token counts, and status for each call. Look at provider usage the 
 - [ ] One provider project and key per app, with budget and alerts
 - [ ] Usage logged and checked after launch
 
-For server actions specifically, see [Next.js server actions security](/guides/nextjs-server-actions-security). They are public endpoints too. Scheduled jobs that call the model need the same idea with a shared secret: [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret).
+For server actions specifically, see [Next.js server actions security](/guides/nextjs-server-actions-security/). They are public endpoints too. Scheduled jobs that call the model need the same idea with a shared secret: [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret/).
 
-If your AI feature reads documents or calls tools, also read [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
+If your AI feature reads documents or calls tools, also read [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps/).
 
 ## Sources
 

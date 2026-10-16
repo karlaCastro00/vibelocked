@@ -27,7 +27,7 @@ faqs:
     answer: "In development, Next.js needs 'unsafe-eval' because React uses eval for better error stacks. The Next.js docs say production does not need it. Also check that your production host actually sends the header: GitHub Pages ignores a _headers file, and a nonce policy in Next.js requires dynamic rendering."
 ---
 
-A Content-Security-Policy (CSP) is a response header that tells the browser what your page is allowed to load and run. If a script, stylesheet, frame, or form target is not on the list, the browser blocks it. That matters when something slips through, like a comment field that renders HTML or a third-party script that was swapped out. CSP does not fix the bug that let the script in. It stops the browser from running it. To fix the bug itself in React and Next.js (`dangerouslySetInnerHTML`, raw HTML in markdown, AI chat output, user links), see [XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs).
+A Content-Security-Policy (CSP) is a response header that tells the browser what your page is allowed to load and run. If a script, stylesheet, frame, or form target is not on the list, the browser blocks it. That matters when something slips through, like a comment field that renders HTML or a third-party script that was swapped out. CSP does not fix the bug that let the script in. It stops the browser from running it. To fix the bug itself in React and Next.js (`dangerouslySetInnerHTML`, raw HTML in markdown, AI chat output, user links), see [XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs/).
 
 Apps built with Cursor, v0, Bolt, or Lovable usually ship with no CSP at all, or with one copied from a chat that allows `'unsafe-inline'` everywhere. This guide gives you a starter policy, a directive checklist, the common things that break, and a safe rollout order.
 
@@ -182,7 +182,7 @@ Where the third-party lines come from:
 | `default-src` | Fallback for fetch directives you do not list | `'self'` |
 | `script-src` | Where JavaScript can load from, and whether inline or eval runs | `'self'` plus a nonce or hashes; specific hosts only if you must |
 | `style-src` | Stylesheets and inline styles | `'self'`, add font CSS hosts if used |
-| `img-src` | Images | `'self' data:` plus your image or avatar hosts (Supabase Storage or Vercel Blob domains if you serve uploads there; see [secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob)) |
+| `img-src` | Images | `'self' data:` plus your image or avatar hosts (Supabase Storage or Vercel Blob domains if you serve uploads there; see [secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)) |
 | `connect-src` | `fetch`, XHR, WebSockets, beacons | `'self'` plus your API, auth, database, and analytics hosts |
 | `font-src` | Web fonts from `@font-face` | `'self'`, or your font host |
 | `frame-src` / `child-src` | What your page may embed in iframes (`child-src` also covers workers) | Only the payment, captcha, or embed hosts you use |
@@ -222,7 +222,7 @@ connect-src https://api.stripe.com https://maps.googleapis.com;
 
 `hooks.stripe.com` in `frame-src` is needed for 3D Secure and other redirect payment methods. For Stripe Checkout, the same guide lists `https://checkout.stripe.com` in `script-src`, `frame-src`, and `connect-src`, plus `img-src https://*.stripe.com`.
 
-**Clerk.** The [Clerk CSP guide](https://clerk.com/docs/guides/secure/best-practices/csp-headers) lists your Frontend API host (for example `https://clerk.your-domain.com`), `https://challenges.cloudflare.com`, and `https://*.protect.clerk.com` for `script-src` and `frame-src`; your Frontend API host and `https://*.protect.clerk.com:*` (the `:*` port is required) for `connect-src`; `https://img.clerk.com` for `img-src`; `worker-src 'self' blob:`; and `style-src 'unsafe-inline'` because Clerk injects styles at runtime. On Next.js, `clerkMiddleware({ contentSecurityPolicy: {} })` can generate the header for you, with a `strict: true` mode that adds nonces. Clerk's publishable key in your frontend is fine; the secret key is not ([why](/guides/clerk-publishable-key-vs-secret-key)).
+**Clerk.** The [Clerk CSP guide](https://clerk.com/docs/guides/secure/best-practices/csp-headers) lists your Frontend API host (for example `https://clerk.your-domain.com`), `https://challenges.cloudflare.com`, and `https://*.protect.clerk.com` for `script-src` and `frame-src`; your Frontend API host and `https://*.protect.clerk.com:*` (the `:*` port is required) for `connect-src`; `https://img.clerk.com` for `img-src`; `worker-src 'self' blob:`; and `style-src 'unsafe-inline'` because Clerk injects styles at runtime. On Next.js, `clerkMiddleware({ contentSecurityPolicy: {} })` can generate the header for you, with a `strict: true` mode that adds nonces. Clerk's publishable key in your frontend is fine; the secret key is not ([why](/guides/clerk-publishable-key-vs-secret-key/)).
 
 **Supabase.** The browser client calls your project URL, and Realtime opens a WebSocket at `wss://<project-ref>.supabase.co/realtime/v1/websocket` ([Supabase Realtime protocol](https://supabase.com/docs/guides/realtime/protocol)). So `connect-src` needs both `https://<project-ref>.supabase.co` and `wss://<project-ref>.supabase.co`. If you only allow the `https:` origin, live updates fail while normal queries work.
 
@@ -259,7 +259,7 @@ None of these steps needs a secret. Example policies above use placeholders like
 - [ ] Rolled out as Report-Only first, then enforced
 - [ ] Response headers checked on production after deploy
 
-CSP is one layer. The bigger risks in AI-built apps are still auth and data access: read [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities) and run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) before launch. While you are looking at response headers, also check `Access-Control-Allow-Origin` for reflected origins with credentials ([CORS misconfiguration in vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps)).
+CSP is one layer. The bigger risks in AI-built apps are still auth and data access: read [common vulnerabilities in vibe-coded apps](/guides/common-vibe-coded-app-vulnerabilities/) and run the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) before launch. While you are looking at response headers, also check `Access-Control-Allow-Origin` for reflected origins with credentials ([CORS misconfiguration in vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps/)).
 
 ## Sources
 

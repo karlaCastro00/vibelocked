@@ -37,13 +37,13 @@ Where to do it, for the stack vibe-coded apps usually use:
 | Secret | Where to revoke | Doc |
 | --- | --- | --- |
 | Stripe secret, restricted, or publishable key | Dashboard, API keys. Roll the key. | [Keys](https://docs.stripe.com/keys) and [best practices](https://docs.stripe.com/keys-best-practices) |
-| Stripe webhook signing secret | Roll the endpoint secret. Stripe lets you expire the old one immediately or delay up to 24 hours. After you roll it, confirm the handler still verifies signatures ([securing Stripe webhooks](/guides/securing-stripe-webhooks)). | [Webhooks](https://docs.stripe.com/webhooks) |
+| Stripe webhook signing secret | Roll the endpoint secret. Stripe lets you expire the old one immediately or delay up to 24 hours. After you roll it, confirm the handler still verifies signatures ([securing Stripe webhooks](/guides/securing-stripe-webhooks/)). | [Webhooks](https://docs.stripe.com/webhooks) |
 | Supabase secret or legacy service_role | Project settings, API keys. Rotate, then update only the server env. | [API keys](https://supabase.com/docs/guides/getting-started/api-keys) |
 | Firebase or Google Cloud service account key | Delete the key in Google Cloud IAM. The web `apiKey` is not this secret. | [IAM keys](https://docs.cloud.google.com/iam/docs/keys-create-delete) and [Firebase API keys](https://firebase.google.com/docs/projects/api-keys) |
 | AWS access key | Deactivate the access key, then delete it after you confirm nothing you own still needs it. | [Access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) |
 | GitHub personal access token | Revoke it in GitHub settings. Public leaks of GitHub PATs are also auto-revoked. | [Remediation](https://docs.github.com/en/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/remediating-a-leaked-secret) |
 | OpenAI or Anthropic API key | Revoke it in that provider's API keys page, then issue a new one on the server only. | Use the provider console. Do not paste the new key into a chat. |
-| Auth.js `AUTH_SECRET` / NextAuth `NEXTAUTH_SECRET` | Generate a new secret, update host env, redeploy. Use a secret array `[new, old]` if you need existing sessions to keep working. | [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth) |
+| Auth.js `AUTH_SECRET` / NextAuth `NEXTAUTH_SECRET` | Generate a new secret, update host env, redeploy. Use a secret array `[new, old]` if you need existing sessions to keep working. | [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth/) |
 
 If you cannot tell which key leaked, revoke the ones that were in the file and issue replacements. A short outage you chose is better than a key that still works.
 
@@ -65,7 +65,7 @@ Absence of a log line is not proof the key was unused. Some products log more th
 
 Issue a new key with less privilege than the one that leaked, if the provider allows it. Stripe restricted keys are the usual example: a key that can do the one API call you need, not the whole account. Supabase secret keys stay on the server. Firebase client config can stay in the app. A service account cannot.
 
-Store the new value in the host's secret store: the deployment environment, Supabase Edge Function secrets, or [Replit Secrets](/guides/replit-secrets-guide). Do not commit it. Do not prefix it with `NEXT_PUBLIC_` or `VITE_`. The [secrets guide](/guides/keep-secrets-out-of-frontend-code) is the detail.
+Store the new value in the host's secret store: the deployment environment, Supabase Edge Function secrets, or [Replit Secrets](/guides/replit-secrets-guide/). Do not commit it. Do not prefix it with `NEXT_PUBLIC_` or `VITE_`. The [secrets guide](/guides/keep-secrets-out-of-frontend-code/) is the detail.
 
 Do not send the new key in the same chat, email, or ticket that contained the old one. Stripe's key docs say not to share keys over email or chat.
 
@@ -88,13 +88,13 @@ GitHub's page on [removing sensitive data](https://docs.github.com/en/authentica
 
 The [secret leakage risks](https://docs.github.com/en/code-security/concepts/secret-security/secret-leakage-risks) page says a committed secret stays in history after you remove it from the latest commit. Forks and other clones keep their copies. Force-pushing your branch does not edit those copies.
 
-If you still need the value gone, follow GitHub's removal guide. It points at `git filter-repo` and at GitHub Support for cached views. Our [step by step guide to removing a leaked key from GitHub history](/guides/remove-api-key-from-github-history) covers the commands, the force-push, and cleaning up clones. That is cleanup. It is not what stops the key. Do not spend the first hour on a history rewrite while the old key still works.
+If you still need the value gone, follow GitHub's removal guide. It points at `git filter-repo` and at GitHub Support for cached views. Our [step by step guide to removing a leaked key from GitHub history](/guides/remove-api-key-from-github-history/) covers the commands, the force-push, and cleaning up clones. That is cleanup. It is not what stops the key. Do not spend the first hour on a history rewrite while the old key still works.
 
 ## 6. Turn on the check that would have caught it
 
-On GitHub, secret scanning for public repositories is free, and it scans history. Push protection can block a push that contains a detected secret. The leakage-risks page describes both. Turn them on for the repo you just cleaned. They will not see every custom token format. They do see a lot of the keys in the table above, which is why the partner program exists. If you are still unsure whether the key landed in git, use [how to check if your API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github).
+On GitHub, secret scanning for public repositories is free, and it scans history. Push protection can block a push that contains a detected secret. The leakage-risks page describes both. Turn them on for the repo you just cleaned. They will not see every custom token format. They do see a lot of the keys in the table above, which is why the partner program exists. If you are still unsure whether the key landed in git, use [how to check if your API key leaked on GitHub](/guides/check-if-api-key-leaked-on-github/).
 
-Add a habit to the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app): search the build output, and keep secrets out of the coding-agent chat.
+Add a habit to the [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/): search the build output, and keep secrets out of the coding-agent chat.
 
 ## What this is not
 

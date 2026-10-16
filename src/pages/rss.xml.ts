@@ -17,6 +17,6 @@ export async function GET(context: APIContext) {
       categories: article.data.tags,
     })),
     customData: '<language>en-us</language>',
-    trailingSlash: false,
+    trailingSlash: true,
   });
 }

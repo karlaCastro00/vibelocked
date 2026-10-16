@@ -87,13 +87,13 @@ The `ignore-scripts` option stops npm from running package scripts during instal
 - **Turn on Dependabot alerts** for known vulnerable versions ([GitHub docs](https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts)). It will not catch a brand new malicious package, but it catches the much more common old-vulnerable-version problem.
 - **Run `npm audit signatures`** to check registry signatures and provenance where packages provide them ([npm provenance](https://docs.npmjs.com/generating-provenance-statements)). Provenance links a package to its source and build, but npm notes it does not guarantee the code is safe.
 - **Tell your AI tool the rule.** Add a line to your project rules file (`.cursor/rules`, `AGENTS.md`, `CLAUDE.md`): "Do not add new dependencies without asking. Prefer official SDKs and packages already in package.json."
-- **Keep secrets out of reach.** A malicious package running on your laptop can read `.env` files. Use separate, low-privilege development keys, and never put production secrets in local files. See [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code).
+- **Keep secrets out of reach.** A malicious package running on your laptop can read `.env` files. Use separate, low-privilege development keys, and never put production secrets in local files. See [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/).
 
 ## If you already installed something suspicious
 
 1. Remove it from `package.json`, delete `node_modules` and the lockfile entry, and reinstall.
 2. Check whether it had an install script. If it did, assume it ran.
-3. Rotate every secret that was in environment variables or `.env` files on that machine or in that build: API keys, database URLs, tokens. The [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks) walks through rotation.
+3. Rotate every secret that was in environment variables or `.env` files on that machine or in that build: API keys, database URLs, tokens. The [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/) walks through rotation.
 4. Report the package to npm or PyPI through the "Report malware" link on its page.
 
 ## Checklist

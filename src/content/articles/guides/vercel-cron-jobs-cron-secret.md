@@ -50,7 +50,7 @@ export async function GET() {
 
 There is no session, no shared secret, and no check that the caller is Vercel. Opening `https://yourapp.com/api/cron/cleanup` in a browser runs the same code. Scrapers and curious users will try `/api/cron`, `/api/cron/daily`, and whatever path appears in your public repo or `vercel.json`.
 
-Treat cron routes like any other privileged API: [missing auth on public routes](/guides/common-vibe-coded-app-vulnerabilities) is the same class of bug as an open AI proxy ([protect OpenAI routes](/guides/protect-openai-api-route-from-abuse)).
+Treat cron routes like any other privileged API: [missing auth on public routes](/guides/common-vibe-coded-app-vulnerabilities/) is the same class of bug as an open AI proxy ([protect OpenAI routes](/guides/protect-openai-api-route-from-abuse/)).
 
 ## What Vercel Cron sends
 
@@ -74,8 +74,8 @@ Do not rely on User-Agent alone. Spoofing it is trivial. The Bearer token is the
 2. Add `CRON_SECRET` with a long random value (password manager or `openssl rand -hex 32`)
 3. Assign it to **Production**. Development is useful for local `vercel env pull`. Preview is optional: Vercel does not fire cron on previews, but if you hit the same route on a preview URL while testing, a Preview value keeps the check consistent
 4. Mark it **Secret** so the dashboard cannot read it back
-5. Never name it `NEXT_PUBLIC_CRON_SECRET`. That would put the token in the browser bundle ([keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code))
-6. Redeploy after adding or rotating the variable. Env changes apply to **new** deployments only ([preview and production env vars](/guides/vercel-preview-deployments-env-vars))
+5. Never name it `NEXT_PUBLIC_CRON_SECRET`. That would put the token in the browser bundle ([keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/))
+6. Redeploy after adding or rotating the variable. Env changes apply to **new** deployments only ([preview and production env vars](/guides/vercel-preview-deployments-env-vars/))
 
 CLI shape (placeholders only):
 
@@ -191,9 +191,9 @@ Also avoid redirects from the cron path. Vercel cron **does not follow redirects
 
 The production URL `/api/cron/...` answers browser GETs and `curl` the same way it answers Vercel. With the check above, those requests get 401 unless they send the correct Bearer token.
 
-Cron does not run on preview deployments, but preview URLs still host the same route code. Protect previews with [Deployment Protection](/guides/vercel-preview-deployments-env-vars) so unfinished handlers are not public, and keep a Preview `CRON_SECRET` if you manually test there.
+Cron does not run on preview deployments, but preview URLs still host the same route code. Protect previews with [Deployment Protection](/guides/vercel-preview-deployments-env-vars/) so unfinished handlers are not public, and keep a Preview `CRON_SECRET` if you manually test there.
 
-If the job calls OpenAI or another paid API, add [rate limits and spend caps](/guides/rate-limit-ai-api-routes-nextjs-supabase) as a second layer. Cron auth stops strangers from starting the job; limits contain damage if something else goes wrong.
+If the job calls OpenAI or another paid API, add [rate limits and spend caps](/guides/rate-limit-ai-api-routes-nextjs-supabase/) as a second layer. Cron auth stops strangers from starting the job; limits contain damage if something else goes wrong.
 
 Idempotency matters too. Vercel documents best-effort delivery: occasional missed or duplicate runs. Prefer "reconcile outstanding work" over "increment a counter by 10" so a double fire is safe.
 
@@ -233,10 +233,10 @@ If you only export `POST`, the scheduled GET will not run your logic (you may se
 - [ ] Browser GET to the path returns 401
 - [ ] Local curl with `Authorization: Bearer ${CRON_SECRET}` returns 200
 - [ ] Job is idempotent (safe if run twice)
-- [ ] Expensive side effects also have [rate limits / provider caps](/guides/rate-limit-ai-api-routes-nextjs-supabase) where relevant
-- [ ] Public repo scanned for accidentally committed secrets ([scanner](/scan))
+- [ ] Expensive side effects also have [rate limits / provider caps](/guides/rate-limit-ai-api-routes-nextjs-supabase/) where relevant
+- [ ] Public repo scanned for accidentally committed secrets ([scanner](/scan/))
 
-Fold this into your [ship checklist for a vibe-coded app](/checklists/ship-checklist-for-a-vibe-coded-app) before launch.
+Fold this into your [ship checklist for a vibe-coded app](/checklists/ship-checklist-for-a-vibe-coded-app/) before launch.
 
 ## Sources
 

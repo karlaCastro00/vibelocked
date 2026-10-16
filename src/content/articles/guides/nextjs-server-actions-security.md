@@ -58,21 +58,21 @@ The names `auth` and `db` are placeholders for your own auth library and databas
 ## Common mistakes to look for
 
 - **Trusting a hidden field.** A `userId` sent from the form can be changed by the caller. Read the user from the session instead.
-- **Looking up a row by id alone.** An action that updates or deletes `where id = ...` without the owner is IDOR. The [IDOR fix for Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase) shows the owner filter, the zero-row check, and how to test it.
+- **Looking up a row by id alone.** An action that updates or deletes `where id = ...` without the owner is IDOR. The [IDOR fix for Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase/) shows the owner filter, the zero-row check, and how to test it.
 - **Only hiding the button.** Not rendering a delete button for non admins does not stop a direct request to the action.
 - **Returning too much.** Whatever an action returns is sent to the client. Return only the fields the UI needs.
-- **Auth only in middleware.** Keep checks in the action or in a shared data access layer. The [CVE-2025-29927 middleware auth bypass](/guides/nextjs-middleware-auth-bypass-cve-2025-29927) showed how a middleware check can be skipped entirely.
-- **Secrets in client components.** Server only code can use secrets. Mark modules with `import 'server-only'` so they fail to build if imported into the client. Never put Auth.js `AUTH_SECRET` (or older `NEXTAUTH_SECRET`) behind `NEXT_PUBLIC_`. Details in the [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth).
+- **Auth only in middleware.** Keep checks in the action or in a shared data access layer. The [CVE-2025-29927 middleware auth bypass](/guides/nextjs-middleware-auth-bypass-cve-2025-29927/) showed how a middleware check can be skipped entirely.
+- **Secrets in client components.** Server only code can use secrets. Mark modules with `import 'server-only'` so they fail to build if imported into the client. Never put Auth.js `AUTH_SECRET` (or older `NEXTAUTH_SECRET`) behind `NEXT_PUBLIC_`. Details in the [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth/).
 
 ## Built in protections, and their limits
 
-Next.js only accepts POST for actions and compares the Origin header to the host, which helps against CSRF. It also creates encrypted, non deterministic action IDs and removes unused actions from the client bundle. None of that replaces your own authentication and authorization checks. Custom Route Handlers do not get that Origin check for free; if you add CORS headers yourself, follow the [CORS guide for vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps).
+Next.js only accepts POST for actions and compares the Origin header to the host, which helps against CSRF. It also creates encrypted, non deterministic action IDs and removes unused actions from the client bundle. None of that replaces your own authentication and authorization checks. Custom Route Handlers do not get that Origin check for free; if you add CORS headers yourself, follow the [CORS guide for vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps/).
 
 If your app runs behind a proxy with a different domain, review the `serverActions.allowedOrigins` option.
 
 ## Ask your AI tool to audit
 
-Paste each action into your AI assistant with the [security review prompt](/guides/security-review-prompt-for-ai-coding-tools), and ask specifically: "Can any user call this with another user's id?"
+Paste each action into your AI assistant with the [security review prompt](/guides/security-review-prompt-for-ai-coding-tools/), and ask specifically: "Can any user call this with another user's id?"
 
 ## Official docs
 

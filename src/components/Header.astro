@@ -1,16 +1,16 @@
 ---
 const path = Astro.url.pathname;
 const links = [
-  { href: '/checklists', label: 'Checklists' },
-  { href: '/guides', label: 'Guides' },
-  { href: '/scan', label: 'Scan' },
-  { href: '/newsletter', label: 'Newsletter' },
-  { href: '/sponsor', label: 'Sponsor' },
-  { href: '/about', label: 'About' },
+  { href: '/checklists/', label: 'Checklists' },
+  { href: '/guides/', label: 'Guides' },
+  { href: '/scan/', label: 'Scan' },
+  { href: '/newsletter/', label: 'Newsletter' },
+  { href: '/sponsor/', label: 'Sponsor' },
+  { href: '/about/', label: 'About' },
 ];
 
 function current(href: string) {
-  return path === href || path.startsWith(`${href}/`);
+  return path === href || path.startsWith(href);
 }
 ---
 

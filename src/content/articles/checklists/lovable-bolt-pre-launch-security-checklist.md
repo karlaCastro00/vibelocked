@@ -43,13 +43,13 @@ Search the repo and the built assets for these prefixes:
 - `AKIA` (often the start of an AWS access key id)
 - A Firebase service account JSON (`"type": "service_account"`)
 
-The publishable Supabase key (`sb_publishable_` or the legacy `anon` key) and a Firebase web `apiKey` are designed to be in the client. They are not a lock. Pair them with the [RLS checklist](/checklists/supabase-rls-security-checklist) or the [Firebase rules checklist](/checklists/firebase-security-rules-checklist).
+The publishable Supabase key (`sb_publishable_` or the legacy `anon` key) and a Firebase web `apiKey` are designed to be in the client. They are not a lock. Pair them with the [RLS checklist](/checklists/supabase-rls-security-checklist/) or the [Firebase rules checklist](/checklists/firebase-security-rules-checklist/).
 
 Stripe publishable keys (`pk_`) may be in the client. Secret keys may not. Stripe's [key best practices](https://docs.stripe.com/keys-best-practices) say not to embed secret keys in applications.
 
-How the generator exposes env vars depends on the framework. The [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code) covers the `NEXT_PUBLIC_` and `VITE_` prefixes. v0 projects are often Next.js. Bolt projects are often Vite. Read the prefix that matches the repo you actually have.
+How the generator exposes env vars depends on the framework. The [frontend secrets guide](/guides/keep-secrets-out-of-frontend-code/) covers the `NEXT_PUBLIC_` and `VITE_` prefixes. v0 projects are often Next.js. Bolt projects are often Vite. Read the prefix that matches the repo you actually have.
 
-On Replit, put credentials in the Secrets tool, which stores them as environment variables, instead of hard-coding them. Replit's [Secrets docs](https://docs.replit.com/core-concepts/project-editor/app-setup/secrets) call out public projects, git, and screen sharing as ways a hard-coded key gets out. The [Replit Secrets guide](/guides/replit-secrets-guide) walks through it step by step.
+On Replit, put credentials in the Secrets tool, which stores them as environment variables, instead of hard-coding them. Replit's [Secrets docs](https://docs.replit.com/core-concepts/project-editor/app-setup/secrets) call out public projects, git, and screen sharing as ways a hard-coded key gets out. The [Replit Secrets guide](/guides/replit-secrets-guide/) walks through it step by step.
 
 ## 3. Read the database rules
 
@@ -59,7 +59,7 @@ If the app uses Supabase:
 - `anon` does not have write grants on private tables.
 - Policies use `auth.uid()`, not a user id from the request body.
 - Views set `security_invoker` on Postgres 15 and above, or they are not exposed.
-- Storage buckets for user files are private, and `storage.objects` has owner policies. See [Supabase Storage bucket security](/guides/supabase-storage-bucket-security). Upload handlers validate type, size, and filenames, and prefer direct-to-storage for large files ([secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob)).
+- Storage buckets for user files are private, and `storage.objects` has owner policies. See [Supabase Storage bucket security](/guides/supabase-storage-bucket-security/). Upload handlers validate type, size, and filenames, and prefer direct-to-storage for large files ([secure file uploads](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)).
 - The secret key appears only in server code.
 
 If the app uses Firebase:
@@ -75,11 +75,11 @@ Run the vendor's own checker too. Supabase Security Advisor flags issues such as
 
 Generated handlers often look like this in spirit: read `userId` or `accountId` from the query or body, then fetch that row with a privileged key.
 
-The signed-in user has to come from the session, not from the body. Then the query filters to that user. The [common vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities) shows this as IDOR. For copy-paste Route Handler and RLS fixes plus a two-account test, see [fix IDOR in Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase).
+The signed-in user has to come from the session, not from the body. Then the query filters to that user. The [common vulnerabilities guide](/guides/common-vibe-coded-app-vulnerabilities/) shows this as IDOR. For copy-paste Route Handler and RLS fixes plus a two-account test, see [fix IDOR in Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase/).
 
 On Next.js, a page that redirects when you are logged out does not protect a Route Handler or a Server Action. Next.js tells you to verify the caller inside each of those. A login screen alone does not do it.
 
-Also check the redirect *after* a successful login. If the generator wired `callbackUrl`, `redirectTo`, or `redirect_url` from the query string, a crafted link can send a signed-in user to a phishing site. Fix pattern: [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
+Also check the redirect *after* a successful login. If the generator wired `callbackUrl`, `redirectTo`, or `redirect_url` from the query string, a crafted link can send a signed-in user to a phishing site. Fix pattern: [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk/).
 
 Search for routes named `admin`, `seed`, `debug`, `internal`, and `migrate`. If they ship in the preview, they are on the internet.
 
@@ -92,11 +92,11 @@ If Stripe is wired up:
 - Test mode and live mode use different keys and different endpoint secrets.
 - The client uses the publishable key only.
 
-The [Stripe webhook guide](/guides/securing-stripe-webhooks) is the longer version. Do not mark an order paid because the browser said the checkout succeeded, and do not trust a `?session_id=` success page alone ([Stripe success page paywall bypass](/guides/stripe-success-page-paywall-bypass)).
+The [Stripe webhook guide](/guides/securing-stripe-webhooks/) is the longer version. Do not mark an order paid because the browser said the checkout succeeded, and do not trust a `?session_id=` success page alone ([Stripe success page paywall bypass](/guides/stripe-success-page-paywall-bypass/)).
 
 ## 6. AI features that spend your key
 
-A chat box in the UI usually means a route that calls OpenAI, Anthropic, or another provider with your key. If that route does not check a session, anyone who can hit the URL spends your quota. Here is [how to protect an OpenAI API route from abuse](/guides/protect-openai-api-route-from-abuse) with auth, rate limits, and spend caps.
+A chat box in the UI usually means a route that calls OpenAI, Anthropic, or another provider with your key. If that route does not check a session, anyone who can hit the URL spends your quota. Here is [how to protect an OpenAI API route from abuse](/guides/protect-openai-api-route-from-abuse/) with auth, rate limits, and spend caps.
 
 Require a signed-in user when the feature is not meant to be public. Cap how much text you will forward. Do not log the provider key. Do not return the provider's raw error if it echoes request headers.
 
@@ -104,14 +104,14 @@ Require a signed-in user when the feature is not meant to be public. Cap how muc
 
 - `.env`, `.env.local`, and service account JSON files are not in git. A `.env.example` with empty values is fine.
 - The generator's chat, if it contains a pasted key, is not something you commit or screenshot into a public bug report.
-- Dependencies have a lockfile. You do not need a new library for every suggestion the model makes. Confirm the package exists on npmjs.com or pypi.org before you install; AI tools sometimes invent names ([hallucinated packages / slopsquatting](/guides/ai-hallucinated-packages-slopsquatting)).
-- Every third-party script the generator added (analytics, chat widgets, embeds) is one you meant to keep. A [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps) then limits scripts to those hosts.
+- Dependencies have a lockfile. You do not need a new library for every suggestion the model makes. Confirm the package exists on npmjs.com or pypi.org before you install; AI tools sometimes invent names ([hallucinated packages / slopsquatting](/guides/ai-hallucinated-packages-slopsquatting/)).
+- Every third-party script the generator added (analytics, chat widgets, embeds) is one you meant to keep. A [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps/) then limits scripts to those hosts.
 
-Cursor and similar editors can see the files and the text you put in the chat. Do not paste a live secret in to "help it debug." Rotate the key if you already did. The [first hour guide](/guides/first-hour-after-an-api-key-leaks) is the order of operations.
+Cursor and similar editors can see the files and the text you put in the chat. Do not paste a live secret in to "help it debug." Rotate the key if you already did. The [first hour guide](/guides/first-hour-after-an-api-key-leaks/) is the order of operations.
 
 ## 8. Ask the model, then check its work
 
-Paste the [security review prompt](/guides/security-review-prompt-for-ai-coding-tools) into the same tool that wrote the app. Ask for file paths. Then open those files. If the model says it turned RLS off, or rewrote a Firebase rule to `if true`, revert that change. A working UI is not worth a public database.
+Paste the [security review prompt](/guides/security-review-prompt-for-ai-coding-tools/) into the same tool that wrote the app. Ask for file paths. Then open those files. If the model says it turned RLS off, or rewrote a Firebase rule to `if true`, revert that change. A working UI is not worth a public database.
 
 ## 9. One signed-out pass, one second-user pass
 
@@ -122,7 +122,7 @@ Before you send the link to anyone else:
 3. Submit a form with an extra field such as `role` or `isAdmin`. It should be ignored.
 4. Search the production build output for `sb_secret_`, `sk_live_`, and `whsec_`.
 
-Then run the shorter [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) so the order stays in one place.
+Then run the shorter [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) so the order stays in one place.
 
 ## Official docs
 

@@ -72,11 +72,11 @@ export async function GET(request: Request) {
 
 Returning 404 when the row is missing or not yours avoids confirming that the id exists. The control is the `user_id` filter, not the status code.
 
-The same bug exists in the database client. If the browser uses the Supabase publishable key, an RLS policy of `(select auth.uid()) = user_id` makes the filter automatic, including for requests your UI never meant to send. That is the point of the [RLS checklist](/checklists/supabase-rls-security-checklist). If the server uses the secret key, RLS will not save you. Supabase says the secret key bypasses RLS when the request has no user access token. Your server code has to apply the owner filter itself.
+The same bug exists in the database client. If the browser uses the Supabase publishable key, an RLS policy of `(select auth.uid()) = user_id` makes the filter automatic, including for requests your UI never meant to send. That is the point of the [RLS checklist](/checklists/supabase-rls-security-checklist/). If the server uses the secret key, RLS will not save you. Supabase says the secret key bypasses RLS when the request has no user access token. Your server code has to apply the owner filter itself.
 
-On Firebase, the matching bug is a rule of `if request.auth != null` plus a client that can name any document id. The [rules checklist](/checklists/firebase-security-rules-checklist) shows the owner comparison.
+On Firebase, the matching bug is a rule of `if request.auth != null` plus a client that can name any document id. The [rules checklist](/checklists/firebase-security-rules-checklist/) shows the owner comparison.
 
-How to test: create two users. Copy an id from user A's network tab. Repeat the request with user B's session. You want no row, not A's row. For full Route Handler code (read, update, delete, team membership), matching RLS policies, and a curl test, see [fix IDOR in Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase).
+How to test: create two users. Copy an id from user A's network tab. Repeat the request with user B's session. You want no row, not A's row. For full Route Handler code (read, update, delete, team membership), matching RLS policies, and a curl test, see [fix IDOR in Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase/).
 
 ## The service role key in the frontend
 
@@ -84,19 +84,19 @@ The Supabase publishable key is supposed to be in the browser. The secret key is
 
 It gets into the client in a few ways:
 
-- A `NEXT_PUBLIC_` or `VITE_` env var. The [secrets guide](/guides/keep-secrets-out-of-frontend-code) explains those prefixes. The same mistake shows up with Auth.js as `NEXT_PUBLIC_AUTH_SECRET`; see [AUTH_SECRET and NEXTAUTH_SECRET](/guides/authjs-auth-secret-nextauth).
+- A `NEXT_PUBLIC_` or `VITE_` env var. The [secrets guide](/guides/keep-secrets-out-of-frontend-code/) explains those prefixes. The same mistake shows up with Auth.js as `NEXT_PUBLIC_AUTH_SECRET`; see [AUTH_SECRET and NEXTAUTH_SECRET](/guides/authjs-auth-secret-nextauth/).
 - A string literal in a shared `supabase.ts` that both the server and the client import.
 - A "temporary" debug line the generator added and nobody removed.
 
-Search the built files for `sb_secret_` and `service_role`. If you find one, rotate it, then move it to the server. Rotating comes first. The [first hour guide](/guides/first-hour-after-an-api-key-leaks) is the order.
+Search the built files for `sb_secret_` and `service_role`. If you find one, rotate it, then move it to the server. Rotating comes first. The [first hour guide](/guides/first-hour-after-an-api-key-leaks/) is the order.
 
-A Firebase service account file in the repo is the same class of mistake. The web `apiKey` is not. Google's [API keys page](https://firebase.google.com/docs/projects/api-keys) says the client key is not what protects Firestore. Rules are. See [is the Firebase API key safe to expose](/guides/firebase-api-key-public-app-check) for the details and where App Check fits.
+A Firebase service account file in the repo is the same class of mistake. The web `apiKey` is not. Google's [API keys page](https://firebase.google.com/docs/projects/api-keys) says the client key is not what protects Firestore. Rules are. See [is the Firebase API key safe to expose](/guides/firebase-api-key-public-app-check/) for the details and where App Check fits.
 
 ## Missing auth on routes you forgot were public
 
 A file at `app/api/orders/route.ts` is a URL. Next.js [authentication guide](https://nextjs.org/docs/app/guides/authentication) says to treat Route Handlers as public-facing API endpoints and to verify that the user is allowed to call them. The example checks the session, then checks the role, and returns 401 or 403.
 
-The same guide describes Proxy (older docs called a similar file Middleware) as an optional optimistic check. It reads the session cookie and can redirect. It is not the authorization boundary. The sample matcher in that guide skips `api`, so it does not run on those Route Handlers at all. Even if you change the matcher, verify inside the handler. A real example of why: in [CVE-2025-29927](/guides/nextjs-middleware-auth-bypass-cve-2025-29927), one request header let attackers skip middleware on self-hosted Next.js apps.
+The same guide describes Proxy (older docs called a similar file Middleware) as an optional optimistic check. It reads the session cookie and can redirect. It is not the authorization boundary. The sample matcher in that guide skips `api`, so it does not run on those Route Handlers at all. Even if you change the matcher, verify inside the handler. A real example of why: in [CVE-2025-29927](/guides/nextjs-middleware-auth-bypass-cve-2025-29927/), one request header let attackers skip middleware on self-hosted Next.js apps.
 
 Server Actions are public in a different way. The [data security guide](https://nextjs.org/docs/app/guides/data-security) says an exported Server Action is reachable by a direct POST, not only from your UI. It also says a page-level auth check does not extend to Server Actions defined in that page. Re-check the session inside the action. Next.js has its own protections, including an Origin check against the Host header, and those do not replace your check of who the user is.
 
@@ -121,9 +121,9 @@ export async function updateInvoice(id: string, title: string) {
 
 Search the repo for `route.ts`, `route.js`, and `'use server'`. For each one, point at the line that loads the session. If you cannot find that line, the route is open.
 
-Scheduled routes under `/api/cron` are the same problem with a different caller. Vercel can send `Authorization: Bearer` with `CRON_SECRET`, but only if you set the env var and check it. Without that check, a browser GET runs the job. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret).
+Scheduled routes under `/api/cron` are the same problem with a different caller. Vercel can send `Authorization: Bearer` with `CRON_SECRET`, but only if you set the env var and check it. Without that check, a browser GET runs the job. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret/).
 
-Upload routes and Blob token handlers are another favorite open door: no session check, trust in `file.type`, and files written under `public/`. Treat them like any other privileged API ([secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob)).
+Upload routes and Blob token handlers are another favorite open door: no session check, trust in `file.type`, and files written under `public/`. Treat them like any other privileged API ([secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)).
 
 ## Trusting the user id in the body
 
@@ -146,7 +146,7 @@ await db.user.update({
 
 A body of `{ "role": "admin" }` sticks if `role` is a column. Allowlist the fields you meant to accept: `displayName`, not `role`, not `stripeCustomerId`, not `emailVerified`.
 
-Firestore has the same hole when an update rule lets the owner write every field. Use `request.resource.data.keys().hasOnly([...])` as shown in the [Firebase checklist](/checklists/firebase-security-rules-checklist). Supabase user metadata is a poor place for a role, because signup `options.data` comes from the client. Use the [custom claims guide](https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac) if you need a role in the JWT.
+Firestore has the same hole when an update rule lets the owner write every field. Use `request.resource.data.keys().hasOnly([...])` as shown in the [Firebase checklist](/checklists/firebase-security-rules-checklist/). Supabase user metadata is a poor place for a role, because signup `options.data` comes from the client. Use the [custom claims guide](https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac) if you need a role in the JWT.
 
 ## A public proxy in front of a paid API
 
@@ -160,16 +160,16 @@ Require a signed-in user when the feature is not public. Limit the size of the i
 2. As a second user, request the first user's ids.
 3. Call each API route with no cookie.
 4. POST an extra `role` field and confirm it is dropped.
-5. Paste the [review prompt](/guides/security-review-prompt-for-ai-coding-tools) into the tool that wrote the app, then open every file it names.
-6. Add a [Content-Security-Policy header](/guides/csp-content-security-policy-vibe-coded-apps) so an injected script has a harder time running, even if one of the bugs above slips through.
-7. Check your CORS headers. A reflected origin with credentials lets any site read your users' data. See [CORS misconfiguration in vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps).
-8. If the app has an AI feature, check that its tools use the user's permissions and its output is not rendered as raw HTML. See [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps). Then search the repo for `dangerouslySetInnerHTML` and `rehype-raw`; anything that renders user or model content as HTML needs a sanitizer ([XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs)).
-9. Check every dependency your AI tool added actually exists and is the real package. See [AI hallucinated packages (slopsquatting)](/guides/ai-hallucinated-packages-slopsquatting).
-10. After login, confirm `callbackUrl`, `redirectTo`, `next`, and `redirect_url` cannot send users to another site. See [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk).
-11. If you have Vercel Cron routes, confirm `CRON_SECRET` is set and unauthenticated GETs return 401. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret).
-12. If you take payments with Stripe, confirm the webhook verifies `Stripe-Signature` on the raw body before it grants access. See [securing Stripe webhooks](/guides/securing-stripe-webhooks).
+5. Paste the [review prompt](/guides/security-review-prompt-for-ai-coding-tools/) into the tool that wrote the app, then open every file it names.
+6. Add a [Content-Security-Policy header](/guides/csp-content-security-policy-vibe-coded-apps/) so an injected script has a harder time running, even if one of the bugs above slips through.
+7. Check your CORS headers. A reflected origin with credentials lets any site read your users' data. See [CORS misconfiguration in vibe-coded apps](/guides/cors-misconfiguration-vibe-coded-apps/).
+8. If the app has an AI feature, check that its tools use the user's permissions and its output is not rendered as raw HTML. See [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps/). Then search the repo for `dangerouslySetInnerHTML` and `rehype-raw`; anything that renders user or model content as HTML needs a sanitizer ([XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs/)).
+9. Check every dependency your AI tool added actually exists and is the real package. See [AI hallucinated packages (slopsquatting)](/guides/ai-hallucinated-packages-slopsquatting/).
+10. After login, confirm `callbackUrl`, `redirectTo`, `next`, and `redirect_url` cannot send users to another site. See [open redirects in Auth.js, Supabase, and Clerk](/guides/open-redirect-callbackurl-authjs-supabase-clerk/).
+11. If you have Vercel Cron routes, confirm `CRON_SECRET` is set and unauthenticated GETs return 401. See [secure Vercel Cron jobs with CRON_SECRET](/guides/vercel-cron-jobs-cron-secret/).
+12. If you take payments with Stripe, confirm the webhook verifies `Stripe-Signature` on the raw body before it grants access. See [securing Stripe webhooks](/guides/securing-stripe-webhooks/).
 
-The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) puts these in launch order. If the app came from Lovable, Bolt, v0, or Replit, follow with the [pre-launch checklist for AI builders](/checklists/lovable-bolt-pre-launch-security-checklist).
+The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) puts these in launch order. If the app came from Lovable, Bolt, v0, or Replit, follow with the [pre-launch checklist for AI builders](/checklists/lovable-bolt-pre-launch-security-checklist/).
 
 ## Official docs
 

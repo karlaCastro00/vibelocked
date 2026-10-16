@@ -30,11 +30,11 @@ faqs:
     answer: "Yes. verify_jwt only proves the caller has a valid session. Anyone can sign up for a free account and call your function as fast as they like. Rate limit by the user id from the verified token."
 ---
 
-Your AI feature is the most expensive endpoint in your app. Every call to OpenAI, Anthropic, or Gemini costs real money, and an unprotected route will answer a script as happily as a user. This guide is the hands-on follow-up to [stop strangers from running up your OpenAI bill](/guides/protect-openai-api-route-from-abuse): actual rate limiting code for Next.js Route Handlers and Supabase Edge Functions, plus token budgets so one account cannot drain you slowly.
+Your AI feature is the most expensive endpoint in your app. Every call to OpenAI, Anthropic, or Gemini costs real money, and an unprotected route will answer a script as happily as a user. This guide is the hands-on follow-up to [stop strangers from running up your OpenAI bill](/guides/protect-openai-api-route-from-abuse/): actual rate limiting code for Next.js Route Handlers and Supabase Edge Functions, plus token budgets so one account cannot drain you slowly.
 
-If your model key is in the browser at all, rate limiting will not help, because attackers will call the provider directly. Fix that first with [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code).
+If your model key is in the browser at all, rate limiting will not help, because attackers will call the provider directly. Fix that first with [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/).
 
-Scheduled `/api/cron` routes that call a model are another open door: protect them with [CRON_SECRET on Vercel Cron](/guides/vercel-cron-jobs-cron-secret), then rate limit the work inside the job if it fans out per user.
+Scheduled `/api/cron` routes that call a model are another open door: protect them with [CRON_SECRET on Vercel Cron](/guides/vercel-cron-jobs-cron-secret/), then rate limit the work inside the job if it fans out per user.
 
 ## The layers you want
 
@@ -168,7 +168,7 @@ Notes on the code:
 - **Fail open or closed is your choice.** Upstash allows a request through if Redis does not answer within the `timeout` (5 seconds by default). For an expensive AI route, consider a shorter timeout and returning 503 on errors instead.
 - **Analytics on the edge.** If you turn on `analytics: true` or multi-region, the `limit()` result has a `pending` promise that must finish before the function exits. In Next.js 15.1 or later, pass it to `after()` from `next/server`.
 
-If your AI call lives in a Server Action instead of a route, the same checks apply at the top of the action. Server Actions are public POST endpoints too, see [Next.js server actions security](/guides/nextjs-server-actions-security).
+If your AI call lives in a Server Action instead of a route, the same checks apply at the top of the action. Server Actions are public POST endpoints too, see [Next.js server actions security](/guides/nextjs-server-actions-security/).
 
 ### Streaming responses
 
@@ -248,8 +248,8 @@ export default {
 
 Two Supabase specific traps:
 
-- **A valid JWT is not a rate limit.** Anyone can create a free account in your app and get a valid token. If sign-ups are open, the per-user limit is what stops one person from scripting a thousand calls, and you may want limits on sign-ups too (see [Supabase Auth security settings](/guides/supabase-auth-security-settings)).
-- **Do not call the function with the secret key from the browser.** The `service_role` or secret key bypasses RLS and makes every caller look the same. Background jobs can use `auth: 'secret'`, but browsers should always send the user session. More in [Supabase anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
+- **A valid JWT is not a rate limit.** Anyone can create a free account in your app and get a valid token. If sign-ups are open, the per-user limit is what stops one person from scripting a thousand calls, and you may want limits on sign-ups too (see [Supabase Auth security settings](/guides/supabase-auth-security-settings/)).
+- **Do not call the function with the secret key from the browser.** The `service_role` or secret key bypasses RLS and makes every caller look the same. Background jobs can use `auth: 'secret'`, but browsers should always send the user session. More in [Supabase anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key/).
 
 If you call the function with `supabase.functions.invoke` from the client, a 429 shows up as an error object. Check the status and show a "slow down" message instead of retrying immediately.
 
@@ -269,9 +269,9 @@ Your code can have bugs, so set the backstop:
 - Turn on usage alerts, and check the usage page the day after launch.
 - Anthropic and Google offer similar workspace or project level limits in their consoles.
 
-If spend spikes and you think the key itself leaked, rotate it now and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+If spend spikes and you think the key itself leaked, rotate it now and follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/).
 
-Rate limits cap how much an attacker can spend. They do not stop someone from hijacking what the model does. For that, see [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
+Rate limits cap how much an attacker can spend. They do not stop someone from hijacking what the model does. For that, see [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps/).
 
 ## Test it before you ship
 
@@ -287,7 +287,7 @@ Never paste your keys, tokens, or code into a public website or chat to test thi
 
 ## Checklist
 
-- [ ] Model API key is server-only (check with the [VibeLocked scanner](/scan) for public repos)
+- [ ] Model API key is server-only (check with the [VibeLocked scanner](/scan/) for public repos)
 - [ ] Route or function requires a verified session, or has a separate tiny anonymous limit
 - [ ] Shared store for counters (Redis or database), not in-memory
 - [ ] Per-IP burst limit before auth

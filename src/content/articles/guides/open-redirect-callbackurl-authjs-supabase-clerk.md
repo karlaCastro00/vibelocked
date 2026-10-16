@@ -51,7 +51,7 @@ AI tools (Cursor, v0, Bolt, Lovable, Claude Code) often "help" by reading the re
 
 ## Never trust absolute URLs from the query
 
-Treat every return URL from the client as untrusted input, same as a `userId` in the body ([common vulnerabilities](/guides/common-vibe-coded-app-vulnerabilities)).
+Treat every return URL from the client as untrusted input, same as a `userId` in the body ([common vulnerabilities](/guides/common-vibe-coded-app-vulnerabilities/)).
 
 Reject or ignore:
 
@@ -145,7 +145,7 @@ callbacks: {
 
 Auth.js also defines `InvalidCallbackUrl` when a `callbackUrl` cannot be verified. The [errors reference](https://authjs.dev/reference/core/errors#invalidcallbackurl) notes that a manipulated callback can be an attempt to send the user to a phishing site. Seeing that error in logs is a signal to audit how you build return URLs, not something to "fix" by accepting more URLs.
 
-Keep `AUTH_SECRET` / `NEXTAUTH_SECRET` server-only ([AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth)). An open redirect does not leak that secret, but a phishing page after login still hurts users.
+Keep `AUTH_SECRET` / `NEXTAUTH_SECRET` server-only ([AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth/)). An open redirect does not leak that secret, but a phishing page after login still hurts users.
 
 ## Supabase Auth: `redirectTo` and the dashboard allow list
 
@@ -178,7 +178,7 @@ Before launch:
 4. If email templates should honor `redirectTo`, use `{{ .RedirectTo }}` as the docs describe
 5. Still validate any post-callback `next` query param with `safeReturnPath` before a client-side `router.push`
 
-More Auth dashboard settings: [Supabase Auth security settings](/guides/supabase-auth-security-settings).
+More Auth dashboard settings: [Supabase Auth security settings](/guides/supabase-auth-security-settings/).
 
 ## Clerk: `redirect_url`, force, and fallback
 
@@ -204,7 +204,7 @@ Pitfalls AI-generated apps hit:
 
 - Passing a user-controlled absolute URL into `forceRedirectUrl`, `fallbackRedirectUrl`, or deprecated `afterSignInUrl` / `redirectUrl` props
 - Building `redirect_url` yourself from `window.location` without checking origin
-- Mixing publishable and secret keys while debugging redirects; keep `sk_` server-only ([Clerk publishable vs secret](/guides/clerk-publishable-key-vs-secret-key))
+- Mixing publishable and secret keys while debugging redirects; keep `sk_` server-only ([Clerk publishable vs secret](/guides/clerk-publishable-key-vs-secret-key/))
 
 Prefer fixed paths for production sign-in. If you keep `redirect_url`, ensure it is a same-origin relative path your own pages created, not a raw query value from an email or ad.
 

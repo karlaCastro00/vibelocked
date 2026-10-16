@@ -100,11 +100,11 @@ The request still has to pass your `SELECT` policy, so users can only sign their
 
 ## Limit what gets uploaded
 
-Set an allowed MIME type list and a file size limit on the bucket in its settings. That stops someone from using your public bucket to host large files or HTML pages on your project domain. Treat file names as untrusted and avoid serving user uploaded HTML or SVG from a public bucket. For the Next.js upload path itself (auth before tokens, MIME allow-lists, filename sanitizing, Vercel Blob client uploads), see [secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob).
+Set an allowed MIME type list and a file size limit on the bucket in its settings. That stops someone from using your public bucket to host large files or HTML pages on your project domain. Treat file names as untrusted and avoid serving user uploaded HTML or SVG from a public bucket. For the Next.js upload path itself (auth before tokens, MIME allow-lists, filename sanitizing, Vercel Blob client uploads), see [secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/).
 
 ## Keys
 
-The anon or publishable key in your frontend is expected. The service role or `sb_secret_` key bypasses every Storage policy. If you are not sure which one your app ships, search your built JavaScript for `service_role` and `sb_secret_`, or run the [VibeLocked scanner](/scan) on your public repo. It decodes Supabase JWTs and flags a service role key. More on this in [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
+The anon or publishable key in your frontend is expected. The service role or `sb_secret_` key bypasses every Storage policy. If you are not sure which one your app ships, search your built JavaScript for `service_role` and `sb_secret_`, or run the [VibeLocked scanner](/scan/) on your public repo. It decodes Supabase JWTs and flags a service role key. More on this in [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key/).
 
 ## Five minute test
 
@@ -112,7 +112,7 @@ The anon or publishable key in your frontend is expected. The service role or `s
 2. Log in as user A, copy a file path belonging to user B, and try `download` on it. It should fail.
 3. Open a private file URL in a private window. It should not load without a signed token.
 
-Then run the rest of the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist) for your tables.
+Then run the rest of the [Supabase RLS checklist](/checklists/supabase-rls-security-checklist/) for your tables.
 
 ## Sources
 

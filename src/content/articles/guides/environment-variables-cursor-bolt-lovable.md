@@ -24,7 +24,7 @@ faqs:
 
 Most leaked keys in AI-built apps are not stolen. They are shipped. A variable gets the wrong prefix, a key gets pasted into a component, or a `.env` file gets committed. This guide covers the rules that decide where an env var ends up, then the specific habits for Cursor, Bolt.new, and Lovable.
 
-Want a fast check right now? Run the [VibeLocked scanner](/scan) on your public GitHub repo. It runs in your browser and flags real secrets versus publishable keys.
+Want a fast check right now? Run the [VibeLocked scanner](/scan/) on your public GitHub repo. It runs in your browser and flags real secrets versus publishable keys.
 
 ## The one rule: the prefix decides who can read it
 
@@ -41,7 +41,7 @@ So `VITE_OPENAI_API_KEY` is a public key by definition, no matter how the variab
 
 Safe to expose: a Stripe `pk_` key, a Supabase anon or `sb_publishable_` key (with Row Level Security on), a Firebase web config, a GoatCounter or analytics site code.
 
-Never expose: OpenAI, Anthropic, or other model keys, Stripe `sk_` or `rk_` keys, a Clerk `sk_` key (see [Clerk publishable key vs secret key](/guides/clerk-publishable-key-vs-secret-key)), Auth.js `AUTH_SECRET` or NextAuth `NEXTAUTH_SECRET` (see [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth)), a Supabase service role or `sb_secret_` key, database URLs, webhook signing secrets, AWS keys.
+Never expose: OpenAI, Anthropic, or other model keys, Stripe `sk_` or `rk_` keys, a Clerk `sk_` key (see [Clerk publishable key vs secret key](/guides/clerk-publishable-key-vs-secret-key/)), Auth.js `AUTH_SECRET` or NextAuth `NEXTAUTH_SECRET` (see [AUTH_SECRET guide](/guides/authjs-auth-secret-nextauth/)), a Supabase service role or `sb_secret_` key, database URLs, webhook signing secrets, AWS keys.
 
 ## Cursor
 
@@ -49,7 +49,7 @@ Cursor edits a real project on your disk, so the normal rules apply plus a few f
 
 1. **Ignore `.env` in git first.** Check `.gitignore` contains `.env`, `.env.*`, and `!.env.example`. Then confirm nothing is tracked: `git ls-files | grep -i env`.
 2. **Add a `.cursorignore`.** It uses gitignore syntax. Add `.env*`, key files, and any folder of credentials. Cursor's docs describe it as best effort for indexing and AI features, not a sandbox.
-3. **Keep production secrets out of the local folder.** Use development or test keys locally (Stripe test mode, a separate Supabase project). Store production values only in your host's secret settings. On Vercel, scope them to Production so [preview deployments](/guides/vercel-preview-deployments-env-vars) do not get them.
+3. **Keep production secrets out of the local folder.** Use development or test keys locally (Stripe test mode, a separate Supabase project). Store production values only in your host's secret settings. On Vercel, scope them to Production so [preview deployments](/guides/vercel-preview-deployments-env-vars/) do not get them.
 4. **Watch agent commands.** Review commands like `cat .env`, `printenv`, or scripts that print config before you approve them. Output in the chat is sent to the model.
 5. **Do not paste keys into the chat.** Describe the variable name instead: "read `OPENAI_API_KEY` from `process.env` in the API route".
 
@@ -59,20 +59,20 @@ Bolt.new runs your project in a browser based environment and usually scaffolds 
 
 1. Anything you read with `import.meta.env.VITE_*` ships to visitors. Use those only for publishable values.
 2. Calls that need a secret key need a server. In a Bolt project that is typically a Supabase Edge Function, a Netlify function, or a separate API route. Put the secret in that platform's environment settings, not in the frontend `.env`.
-3. Before you deploy, open the built site, view the JavaScript files in dev tools, and search for `sk-`, `sk_live`, and `service_role`. Then scan the repo with [the scanner](/scan).
+3. Before you deploy, open the built site, view the JavaScript files in dev tools, and search for `sk-`, `sk_live`, and `service_role`. Then scan the repo with [the scanner](/scan/).
 4. If you export to GitHub, check the `.env` file did not come along.
 
 ## Lovable
 
 Lovable apps are React and Vite on the frontend, with Supabase as the usual backend.
 
-1. The Supabase URL and anon or publishable key in the client are expected. They are only safe when [Row Level Security](/checklists/supabase-rls-security-checklist) is enabled with real policies on every exposed table.
+1. The Supabase URL and anon or publishable key in the client are expected. They are only safe when [Row Level Security](/checklists/supabase-rls-security-checklist/) is enabled with real policies on every exposed table.
 2. Secret keys (OpenAI, Stripe secret, Resend, and so on) belong in Supabase Edge Function secrets, read with `Deno.env.get('NAME')` inside the function. The browser calls the function, never the provider.
-3. Never place the service role key in client code or in a `VITE_` variable. It bypasses RLS completely. See [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key).
-4. If you ask Lovable to "connect OpenAI", read the generated code and confirm the call happens in an edge function. Then [protect that route from abuse](/guides/protect-openai-api-route-from-abuse) so strangers cannot spend your credits.
-5. Before you share a preview URL, walk the [Lovable and Bolt pre-launch security checklist](/checklists/lovable-bolt-pre-launch-security-checklist). It covers the tool-specific places keys and open rules tend to hide.
+3. Never place the service role key in client code or in a `VITE_` variable. It bypasses RLS completely. See [anon key vs service role key](/guides/supabase-anon-key-vs-service-role-key/).
+4. If you ask Lovable to "connect OpenAI", read the generated code and confirm the call happens in an edge function. Then [protect that route from abuse](/guides/protect-openai-api-route-from-abuse/) so strangers cannot spend your credits.
+5. Before you share a preview URL, walk the [Lovable and Bolt pre-launch security checklist](/checklists/lovable-bolt-pre-launch-security-checklist/). It covers the tool-specific places keys and open rules tend to hide.
 
-On Replit, put credentials in the Secrets tool instead of hard-coding them. The [Replit Secrets guide](/guides/replit-secrets-guide) covers public projects, git, and screen sharing as leak paths.
+On Replit, put credentials in the Secrets tool instead of hard-coding them. The [Replit Secrets guide](/guides/replit-secrets-guide/) covers public projects, git, and screen sharing as leak paths.
 
 ## A quick pre-deploy check for any tool
 
@@ -87,7 +87,7 @@ git grep -nE "sk-|sk_live_|rk_live_|sb_secret_|service_role|AKIA|-----BEGIN"
 npm run build && grep -rnE "sk-|sk_live_|sb_secret_|service_role" dist/
 ```
 
-Then run [/scan](/scan) on the public repo. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks). If you committed a `.env` file, [this guide shows how to untrack it and remove it from git history](/guides/remove-api-key-from-github-history). On the live site, confirm `/.env` and `/.git/config` return 404 ([how to check for exposed .env, .git, and source maps](/guides/exposed-env-git-source-maps-deployed-app)).
+Then run [/scan](/scan/) on the public repo. If a real secret shows up in a commit or a deployed bundle, rotate it first. Removing it from the code does not undo the leak. Follow [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/). If you committed a `.env` file, [this guide shows how to untrack it and remove it from git history](/guides/remove-api-key-from-github-history/). On the live site, confirm `/.env` and `/.git/config` return 404 ([how to check for exposed .env, .git, and source maps](/guides/exposed-env-git-source-maps-deployed-app/)).
 
 ## Sources
 

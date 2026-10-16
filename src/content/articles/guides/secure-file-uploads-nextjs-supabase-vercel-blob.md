@@ -31,7 +31,7 @@ faqs:
 
 AI builders love avatar pickers and "upload your PDF" forms. The usual vibe-coded shape is a Route Handler that reads `FormData`, trusts `file.type`, and writes `file.name` somewhere public. That pattern fails the [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html): Content-Type is spoofable, extensions are bypassable, and files must not land under a web-served root without controls.
 
-This guide focuses on the **upload path** in Next.js apps using Supabase Storage or Vercel Blob: auth before permission, allow-lists, safe object keys, and private-by-default storage. For Supabase bucket privacy and `storage.objects` RLS, use [Supabase Storage bucket security](/guides/supabase-storage-bucket-security).
+This guide focuses on the **upload path** in Next.js apps using Supabase Storage or Vercel Blob: auth before permission, allow-lists, safe object keys, and private-by-default storage. For Supabase bucket privacy and `storage.objects` RLS, use [Supabase Storage bucket security](/guides/supabase-storage-bucket-security/).
 
 Checked against the Next.js, Vercel, Supabase, and OWASP docs linked below on October 15, 2026.
 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 Problems stacked on top of each other:
 
 1. **Trusts `file.type` / extension.** The client sets Content-Type. OWASP says do not trust it; allow-list types and validate content.
-2. **No auth.** Anyone who finds `/api/upload` can fill your storage or host malware on your domain. Same class of bug as [missing auth on public routes](/guides/common-vibe-coded-app-vulnerabilities).
+2. **No auth.** Anyone who finds `/api/upload` can fill your storage or host malware on your domain. Same class of bug as [missing auth on public routes](/guides/common-vibe-coded-app-vulnerabilities/).
 3. **No size cap.** Large uploads burn bandwidth, fill buckets, and can DoS parsers.
 4. **Writes under `public/`.** Anything there is served as a static asset. HTML or SVG uploads become XSS hosts.
 5. **Raw client path as the key.** `../../.env` style names, double extensions, and collisions are classic unrestricted-upload issues.
@@ -138,9 +138,9 @@ export async function POST(request: Request) {
 }
 ```
 
-`allowedContentTypes` and `maximumSizeInBytes` are enforced with the client token (see the [Blob SDK `handleUpload` reference](https://vercel.com/docs/vercel-blob/using-blob-sdk)). Keep `BLOB_READ_WRITE_TOKEN` on the server only ([keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code)).
+`allowedContentTypes` and `maximumSizeInBytes` are enforced with the client token (see the [Blob SDK `handleUpload` reference](https://vercel.com/docs/vercel-blob/using-blob-sdk)). Keep `BLOB_READ_WRITE_TOKEN` on the server only ([keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/)).
 
-**Supabase Storage:** Build the object key from `auth.getUser()` / `auth.uid()`, never from a form field claiming `userId`. Pair that with owner-scoped RLS on `storage.objects` ([bucket security guide](/guides/supabase-storage-bucket-security)).
+**Supabase Storage:** Build the object key from `auth.getUser()` / `auth.uid()`, never from a form field claiming `userId`. Pair that with owner-scoped RLS on `storage.objects` ([bucket security guide](/guides/supabase-storage-bucket-security/)).
 
 ```ts
 const {
@@ -240,11 +240,11 @@ Never write uploads into `public/`, `static/`, or any folder your host serves as
 
 ## Private by default; serve with short-lived signed URLs
 
-**Supabase:** Keep user documents in a **private** bucket. Serve with `createSignedUrl` and a short expiry (minutes, not days) after the caller passes your `SELECT` policy. Public buckets are for content you would publish. Details and RLS examples: [Supabase Storage bucket security](/guides/supabase-storage-bucket-security). Serving docs: [Supabase downloads / signed URLs](https://supabase.com/docs/guides/storage/serving/downloads).
+**Supabase:** Keep user documents in a **private** bucket. Serve with `createSignedUrl` and a short expiry (minutes, not days) after the caller passes your `SELECT` policy. Public buckets are for content you would publish. Details and RLS examples: [Supabase Storage bucket security](/guides/supabase-storage-bucket-security/). Serving docs: [Supabase downloads / signed URLs](https://supabase.com/docs/guides/storage/serving/downloads).
 
 **Vercel Blob:** Create the store as **private** when user content is involved. Client uploads can set `access: 'private'`. Serve through your authenticated Route Handler (Blob `get()`) or short-lived signed URLs, not by flipping the whole store to public so an `<img>` tag works without auth.
 
-If you display avatars from Blob or Supabase on pages with a CSP, add those hosts to `img-src` deliberately ([CSP for vibe-coded apps](/guides/csp-content-security-policy-vibe-coded-apps)). Do not open `img-src *` to "fix uploads."
+If you display avatars from Blob or Supabase on pages with a CSP, add those hosts to `img-src` deliberately ([CSP for vibe-coded apps](/guides/csp-content-security-policy-vibe-coded-apps/)). Do not open `img-src *` to "fix uploads."
 
 ## Self-test checklist
 
@@ -258,8 +258,8 @@ If you display avatars from Blob or Supabase on pages with a CSP, add those host
 - [ ] Private files are fetched via signed URL or authenticated proxy, not a permanent public URL
 - [ ] Large files use client/direct upload (respect 4.5 MB Vercel body limit and 1 MB Server Action default)
 - [ ] `BLOB_READ_WRITE_TOKEN` / service role keys are server-only
-- [ ] Supabase `storage.objects` RLS reviewed ([bucket guide](/guides/supabase-storage-bucket-security))
-- [ ] Folded into your [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app) and [Lovable/Bolt pre-launch checklist](/checklists/lovable-bolt-pre-launch-security-checklist)
+- [ ] Supabase `storage.objects` RLS reviewed ([bucket guide](/guides/supabase-storage-bucket-security/))
+- [ ] Folded into your [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) and [Lovable/Bolt pre-launch checklist](/checklists/lovable-bolt-pre-launch-security-checklist/)
 
 ## Sources
 

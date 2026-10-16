@@ -16,7 +16,7 @@ export function articleSlug(article: Article) {
 }
 
 export function articlePath(article: Article) {
-  return `/${categoryPath(article.data.category)}/${articleSlug(article)}`;
+  return `/${categoryPath(article.data.category)}/${articleSlug(article)}/`;
 }
 
 export function formatDate(date: Date) {

@@ -52,7 +52,7 @@ Each variable is assigned to **Production**, **Preview**, and or **Development**
 | `STRIPE_SECRET_KEY` | `sk_live_...` | `sk_test_...` |
 | `OPENAI_API_KEY` | production project key | separate key with a low budget |
 | `SUPABASE_SERVICE_ROLE_KEY` | production project | staging project |
-| `CRON_SECRET` | required for production cron auth ([guide](/guides/vercel-cron-jobs-cron-secret)) | optional; crons do not run on previews |
+| `CRON_SECRET` | required for production cron auth ([guide](/guides/vercel-cron-jobs-cron-secret/)) | optional; crons do not run on previews |
 
 Preview variables can also be scoped to a single branch. A branch specific value overrides the general Preview value with the same name.
 
@@ -70,7 +70,7 @@ When you add a variable, choose **Secret** for API keys and tokens. Secret value
 
 ## 4. Mind the public prefix
 
-Vercel stores variables securely, but your framework decides what reaches the browser. In Next.js anything named `NEXT_PUBLIC_*` is bundled into client JavaScript and readable by every visitor, on previews and production alike. Never give a secret that prefix. More in [environment variables in Cursor, Bolt.new, and Lovable](/guides/environment-variables-cursor-bolt-lovable).
+Vercel stores variables securely, but your framework decides what reaches the browser. In Next.js anything named `NEXT_PUBLIC_*` is bundled into client JavaScript and readable by every visitor, on previews and production alike. Never give a secret that prefix. More in [environment variables in Cursor, Bolt.new, and Lovable](/guides/environment-variables-cursor-bolt-lovable/).
 
 ## 5. Rotate correctly
 
@@ -80,17 +80,17 @@ Changing a variable only affects **new** deployments. After a leak:
 2. Update the variable in Vercel and redeploy.
 3. Revoke the old key at the provider, so older deployments that still contain it stop working.
 
-See [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks).
+See [the first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/).
 
 ## Checklist
 
 - [ ] Deployment Protection on, at least Standard Protection
 - [ ] Preview uses its own database and test mode keys
 - [ ] Credentials stored as Secret variables
-- [ ] `CRON_SECRET` on Production if you use Vercel Cron ([secure cron jobs](/guides/vercel-cron-jobs-cron-secret))
+- [ ] `CRON_SECRET` on Production if you use Vercel Cron ([secure cron jobs](/guides/vercel-cron-jobs-cron-secret/))
 - [ ] No secret with a `NEXT_PUBLIC_` prefix
-- [ ] Public repo checked with the [VibeLocked scanner](/scan) for keys committed by mistake
-- [ ] If you set a [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps), preview deployments allow `vercel.live` so the Vercel Toolbar still loads
+- [ ] Public repo checked with the [VibeLocked scanner](/scan/) for keys committed by mistake
+- [ ] If you set a [Content-Security-Policy](/guides/csp-content-security-policy-vibe-coded-apps/), preview deployments allow `vercel.live` so the Vercel Toolbar still loads
 
 ## Sources
 
