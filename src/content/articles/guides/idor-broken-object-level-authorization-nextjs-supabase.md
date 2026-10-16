@@ -10,6 +10,7 @@ tags:
   - supabase
   - rls
 related:
+  - test-supabase-rls-policies-ci
   - common-vibe-coded-app-vulnerabilities
   - supabase-rls-security-checklist
   - nextjs-server-actions-security
@@ -276,7 +277,7 @@ curl -i -X PATCH https://staging.example.com/api/invoices/ID_FROM_USER_A \
 
 Do not paste real session cookies into chats, tickets, or AI tools. Treat them like passwords and sign out afterwards.
 
-**Against the database directly:** Supabase recommends a pgTAP file per table under `supabase/tests/`, run with `supabase test db`, that switches identity with `set local request.jwt.claim.sub` and asserts another user reads no rows. The [RLS docs](https://supabase.com/docs/guides/database/postgres/row-level-security) include a full example. Note their warning: a `using` clause that filters a row out raises nothing and matches zero rows, so assert on `is_empty` and then check the target row is intact.
+**Against the database directly:** Supabase recommends a pgTAP file per table under `supabase/tests/`, run with `supabase test db`, that switches identity with `set local request.jwt.claim.sub` and asserts another user reads no rows. The [RLS docs](https://supabase.com/docs/guides/database/postgres/row-level-security) include a full example. Note their warning: a `using` clause that filters a row out raises nothing and matches zero rows, so assert on `is_empty` and then check the target row is intact. The [RLS testing guide](/guides/test-supabase-rls-policies-ci/) has a complete two-user pgTAP file and a GitHub Actions workflow that runs it on every pull request.
 
 ## Test checklist
 

@@ -34,7 +34,7 @@ This site is not affiliated with those products. The prompt does not depend on o
 2. Paste the prompt as a new message. Do not paste API keys, database passwords, or customer rows "for context."
 3. Ask it to wait for your go-ahead before editing files. The first answer should be a list, not a rewrite.
 4. Open every file it names. If a line number is wrong, search the symbol instead of trusting the number.
-5. Retest with two users and a signed-out window. The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) is that pass.
+5. Retest with two users and a signed-out window. The [ship checklist](/checklists/ship-checklist-for-a-vibe-coded-app/) is that pass. On Supabase, make the database half of that retest automatic with [RLS tests in CI](/guides/test-supabase-rls-policies-ci/).
 
 If the tool offers a "fix it all" button, read the diff first. The failure mode is a fix that deletes the check.
 

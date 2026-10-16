@@ -8,6 +8,7 @@ tags:
   - secrets
   - rls
 related:
+  - test-supabase-rls-policies-ci
   - supabase-rls-security-checklist
   - keep-secrets-out-of-frontend-code
   - first-hour-after-an-api-key-leaks
@@ -51,7 +52,7 @@ The service role key maps to a role that bypasses RLS. That is useful for admin 
 2. Make sure no environment variable holding it starts with `NEXT_PUBLIC_` or `VITE_`. Those prefixes put the value in the client bundle.
 3. Build the app and search the output folder (`dist/`, `.next/static/`) for the key prefix.
 4. In Lovable or Bolt projects, check which key the generated client uses. It should be the anon or publishable key.
-5. Open the Supabase dashboard and confirm RLS is enabled on every table in the `public` schema. The Security Advisor flags tables without it.
+5. Open the Supabase dashboard and confirm RLS is enabled on every table in the `public` schema. The Security Advisor flags tables without it. To keep it that way, add a CI test that fails when a new table ships without RLS ([test Supabase RLS policies in CI](/guides/test-supabase-rls-policies-ci/)).
 
 If you find a secret key anywhere public, follow the [first hour after an API key leaks](/guides/first-hour-after-an-api-key-leaks/).
 

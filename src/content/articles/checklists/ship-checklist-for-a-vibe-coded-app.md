@@ -55,7 +55,7 @@ A `NEXT_PUBLIC_` or `VITE_` prefix means the value is for the browser. A secret 
 
 ## 3. Lock the database the client can reach
 
-Supabase: run the [RLS checklist](/checklists/supabase-rls-security-checklist/). RLS on, grants tightened, one policy per operation, views checked, storage policies written ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security/)), upload routes validated ([secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)), tests run as `anon` and `authenticated`.
+Supabase: run the [RLS checklist](/checklists/supabase-rls-security-checklist/). RLS on, grants tightened, one policy per operation, views checked, storage policies written ([Supabase Storage bucket security](/guides/supabase-storage-bucket-security/)), upload routes validated ([secure file uploads in Next.js](/guides/secure-file-uploads-nextjs-supabase-vercel-blob/)), tests run as `anon` and `authenticated` ([test Supabase RLS policies in CI](/guides/test-supabase-rls-policies-ci/)).
 
 Firebase: run the [rules checklist](/checklists/firebase-security-rules-checklist/). No test-mode rule, no `if true`, owner checks on private documents, queries that match the rules, separate rules for Storage and Realtime Database.
 

@@ -11,6 +11,7 @@ tags:
   - security-definer
   - security
 related:
+  - test-supabase-rls-policies-ci
   - supabase-rls-security-checklist
   - idor-broken-object-level-authorization-nextjs-supabase
   - supabase-anon-key-vs-service-role-key
@@ -327,7 +328,7 @@ select distinct user_id from public.order_summaries;   -- expect only user A
 rollback;
 ```
 
-For a repeatable version, put those assertions in `supabase/tests/` and run `supabase test db`, as the RLS guide describes. The [IDOR guide](/guides/idor-broken-object-level-authorization-nextjs-supabase/) has the two-user test for Route Handlers.
+For a repeatable version, put those assertions in `supabase/tests/` and run `supabase test db`, as the RLS guide describes. [Testing Supabase RLS in CI](/guides/test-supabase-rls-policies-ci/) has a guardrail test that fails the build on any `public` view without `security_invoker` or any definer function `anon` can run. The [IDOR guide](/guides/idor-broken-object-level-authorization-nextjs-supabase/) has the two-user test for Route Handlers.
 
 ## Checklist
 

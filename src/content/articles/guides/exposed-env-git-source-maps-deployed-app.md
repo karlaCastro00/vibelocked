@@ -1,7 +1,8 @@
 ---
 title: "Is your .env, .git, or source code public?"
-description: "How vibe-coded apps end up serving .env files, .git folders, and source maps to anyone, a five-minute check for your site, and fixes for Vercel and Netlify."
+description: "How vibe-coded apps end up serving .env files, .git folders, and source maps, a five-minute check for your site, and fixes for Vercel, Netlify, and Cloudflare."
 pubDate: 2026-10-15
+updatedDate: 2026-10-16
 category: guide
 tags:
   - secrets
@@ -10,6 +11,7 @@ tags:
   - env-vars
   - nextjs
   - vite
+  - cloudflare
 related:
   - keep-secrets-out-of-frontend-code
   - environment-variables-cursor-bolt-lovable
@@ -22,6 +24,8 @@ faqs:
     answer: "A served .git folder lets anyone rebuild your repository, including its full history. That exposes your source code and any secret that was ever committed, even if you deleted it later. Block it at the server and rotate any secret that was in the history."
   - question: "Are source maps a security problem?"
     answer: "Source maps let anyone read your original, readable frontend code. That is not a hole by itself, since frontend code is public anyway, but it makes hidden admin routes, API shapes, and comments easy to find. Next.js and Vite do not publish browser source maps in production by default. If you turned them on, consider uploading them privately to your error tracker instead."
+  - question: "Does wrangler pages deploy upload my .env file?"
+    answer: "It uploads whatever folder you give it. Cloudflare's Direct Upload guide says to run wrangler pages deploy with your build output directory. Wrangler's Pages uploader skips only node_modules, .git, .DS_Store, .wrangler, the functions folder, and Cloudflare's own config files, so wrangler pages deploy . from the project root publishes .env and .dev.vars. Deploy dist/ or out/ instead, then request /.env on your site to confirm a 404."
   - question: "I found my .env publicly available. What do I do first?"
     answer: "Rotate every secret in it right away, starting with database URLs, service_role or secret keys, and payment keys. Then remove the file from the served folder and redeploy. Removing the file does not undo the leak, because anyone could have downloaded it already."
 ---
@@ -33,7 +37,7 @@ The good news: you can check your own site in five minutes, from your own termin
 ## How these files end up public
 
 - **`.env` in `public/`.** In Next.js, everything in `public/` is served from the site root ([Next.js docs](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder)). Vite copies `public/` into the build as-is ([Vite docs](https://vite.dev/guide/assets)). An AI tool that "puts config where the browser can read it" can drop a secret there.
-- **Whole folder uploaded.** Dragging the project folder (not `dist/` or `out/`) to a static host, FTP, or an S3 bucket ships `.env` and `.git` along with it.
+- **Whole folder uploaded.** Dragging the project folder (not `dist/` or `out/`) to a static host, FTP, or an S3 bucket ships `.env` and `.git` along with it. Running `wrangler pages deploy .` on Cloudflare does the same (see [Cloudflare Pages and Workers](#cloudflare-pages-and-workers) below).
 - **Server root is the project folder.** On a VPS, an nginx or Apache root pointed at the repo checkout serves `.git/` and dotfiles unless you block them.
 - **Secret baked into the build.** Any `NEXT_PUBLIC_` or `VITE_` variable is written into the client JavaScript ([Next.js](https://nextjs.org/docs/app/guides/environment-variables), [Vite](https://vite.dev/guide/env-and-mode)). This is the most common case, covered in [keep secrets out of frontend code](/guides/keep-secrets-out-of-frontend-code/).
 - **Source maps turned on for production.** Next.js disables browser source maps in production unless you set `productionBrowserSourceMaps: true` ([Next.js docs](https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps)). Vite's `build.sourcemap` defaults to `false` ([Vite build options](https://vite.dev/config/build-options)). AI tools sometimes turn them on to debug a production error and never turn them off.
@@ -44,7 +48,7 @@ Run this against **your own** domain only. It requests common sensitive paths an
 
 ```bash
 SITE=https://yourapp.com
-for p in /.env /.env.local /.env.production /.git/config /.git/HEAD /config.json /.DS_Store /backup.zip; do
+for p in /.env /.env.local /.env.production /.dev.vars /.git/config /.git/HEAD /config.json /.DS_Store /backup.zip; do
   printf "%s %s\n" "$(curl -s -o /dev/null -w '%{http_code}' "$SITE$p")" "$p"
 done
 ```
@@ -60,13 +64,33 @@ While you are in the Sources tab, search the bundle for `sk_live`, `sk-`, `servi
 
 ## Fix it
 
-### Vercel, Netlify, Cloudflare Pages
+### Vercel and Netlify
 
 These platforms serve the build output, so `.env` and `.git` are not served from a normal framework build. Check that:
 
 - No secret file is inside `public/` (or `static/`).
 - The output directory in project settings is the framework's build folder (`.next`, `dist`, `out`), not `.` or the repo root.
 - Secrets are set in the platform's environment variable settings, without a `NEXT_PUBLIC_` or `VITE_` prefix unless they are truly public. See [environment variables in Cursor, Bolt, and Lovable](/guides/environment-variables-cursor-bolt-lovable/).
+
+### Cloudflare Pages and Workers
+
+Cloudflare publishes the folder you point it at. A Git-connected Pages build uses the build output directory from your project settings. A deploy from your laptop with Wrangler uploads a local folder, including files that were never committed, and that is how a `.env` ends up live.
+
+- **Pages: deploy the build folder, never `.`** Cloudflare's [Direct Upload guide](https://developers.cloudflare.com/pages/get-started/direct-upload/) says to run `npx wrangler pages deploy <BUILD_OUTPUT_DIRECTORY>`. Wrangler's Pages uploader [skips only](https://github.com/cloudflare/workers-sdk/blob/main/packages/wrangler/src/pages/validate.ts) `node_modules`, `.git`, `.DS_Store`, `.wrangler`, the `functions` folder, and Cloudflare's own `_worker.js`, `_redirects`, `_headers`, and `_routes.json` files. `.env`, `.env.local`, and `.dev.vars` are not on that list, so `wrangler pages deploy .` from the project root publishes them.
+- **Workers static assets: point `assets.directory` at the build output.** Cloudflare's [static assets config](https://developers.cloudflare.com/workers/static-assets/binding/) describes `directory` as "the folder of static assets to be served," usually `./dist/` or `./build/`. Set it to `./` and every file in the project is a public asset.
+- **Add `.assetsignore` as a backstop.** The same page says a `.assetsignore` file in the root of the assets directory "takes the same format as `.gitignore`," and Wrangler will not upload files that match. It only applies to Workers assets, and it does not replace pointing at the right folder:
+
+```gitignore
+# .assetsignore, in the root of your Workers assets directory
+.env*
+.dev.vars*
+.git
+.wrangler
+```
+
+- **Keep secrets out of files that sit next to your site.** Cloudflare's [secrets docs](https://developers.cloudflare.com/workers/configuration/secrets/) say to set production secrets with `npx wrangler secret put <KEY>` (Pages projects use [`wrangler pages secret put`](https://developers.cloudflare.com/workers/wrangler/commands/pages/)) or the dashboard, and not to use `vars` in your Wrangler config for sensitive values. For local development they go in `.dev.vars` or `.env` "in the same directory as the Wrangler configuration file," which is usually the project root, and Cloudflare says to add `.dev.vars*` and `.env*` to `.gitignore`. That location is exactly why a deploy of the project root leaks them.
+
+After any Cloudflare deploy, run the check above. `/.env` and `/.dev.vars` should both return 404. If either returns the file, rotate every value in it first, then redeploy the right folder.
 
 ### Static hosting, S3, FTP
 
@@ -100,6 +124,7 @@ If you need readable stack traces, upload source maps privately to your error tr
 - [ ] `/.git/config` and `/.git/HEAD` return 404 or 403
 - [ ] No secrets in `public/` or `static/`
 - [ ] Host serves the build folder, not the project root
+- [ ] Cloudflare: `wrangler pages deploy` and `assets.directory` point at the build output, `/.dev.vars` returns 404, secrets set with `wrangler secret put`
 - [ ] Dotfile deny rule on any self-managed server
 - [ ] No public `.map` files unless you chose that
 - [ ] No secret prefixes (`sk_live`, `sk-`, `service_role`) in the client bundle
@@ -111,7 +136,8 @@ Give this prompt to Cursor, Lovable, Bolt, or Claude Code inside your own projec
 
 ```text
 Check how this project is built and deployed. Tell me: which folder is deployed
-(build output or project root), whether any file in public/ or static/ contains
+(build output or project root, including any wrangler pages deploy command or
+assets.directory in a Wrangler config), whether any file in public/ or static/ contains
 secrets or config that should be private, whether production source maps are
 enabled (productionBrowserSourceMaps, build.sourcemap, or similar), and which
 environment variables are exposed to the client through NEXT_PUBLIC_, VITE_, or
@@ -129,3 +155,8 @@ secret values.
 - [Vite: static asset handling (public directory)](https://vite.dev/guide/assets)
 - [Vite: env variables and modes](https://vite.dev/guide/env-and-mode)
 - [Vite: build options (build.sourcemap)](https://vite.dev/config/build-options)
+- [Cloudflare Pages: Direct Upload (wrangler pages deploy)](https://developers.cloudflare.com/pages/get-started/direct-upload/)
+- [Cloudflare Workers: static assets configuration (directory, .assetsignore)](https://developers.cloudflare.com/workers/static-assets/binding/)
+- [Cloudflare Workers: secrets (wrangler secret put, .dev.vars)](https://developers.cloudflare.com/workers/configuration/secrets/)
+- [Cloudflare Wrangler: Pages commands (wrangler pages secret put)](https://developers.cloudflare.com/workers/wrangler/commands/pages/)
+- [Wrangler source: Pages upload ignore list](https://github.com/cloudflare/workers-sdk/blob/main/packages/wrangler/src/pages/validate.ts)

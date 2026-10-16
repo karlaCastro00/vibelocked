@@ -8,6 +8,7 @@ tags:
   - rls
   - postgres
 related:
+  - test-supabase-rls-policies-ci
   - ship-checklist-for-a-vibe-coded-app
   - keep-secrets-out-of-frontend-code
   - common-vibe-coded-app-vulnerabilities
@@ -155,7 +156,7 @@ Supabase's procedure for each table is:
 2. Run `supabase test db`.
 3. Fix what it reports.
 
-The RLS guide includes full test files, including `set local role authenticated` and `set local request.jwt.claim.sub`. Copy that pattern from the current guide rather than from memory. Also run the Security Advisor. The [Advisors guide](https://supabase.com/docs/guides/observability/advisors) describes checks for security issues such as misconfigured RLS policies. An advisor warning is a lead, not a certificate that the policies match your product.
+The RLS guide includes full test files, including `set local role authenticated` and `set local request.jwt.claim.sub`. Copy that pattern from the current guide rather than from memory. For ready-to-adapt files (a guardrail test that fails on any table without RLS, a two-user test for every operation, and a GitHub Actions workflow), see [how to test Supabase RLS policies in CI](/guides/test-supabase-rls-policies-ci/). Also run the Security Advisor. The [Advisors guide](https://supabase.com/docs/guides/observability/advisors) describes checks for security issues such as misconfigured RLS policies. An advisor warning is a lead, not a certificate that the policies match your product.
 
 From the browser, signed out, call the Data API for the table with the publishable key. You should get no private rows. Signed in as user A, you should not see user B's rows. Try to insert a row whose `user_id` is user B. It should fail.
 
