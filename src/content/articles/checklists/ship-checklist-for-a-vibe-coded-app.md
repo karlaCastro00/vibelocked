@@ -15,6 +15,7 @@ related:
   - security-review-prompt-for-ai-coding-tools
   - open-redirect-callbackurl-authjs-supabase-clerk
   - vercel-cron-jobs-cron-secret
+  - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
 faqs:
   - question: "What should I do first if I find a live secret in the repo?"
     answer: "Revoke or rotate the key at the provider before you delete the file. Removing it from the latest commit does not make the old value useless. GitHub's remediation guide says revocation is the step that matters."
@@ -81,7 +82,7 @@ If you take money, the browser does not get to say that a payment succeeded. The
 
 Build the app the way you deploy it. Search the output for secret prefixes. For Vite that is usually `dist/`. For Next.js it is usually `.next/`. A secret that appears there is already public, even if the source looks careful.
 
-While you have the production build open, check its response headers. If there is no `Content-Security-Policy`, the [CSP checklist](/guides/csp-content-security-policy-vibe-coded-apps) has a starter policy and a Report-Only rollout that will not break checkout or sign-in.
+While you have the production build open, check its response headers. If there is no `Content-Security-Policy`, the [CSP checklist](/guides/csp-content-security-policy-vibe-coded-apps) has a starter policy and a Report-Only rollout that will not break checkout or sign-in. CSP is the backstop, not the fix: search the source for `dangerouslySetInnerHTML`, `rehype-raw`, and user-supplied `href` values, and sanitize or allow-list each one ([XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs)).
 
 In the same headers, look for `Access-Control-Allow-Origin`. If it echoes back any origin you send, follow the [CORS misconfiguration guide](/guides/cors-misconfiguration-vibe-coded-apps). Also request `/.env` and `/.git/config` on the live domain; both should return 404 ([how to check](/guides/exposed-env-git-source-maps-deployed-app)).
 

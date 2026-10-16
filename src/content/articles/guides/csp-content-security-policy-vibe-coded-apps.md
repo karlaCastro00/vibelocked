@@ -15,6 +15,7 @@ related:
   - vercel-preview-deployments-env-vars
   - clerk-publishable-key-vs-secret-key
   - ship-checklist-for-a-vibe-coded-app
+  - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
 faqs:
   - question: "Do I need a Content-Security-Policy if my app has no user input?"
     answer: "It still helps. OWASP notes that even a fully static site can use CSP to limit which third-party scripts load and to require Subresource Integrity. On top of that, frame-ancestors stops other sites from framing your pages for clickjacking. CSP is a second layer, not a replacement for escaping and sanitizing input."
@@ -26,7 +27,7 @@ faqs:
     answer: "In development, Next.js needs 'unsafe-eval' because React uses eval for better error stacks. The Next.js docs say production does not need it. Also check that your production host actually sends the header: GitHub Pages ignores a _headers file, and a nonce policy in Next.js requires dynamic rendering."
 ---
 
-A Content-Security-Policy (CSP) is a response header that tells the browser what your page is allowed to load and run. If a script, stylesheet, frame, or form target is not on the list, the browser blocks it. That matters when something slips through, like a comment field that renders HTML or a third-party script that was swapped out. CSP does not fix the bug that let the script in. It stops the browser from running it.
+A Content-Security-Policy (CSP) is a response header that tells the browser what your page is allowed to load and run. If a script, stylesheet, frame, or form target is not on the list, the browser blocks it. That matters when something slips through, like a comment field that renders HTML or a third-party script that was swapped out. CSP does not fix the bug that let the script in. It stops the browser from running it. To fix the bug itself in React and Next.js (`dangerouslySetInnerHTML`, raw HTML in markdown, AI chat output, user links), see [XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs).
 
 Apps built with Cursor, v0, Bolt, or Lovable usually ship with no CSP at all, or with one copied from a chat that allows `'unsafe-inline'` everywhere. This guide gives you a starter policy, a directive checklist, the common things that break, and a safe rollout order.
 

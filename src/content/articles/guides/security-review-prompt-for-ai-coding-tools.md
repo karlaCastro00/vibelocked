@@ -13,6 +13,7 @@ related:
   - ship-checklist-for-a-vibe-coded-app
   - prompt-injection-ai-features-vibe-coded-apps
   - securing-stripe-webhooks
+  - xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs
 faqs:
   - question: "Will this prompt find every vulnerability?"
     answer: "No. It asks the model to look for a specific set of failures and to cite files. Models miss routes, invent line numbers, and sometimes suggest fixes that remove the control. You still have to open the files and retest."
@@ -114,6 +115,8 @@ It will not rotate a key. If it reports a live secret, stop and use the [first h
 It will not prove your Stripe webhook is safe. If payments are in scope, read [securing Stripe webhooks](/guides/securing-stripe-webhooks) and confirm the handler verifies the signature on the raw body before it fulfills.
 
 It will not catch prompt injection by itself. If the app sends user text, documents, or tool calls to a model, follow [prompt injection in vibe-coded AI features](/guides/prompt-injection-ai-features-vibe-coded-apps).
+
+It may not trace every place HTML reaches the page. If the app renders rich text, markdown, AI chat replies, or profile links, run the XSS prompt in [XSS in React and Next.js](/guides/xss-dangerouslysetinnerhtml-markdown-ai-output-react-nextjs) and search for `dangerouslySetInnerHTML` yourself.
 
 It is not a pentest, a compliance review, or a promise that the app is safe to take payments. It is a way to make the tool show you the spots it usually gets wrong, so you can check them before you send the URL. The [pre-launch checklist](/checklists/lovable-bolt-pre-launch-security-checklist) is the same work, written as steps instead of a prompt.
 
