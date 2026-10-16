@@ -34,6 +34,8 @@ Most leaked keys in vibe-coded apps are in the JavaScript bundle. A less known, 
 
 The good news: you can check your own site in five minutes, from your own terminal.
 
+Prefer a quick outside check first? Paste your deployed URL into the free [VibeLocked Live App Scanner](/live-scan/). It requests `/.env`, `/.git/config`, and source map paths from the outside, read only, and gives you a fix prompt for anything it finds.
+
 ## How these files end up public
 
 - **`.env` in `public/`.** In Next.js, everything in `public/` is served from the site root ([Next.js docs](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder)). Vite copies `public/` into the build as-is ([Vite docs](https://vite.dev/guide/assets)). An AI tool that "puts config where the browser can read it" can drop a secret there.

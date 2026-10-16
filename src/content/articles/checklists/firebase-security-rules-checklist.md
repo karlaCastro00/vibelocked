@@ -24,6 +24,8 @@ Firebase will happily serve your database to the browser. The thing that stops a
 
 Checked against the Firebase docs linked below on October 14, 2026.
 
+For a fast outside check, paste your deployed URL into the [Live App Scanner](/live-scan/). It reads the Firebase config from your shipped JavaScript and tests, read only, whether your Realtime Database or Firestore answers without sign in.
+
 ## Read the rules that are actually deployed
 
 When you create a database or storage bucket in the console, Firebase asks you to choose Locked mode or Test mode. The [rules basics](https://firebase.google.com/docs/rules/basics) page says Locked mode denies access to all users for Cloud Firestore and Realtime Database. For Cloud Storage, Locked mode allows only authenticated users. Test mode allows anyone access.

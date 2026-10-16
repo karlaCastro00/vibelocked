@@ -202,10 +202,41 @@ export function exposureFinding(path: string, status: number, snippet: string): 
   return null;
 }
 
-export function headerFindings(headers: Headers, originChecked: boolean, corsAllowsSpoofed: boolean): Finding[] {
+export function metaCspFromHtml(html: string): string | null {
+  const head = html.slice(0, 200_000);
+  const tags = head.match(/<meta\b[^>]*>/gi) || [];
+  for (const tag of tags) {
+    if (!/http-equiv\s*=\s*["']?content-security-policy["']?/i.test(tag)) continue;
+    const m = tag.match(/content\s*=\s*"([^"]*)"/i) || tag.match(/content\s*=\s*'([^']*)'/i);
+    if (m && m[1].trim()) return m[1].trim();
+  }
+  return null;
+}
+
+export type CorsKind = 'none' | 'wildcard' | 'reflect' | 'reflect-credentials';
+
+export function corsKind(acao: string, acac: string, probeOrigin: string): CorsKind {
+  const a = acao.trim();
+  if (a === '*') return 'wildcard';
+  if (a === probeOrigin || a === 'null') return acac.trim().toLowerCase() === 'true' ? 'reflect-credentials' : 'reflect';
+  return 'none';
+}
+
+export function headerFindings(headers: Headers, originChecked: boolean, corsAllowsSpoofed: boolean | CorsKind, html = ''): Finding[] {
   const res: Finding[] = [];
   const get = (n: string) => headers.get(n) || headers.get(n.toLowerCase());
-  if (!get('content-security-policy')) {
+  const metaCsp = get('content-security-policy') ? null : metaCspFromHtml(html);
+  if (metaCsp) {
+    res.push({
+      id: 'csp-meta-only',
+      severity: 'info',
+      title: 'Content-Security-Policy is set only in a meta tag',
+      detail:
+        'Your page sets CSP with a <meta http-equiv> tag, which browsers honor for script and connect rules. Browsers ignore frame-ancestors, report-uri, and sandbox in meta tags, so clickjacking protection and violation reports need a real response header.',
+      fixPrompt:
+        `My app sets Content-Security-Policy only through a meta tag. Move the same policy into a response header (Vercel headers, Netlify _headers, Cloudflare, or Next.js middleware) and add frame-ancestors 'none'. If my host cannot set headers, keep the meta tag and tell me which directives it cannot enforce.`,
+    });
+  } else if (!get('content-security-policy')) {
     res.push({
       id: 'missing-csp',
       severity: 'low',
@@ -247,15 +278,29 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
       fixPrompt: `Add the response header X-Content-Type-Options: nosniff on my site.`,
     });
   }
-  if (originChecked && corsAllowsSpoofed) {
+  const cors: CorsKind = corsAllowsSpoofed === true ? 'reflect' : corsAllowsSpoofed === false ? 'none' : corsAllowsSpoofed;
+  if (originChecked && cors === 'wildcard') {
+    res.push({
+      id: 'cors-wildcard',
+      severity: 'info',
+      title: 'CORS allows any site to read this page (Access-Control-Allow-Origin: *)',
+      detail:
+        'Fine for a public static site, because browsers never send cookies with a wildcard response. It becomes a problem only if the same rule covers API routes that return private data based on a token or IP.',
+      fixPrompt:
+        `My site answers with Access-Control-Allow-Origin: *. Check whether any API route that returns user specific or private data shares this rule. If so, restrict CORS on those routes to my real frontends with an exact allow list. Show the config change and a curl test with a foreign Origin.`,
+    });
+  }
+  if (originChecked && (cors === 'reflect' || cors === 'reflect-credentials')) {
+    const withCreds = cors === 'reflect-credentials';
     res.push({
       id: 'cors-open',
-      severity: 'medium',
-      title: 'CORS allows a foreign Origin',
-      detail:
-        'A request with Origin: https://evil.example got Access-Control-Allow-Origin back for that origin (or *). If the response includes credentials or private data, any website can read it.',
+      severity: withCreds ? 'high' : 'medium',
+      title: withCreds ? 'CORS reflects any Origin and allows credentials' : 'CORS reflects a foreign Origin',
+      detail: withCreds
+        ? 'A request with Origin: https://evil.example got that origin back in Access-Control-Allow-Origin together with Access-Control-Allow-Credentials: true. Any website a signed in user visits can read responses made with their cookies.'
+        : 'A request with Origin: https://evil.example got that origin echoed back in Access-Control-Allow-Origin. If the server ever adds credentials or returns private data, any website can read it.',
       fixPrompt:
-        `My API or app reflects Access-Control-Allow-Origin for arbitrary Origins. Restrict CORS to my real frontends only (exact allow list, never * with credentials). Show the server or edge config change and a quick curl test.`,
+        `My API or app reflects Access-Control-Allow-Origin for arbitrary Origins${withCreds ? ' and sends Access-Control-Allow-Credentials: true' : ''}. Restrict CORS to my real frontends only (exact allow list, never echo the request Origin, never * with credentials). Show the server or edge config change and a quick curl test.`,
     });
   }
   return res;

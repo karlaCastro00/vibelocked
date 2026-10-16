@@ -27,6 +27,8 @@ Lovable, Bolt, v0, Cursor, and Replit can produce a working app in an afternoon.
 
 These products are not the same, and this site is not affiliated with them. The checks below are about the app they generated, not about a claim that one product is safer than another.
 
+Already deployed? Run the URL through the free [Live App Scanner](/live-scan/) first. It checks the shipped app from the outside for keys in JavaScript, Supabase tables readable with the public key, exposed `.env` files, and missing headers.
+
 ## 1. Treat the preview as production
 
 Open the preview in a private window, signed out. Click through every page the generator built, including pages linked from the footer and any `/admin` route. If data loads while you are signed out, the backend is public. Fix that before you invite users.

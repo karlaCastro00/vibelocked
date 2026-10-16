@@ -5,6 +5,7 @@ import {
   detectSupabase,
   exposureFinding,
   headerFindings,
+  corsKind,
   openTableFinding,
   scanJs,
   scriptUrlsFromHtml,
@@ -85,6 +86,32 @@ describe('headerFindings', () => {
     const hits = headerFindings(h, true, true);
     assert.ok(hits.some((x) => x.id === 'missing-csp'));
     assert.ok(hits.some((x) => x.id === 'cors-open'));
+  });
+  it('treats a meta CSP as present but notes header-only directives', () => {
+    const h = new Headers({ 'x-content-type-options': 'nosniff' });
+    const html = `<html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"></head></html>`;
+    const hits = headerFindings(h, true, false, html);
+    assert.ok(!hits.some((x) => x.id === 'missing-csp'));
+    assert.ok(hits.some((x) => x.id === 'csp-meta-only'));
+    assert.ok(hits.some((x) => x.id === 'missing-xfo'));
+  });
+  it('grades CORS by wildcard, reflection, and credentials', () => {
+    assert.equal(corsKind('*', '', 'https://evil.example'), 'wildcard');
+    assert.equal(corsKind('https://evil.example', '', 'https://evil.example'), 'reflect');
+    assert.equal(corsKind('https://evil.example', 'true', 'https://evil.example'), 'reflect-credentials');
+    assert.equal(corsKind('https://app.example', 'true', 'https://evil.example'), 'none');
+    const h = new Headers({ 'content-security-policy': "frame-ancestors 'none'" });
+    const wild = headerFindings(h, true, 'wildcard');
+    assert.ok(wild.some((x) => x.id === 'cors-wildcard' && x.severity === 'info'));
+    assert.ok(!wild.some((x) => x.id === 'cors-open'));
+    const cred = headerFindings(h, true, 'reflect-credentials');
+    assert.ok(cred.some((x) => x.id === 'cors-open' && x.severity === 'high'));
+  });
+  it('prefers the CSP header over a meta tag', () => {
+    const h = new Headers({ 'content-security-policy': "default-src 'self'; frame-ancestors 'none'" });
+    const html = `<meta http-equiv="content-security-policy" content="default-src *">`;
+    const hits = headerFindings(h, true, false, html);
+    assert.ok(!hits.some((x) => x.id === 'missing-csp' || x.id === 'csp-meta-only' || x.id === 'missing-xfo'));
   });
 });
 

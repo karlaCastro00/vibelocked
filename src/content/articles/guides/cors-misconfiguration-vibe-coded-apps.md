@@ -30,6 +30,8 @@ faqs:
 
 "Blocked by CORS policy" is one of the most common errors vibe coders paste into their AI tool, and the quickest "fix" the tool can give is to allow everything. Sometimes that is harmless. Sometimes it lets any website on the internet read your users' private data with their own cookies. This guide shows how to tell the difference and what to ship instead.
 
+To see what your live app sends today, run it through the [Live App Scanner](/live-scan/). It makes one request with a foreign `Origin` and tells you whether your server answers with `*`, echoes the origin back, or also allows credentials.
+
 ## What CORS actually does
 
 By default, a script on `https://evil.example` can send requests to your API, but the browser will not let that script **read** the response. CORS headers are how your server tells the browser "this other origin may read my responses" ([MDN: CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS)).

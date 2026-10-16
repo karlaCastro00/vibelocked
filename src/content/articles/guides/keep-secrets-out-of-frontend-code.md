@@ -28,6 +28,8 @@ The JavaScript you ship is not a hiding place. Anyone can open the file, pretty-
 
 Checked against the Next.js, Vite, Supabase, Firebase, and Stripe docs linked below on October 14, 2026.
 
+To check what your deployed app actually ships, paste its URL into the [Live App Scanner](/live-scan/). It downloads your public JavaScript like any visitor would and flags known secret key patterns, with values masked.
+
 ## Two piles, not one `.env`
 
 | Value | Browser | Server only |

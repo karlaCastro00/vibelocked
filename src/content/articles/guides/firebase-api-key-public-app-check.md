@@ -24,6 +24,8 @@ AI builders put the Firebase config object straight into frontend code, and scan
 
 Checked against the Firebase and Google Cloud docs linked below on October 14, 2026.
 
+To see what your live app exposes, run it through the [Live App Scanner](/live-scan/). It reads your Firebase config from the shipped JavaScript and tests, read only, whether your database answers without sign in.
+
 ## The short answer
 
 A Firebase API key **identifies** your project. It does not **authorize** anything. Firebase's own docs say keys restricted to Firebase services do not need to be treated as secrets and are safe in code and config files. Your data is protected by **Firebase Security Rules** and **App Check**, not by hiding the key.

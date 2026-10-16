@@ -6,6 +6,8 @@ import {
   firebaseConfigFinding,
   firebaseOpenDbFinding,
   headerFindings,
+  corsKind,
+  type CorsKind,
   openTableFinding,
   secretFindings,
   sourceMapCandidates,
@@ -92,7 +94,7 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
   if (fb) add(firebaseConfigFinding(fb));
 
   emit(deps, { type: 'status', message: 'Checking security headers and CORS...' });
-  let corsOpen = false;
+  let corsOpen: CorsKind = 'none';
   try {
     const cors = await safeFetch(f, resolve, target, {
       method: 'GET',
@@ -101,11 +103,11 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
       timeoutMs: 5000,
     });
     const acao = cors.headers.get('access-control-allow-origin') || '';
-    corsOpen = acao === '*' || acao === 'https://evil.example';
+    corsOpen = corsKind(acao, cors.headers.get('access-control-allow-credentials') || '', 'https://evil.example');
   } catch {
     /* CORS probe failure is not a finding */
   }
-  for (const h of headerFindings(page.headers, true, corsOpen)) add(h);
+  for (const h of headerFindings(page.headers, true, corsOpen, page.body)) add(h);
 
   emit(deps, { type: 'status', message: 'Probing for exposed .env, .git, and source maps...' });
   for (const path of EXPOSURE_PATHS) {

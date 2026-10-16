@@ -33,6 +33,8 @@ Apps built with Cursor, v0, Bolt, or Lovable usually ship with no CSP at all, or
 
 Checked against MDN, web.dev, OWASP, the Next.js and Vercel docs, and the vendor docs linked below on October 15, 2026.
 
+Not sure whether your deployed app sends a policy at all? The free [Live App Scanner](/live-scan/) reads your response headers and meta tags and flags a missing CSP, a meta tag only policy, and missing clickjacking protection.
+
 ## What CSP actually blocks
 
 The [MDN CSP guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP) lists the kinds of injected code a policy can stop:

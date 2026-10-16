@@ -29,6 +29,8 @@ Supabase gives every project two kinds of API keys. One is meant for the public.
 
 Checked against the Supabase docs linked below on October 13, 2026.
 
+Want to know which key your live app exposes? The [Live App Scanner](/live-scan/) finds the Supabase key in your shipped JavaScript, tells you whether it is the public key or a secret one, and checks which tables it can read.
+
 ## The two keys in one table
 
 | | anon / publishable key | service_role / secret key |

@@ -30,6 +30,8 @@ A Supabase table in an exposed schema is reachable with the key you already ship
 
 Checked against the Supabase docs linked at the bottom on October 14, 2026. Those pages win if they change.
 
+Before you start, you can run your deployed URL through the [Live App Scanner](/live-scan/). It finds the Supabase key in your shipped JavaScript and checks, read only, whether that key can list rows from your tables. Then use this checklist to fix what it finds.
+
 ## Know which key you shipped
 
 Every request carries an API key. Supabase Auth, when someone is signed in, identifies who is calling. The key identifies what is calling. RLS is only as strong as your sign up rules, so also review your [Supabase Auth security settings](/guides/supabase-auth-security-settings/).

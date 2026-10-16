@@ -33,6 +33,8 @@ AI coding tools are good at making a button that loads a row. They are less reli
 
 Names of products are for finding your stack. This site is not affiliated with them.
 
+Several of the problems below can be spotted from outside your app. The free [Live App Scanner](/live-scan/) checks a deployed URL for exposed keys, open Supabase or Firebase data, leaked `.env` and `.git` files, CORS, and security headers.
+
 ## IDOR, or broken object level authorization
 
 You have IDOR when the request names an object and the server returns it without checking that this caller may see it. OWASP API Security Top 10 (2023) lists this class as [API1: Broken Object Level Authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/). People still say IDOR. The fix is the same.

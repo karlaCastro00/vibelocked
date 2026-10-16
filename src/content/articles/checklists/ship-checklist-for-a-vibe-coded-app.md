@@ -32,6 +32,8 @@ You are about to send someone the URL. The app was built with an AI coding tool,
 
 This is not a pentest. It is the pass that catches the failures these apps actually ship with: a public key that was supposed to be a secret, a table with no rule, and a route that trusts the browser.
 
+Once the app is live, the [Live App Scanner](/live-scan/) checks the deployed URL from the outside, and the [repo scanner](/scan/) checks a public GitHub repo. Neither replaces this checklist, but both catch the most common misses in under a minute.
+
 ## 1. Revoke anything that already leaked
 
 If you find a live secret in git, in a screenshot, in a chat, or in the built JavaScript, stop and follow the [first hour guide](/guides/first-hour-after-an-api-key-leaks/). Delete the file after the provider has revoked the key, not before.
