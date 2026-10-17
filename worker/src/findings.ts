@@ -472,3 +472,79 @@ export function storagePublicFinding(kind: string, bucket: string, detail: strin
     fixPrompt: `My ${kind} bucket "${bucket}" allows public listing or anonymous reads of objects. Make the bucket private, require signed URLs for private files, and tighten storage policies (Supabase storage policies, Firebase Storage rules, or S3 Block Public Access). Show me the exact policy change.`,
   };
 }
+
+export function adminPathFinding(path: string, status: number): Finding {
+  return {
+    id: 'admin-path-' + path.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60),
+    severity: status < 400 ? 'medium' : 'low',
+    category: 'api',
+    title: `Admin or dashboard path responds: ${path}`,
+    detail: `A stranger requested ${path} and got HTTP ${status}. Confirm this route requires auth and does not leak data to anonymous users.`,
+    where: `GET ${path}`,
+    evidence: `HTTP ${status}`,
+    fixPrompt: `My app serves ${path} with HTTP ${status} to anonymous requests. Require authentication for every admin or dashboard route, return 401 or 404 when logged out, and avoid shipping admin UI bundles to the public. Show me the auth guard change.`,
+  };
+}
+
+export function openApiDocFinding(url: string, pathCount: number): Finding {
+  return {
+    id: 'openapi-doc-' + url.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60),
+    severity: 'medium',
+    category: 'api',
+    title: 'OpenAPI or Swagger document is publicly readable',
+    detail: `Fetched ${url} and found ${pathCount} path${pathCount === 1 ? '' : 's'}. Attackers use this to map your API. Restrict it to trusted networks or disable it in production.`,
+    where: url,
+    evidence: `paths=${pathCount}`,
+    fixPrompt: `My OpenAPI or Swagger document at ${url} is public. Disable it in production or put it behind auth. Show me the framework or host config change.`,
+  };
+}
+
+export function authJsCallbackFinding(): Finding {
+  return {
+    id: 'authjs-callbackurl',
+    severity: 'medium',
+    category: 'api',
+    title: 'Auth.js callbackUrl pattern detected',
+    detail:
+      'The bundle references callbackUrl with Auth.js or NextAuth sign-in routes. If the server redirects to any absolute URL without an allow list, that is an open redirect. Confirm your auth config restricts callbackUrl to your own origin.',
+    where: 'JavaScript bundle',
+    fixPrompt: `My app uses Auth.js or NextAuth with callbackUrl. Ensure the auth config only allows relative callbacks or an explicit allow list of my domains (never redirect to an arbitrary external URL). Show me the auth config change and a test.`,
+  };
+}
+
+export function vercelBlobFinding(url: string): Finding {
+  return {
+    id: 'vercel-blob-' + url.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50),
+    severity: 'medium',
+    category: 'storage',
+    title: 'Vercel Blob public URL found in JavaScript',
+    detail: `A public Blob URL is embedded in the client bundle (${url}). Anyone who finds the URL can fetch the object. Confirm this file is meant to be public; otherwise use private blobs and signed URLs.`,
+    where: url,
+    evidence: url.slice(0, 80),
+    fixPrompt: `My frontend embeds a Vercel Blob public URL. If the file is private, switch the blob to private access and serve it through a server route with a signed URL. Show me the upload and read code change.`,
+  };
+}
+
+export function sourceMapSecretFinding(mapUrl: string, secretName: string, masked: string): Finding {
+  return {
+    id: 'sourcemap-secret-' + secretName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40),
+    severity: 'critical',
+    category: 'secrets',
+    title: `Secret found inside source map: ${secretName}`,
+    detail: `After loading ${mapUrl}, a ${secretName} appeared in the recovered source. Remove source maps from production and rotate the value.`,
+    where: mapUrl,
+    evidence: masked,
+    fixPrompt: `A production source map (${mapUrl}) exposed a ${secretName}. Disable production source maps, delete published .map files, rotate the secret, and confirm the map URL returns 404.`,
+  };
+}
+
+export function ownershipDeepNote(reason: string): Finding {
+  return {
+    id: 'ownership-deep-skip-signup',
+    severity: 'info',
+    category: 'database',
+    title: 'Ownership verified: throwaway signup skipped',
+    detail: reason,
+    fixPrompt: `Ownership is verified for deeper read-only checks. Throwaway signup was skipped because cleanup would need an admin key. Keep RLS strict and test policies in CI with pgTAP instead.`,
+  };
+}

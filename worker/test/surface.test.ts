@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { extractEndpoints, extractStorage, extractSupabaseTables, tablesFromOpenApi } from '../src/surface.ts';
+import { extractAdminPaths, extractEndpoints, extractOpenApiUrls, extractStorage, extractSupabaseTables, pathsFromOpenApiDoc, tablesFromOpenApi } from '../src/surface.ts';
 
 describe('extractSupabaseTables', () => {
   it('finds .from and rest paths', () => {
@@ -33,5 +33,27 @@ describe('tablesFromOpenApi', () => {
   it('reads definitions', () => {
     const tables = tablesFromOpenApi(JSON.stringify({ definitions: { profiles: {}, messages: {} }, paths: { '/orders': {} } }));
     assert.deepEqual(tables.sort(), ['messages', 'orders', 'profiles']);
+  });
+});
+
+
+describe('extractAdminPaths', () => {
+  it('finds admin routes', () => {
+    const p = extractAdminPaths(`navigate("/admin/users"); link:'/dashboard'`);
+    assert.ok(p.includes('/admin/users'));
+    assert.ok(p.includes('/dashboard'));
+  });
+});
+
+describe('extractOpenApiUrls', () => {
+  it('finds swagger paths', () => {
+    const u = extractOpenApiUrls(`fetch("/openapi.json");`, 'https://app.example');
+    assert.ok(u.some((x) => x.includes('openapi.json')));
+  });
+});
+
+describe('pathsFromOpenApiDoc', () => {
+  it('lists paths', () => {
+    assert.deepEqual(pathsFromOpenApiDoc(JSON.stringify({ paths: { '/api/me': {}, '/api/users': {} } })).sort(), ['/api/me', '/api/users']);
   });
 });

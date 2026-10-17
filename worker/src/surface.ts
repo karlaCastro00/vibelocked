@@ -171,3 +171,62 @@ export function tablesFromOpenApi(body: string): string[] {
   }
   return [...names].slice(0, 60);
 }
+
+/** Admin / dashboard paths appearing as string literals in JS. */
+export function extractAdminPaths(text: string): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const re = /["'`](\/(?:admin|dashboard|console|manage|internal|staff|backoffice)(?:\/[A-Za-z0-9._~/-]*)?)["'`]/g;
+  for (const m of text.matchAll(re)) {
+    let path = m[1];
+    if (path.length > 120) continue;
+    if (seen.has(path)) continue;
+    seen.add(path);
+    out.push(path);
+    if (out.length >= 15) break;
+  }
+  return out;
+}
+
+/** OpenAPI / Swagger document URLs in JS or HTML. */
+export function extractOpenApiUrls(text: string, pageOrigin: string): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const add = (raw: string) => {
+    try {
+      const u = new URL(raw, pageOrigin);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return;
+      const key = u.href.split('#')[0];
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push(key);
+    } catch {}
+  };
+  for (const m of text.matchAll(/https?:\/\/[^\s"'`]+\.(?:json|ya?ml)\b[^\s"'`]*/gi)) {
+    if (/openapi|swagger|api-docs/i.test(m[0])) add(m[0]);
+  }
+  for (const m of text.matchAll(/["'`]((?:https?:\/\/[^"'`]+)?\/(?:openapi(?:\.json)?|swagger(?:\.json)?|api-docs(?:\/swagger\.json)?|v\d+\/api-docs))["'`]/gi)) {
+    add(m[1]);
+  }
+  return out.slice(0, 10);
+}
+
+/** Paths listed inside an OpenAPI/Swagger document (limited). */
+export function pathsFromOpenApiDoc(body: string): string[] {
+  const paths: string[] = [];
+  try {
+    const j = JSON.parse(body);
+    if (j.paths && typeof j.paths === 'object') {
+      for (const p of Object.keys(j.paths)) {
+        if (p.startsWith('/') && p.length < 120) paths.push(p);
+        if (paths.length >= 25) break;
+      }
+    }
+  } catch {
+    for (const m of body.matchAll(/["'](\/[A-Za-z0-9._~/-]{1,80})["']\s*:/g)) {
+      paths.push(m[1]);
+      if (paths.length >= 25) break;
+    }
+  }
+  return paths;
+}

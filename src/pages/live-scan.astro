@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import { SITE } from '../lib/site';
 
 const description =
-  'Free live app scanner for vibe coders. Probe a deployed URL for leaked keys in JavaScript, open Supabase tables, exposed .env or .git, and weak headers. Read only.';
+  'Free live app scanner for vibe coders. Fingerprint your stack, score risk 0-100, find open tables and secrets, and rescan to see what improved. Read only.';
 
 const jsonLd = {
   '@type': 'WebApplication',
@@ -24,7 +24,7 @@ const workerUrl = SITE.liveScanWorker;
       <p class="kicker">Free tool</p>
       <h1 class="page-title">Probe your deployed app like an attacker</h1>
       <p class="lede">
-        Enter the public URL of an app you shipped with Lovable, Bolt, v0, Cursor, or similar. We fetch it from the outside, hunt known and unknown secrets in shipped JavaScript, map API and BaaS endpoints, discover real Supabase tables from your bundle, and check storage buckets plus exposed .env, .git, and source maps. Read only. We never ask you to paste code or secrets.
+        Enter the public URL of an app you shipped with Lovable, Bolt, v0, Cursor, or similar. We fingerprint the stack, hunt secrets, map APIs and tables, score risk from 0 to 100, and show the top fixes first. Read only. We never ask you to paste code or secrets.
       </p>
     </header>
 
@@ -34,11 +34,23 @@ const workerUrl = SITE.liveScanWorker;
         <div class="scan-actions">
           <input id="live-url" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://your-app.lovable.app" required />
           <button class="button" type="submit" id="live-run">Scan live app</button>
+          <button class="button button-ghost" type="button" id="live-rescan" hidden>Rescan</button>
         </div>
       </form>
       <p class="scan-note">
-        Scans run on a Cloudflare Worker (not in your browser) so we can reach the site the way a stranger would. Free limit: 5 scans per 10 minutes per network. We only send GET, HEAD, and OPTIONS. We never write to your app.
+        Scans run on a Cloudflare Worker so we can reach the site the way a stranger would. Free limit: 5 scans per 10 minutes per network. Anonymous scans are GET, HEAD, and OPTIONS only (plus read-only Supabase or Firebase probes). We never write to your app.
       </p>
+      <details class="own-box">
+        <summary>Prove ownership for deeper read-only checks (optional)</summary>
+        <p class="scan-note">
+          Deeper checks stay read-oriented. We do not create throwaway auth users on free scans because we cannot reliably delete them without an admin key.
+        </p>
+        <div class="scan-actions">
+          <button class="button button-ghost" type="button" id="own-start">Get verification token</button>
+          <button class="button button-ghost" type="button" id="own-check">I published the token, check</button>
+        </div>
+        <pre id="own-out" class="own-out" hidden></pre>
+      </details>
       <p class="scan-note">
         Looking for keys in a GitHub repo instead? Use the <a href="/scan/">repo scanner</a>.
       </p>
@@ -46,6 +58,7 @@ const workerUrl = SITE.liveScanWorker;
       <div id="live-progress" class="live-progress" hidden>
         <div class="live-progress-bar" id="live-progress-bar"></div>
       </div>
+      <p id="live-diff" class="scan-note diff-note" hidden aria-live="polite"></p>
     </section>
 
     <div id="live-results" class="scan-results" aria-live="polite"></div>
@@ -53,20 +66,18 @@ const workerUrl = SITE.liveScanWorker;
     <article class="prose">
       <h2>What it checks</h2>
       <ul>
-        <li>Known provider secrets and generic high-entropy credentials (assignment names, Bearer tokens, JWTs), with values masked and confidence labels</li>
-        <li>Supabase: tables named in your bundle, OpenAPI schema if exposed, plus a common table list; Storage bucket visibility</li>
-        <li>Firebase Realtime Database, Firestore, and Storage listing when detectable over public REST</li>
-        <li>Backend surface: same-origin /api routes, GraphQL, and known BaaS hosts extracted from JavaScript, probed with anonymous GET only</li>
-        <li>Public S3 / R2 / GCS bucket URLs found in JavaScript, plus exposed /.env, .git, and source maps</li>
-        <li>CORS and missing security headers (CSP, X-Frame-Options, HSTS, nosniff)</li>
+        <li>Stack fingerprint (Lovable, Bolt, v0, Next.js, Supabase, Firebase, Clerk, Auth.js, Stripe, Vercel) with stack-specific probes</li>
+        <li>Known and generic secrets, open database tables, storage buckets, API endpoints, exposed files, and headers</li>
+        <li>Chained discovery: source maps, OpenAPI docs, admin paths, and bucket names found in JavaScript feed the next probes</li>
+        <li>Risk score 0-100 with a letter grade and top three fixes</li>
       </ul>
-      <h2>How to use a finding</h2>
+      <h2>Ownership</h2>
       <p>
-        Each result includes a plain-language explanation and a ready prompt you can paste into Cursor or Lovable. The prompt never includes the secret value. Rotate real secrets at the provider first, then apply the fix.
+        Optional: prove you control the host with a file at <code>/.well-known/vibelocked-verify.txt</code> or a DNS TXT record on <code>_vibelocked-verify</code>. Until then we only run anonymous reads. After proof we add deeper read-only checks (still no mutating RPCs or throwaway signups).
       </p>
       <h2>Limits</h2>
       <p>
-        This is an outside read of a public URL. It does not log in as a user, does not prove ownership, and does not replace a full review. Private apps, auth-gated pages, and secrets that only appear after login are out of scope. Cap: about 20 same-origin scripts, about 1.5 MB each, short timeouts. A clean result is not a guarantee.
+        This is an outside read of a public URL. A clean result is not a guarantee. Cap: about 20 same-origin scripts, about 1.5 MB each, short timeouts, capped probe counts.
       </p>
       <p>
         Related: <a href="/guides/exposed-env-git-source-maps-deployed-app/">exposed .env, .git, and source maps</a>, <a href="/guides/supabase-anon-key-vs-service-role-key/">anon vs service role</a>, <a href="/guides/cors-misconfiguration-vibe-coded-apps/">CORS misconfiguration</a>, <a href="/guides/csp-content-security-policy-vibe-coded-apps/">CSP for vibe-coded apps</a>.
@@ -84,6 +95,14 @@ const workerUrl = SITE.liveScanWorker;
   }
   .scan-actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 0.7rem; }
   .scan-note { font-size: 0.85rem; opacity: 0.75; }
+  .own-box { margin-top: 0.9rem; font-size: 0.9rem; }
+  .own-box summary { cursor: pointer; font-weight: 600; }
+  .own-out {
+    margin-top: 0.6rem; padding: 0.7rem; border-radius: 6px; white-space: pre-wrap; overflow: auto;
+    font-size: 0.78rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  }
+  .diff-note { color: #8a4218; font-weight: 600; opacity: 1; }
   .scan-results { margin: 1.4rem 0; max-width: 52rem; }
   .scan-results :global(.finding) { border-left: 4px solid #c0392b; padding: 0.5rem 0.8rem; margin: 0.6rem 0; background: color-mix(in srgb, var(--bg) 92%, #c0392b); }
   .scan-results :global(.finding.critical) { border-color: #8b0000; }
@@ -92,12 +111,26 @@ const workerUrl = SITE.liveScanWorker;
   .scan-results :global(.finding.warn) { border-color: #d48806; }
   .scan-results :global(.finding.low) { border-color: #5b7c8d; }
   .scan-results :global(.finding.info) { border-color: #2e8b57; }
+  .scan-results :global(.finding.improved) { outline: 2px solid #2e8b57; }
+  .scan-results :global(.finding.regressed) { outline: 2px solid #c0392b; }
   .scan-results :global(code) { word-break: break-all; }
   .scan-results :global(.sum) { font-weight: 600; }
   .scan-results :global(.stranger) {
     padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 0.8rem;
     background: color-mix(in srgb, #0e4f48 12%, var(--bg));
     border: 1px solid color-mix(in srgb, #0e4f48 35%, transparent);
+  }
+  .scan-results :global(.score-card) {
+    display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;
+    padding: 0.9rem 1rem; margin: 0.8rem 0; border-radius: 8px;
+    border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  }
+  .scan-results :global(.score-num) { font-size: 2rem; font-weight: 700; color: #0e4f48; line-height: 1; }
+  .scan-results :global(.score-grade) { font-size: 1.4rem; font-weight: 700; }
+  .scan-results :global(.stack-badges) { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0.8rem; }
+  .scan-results :global(.stack-badge) {
+    font-size: 0.75rem; padding: 0.2rem 0.55rem; border-radius: 999px;
+    background: color-mix(in srgb, #0e4f48 15%, var(--bg)); border: 1px solid #0e4f48;
   }
   .scan-results :global(.find-group) {
     font-size: 1.05rem; margin: 1.4rem 0 0.5rem; padding-bottom: 0.25rem;
@@ -116,6 +149,8 @@ const workerUrl = SITE.liveScanWorker;
   .live-progress { height: 4px; background: color-mix(in srgb, currentColor 15%, transparent); border-radius: 2px; margin-top: 0.8rem; overflow: hidden; }
   .live-progress-bar { height: 100%; width: 15%; background: #0e4f48; animation: live-pulse 1.2s ease-in-out infinite; }
   :global([data-theme='dark']) .live-progress-bar { background: #7eb6ad; }
+  :global([data-theme='dark']) .scan-results :global(.score-num) { color: #7eb6ad; }
+  :global([data-theme='dark']) .scan-results :global(.stack-badge) { border-color: #7eb6ad; }
   @keyframes live-pulse { 0% { transform: translateX(-20%); } 50% { transform: translateX(120%); } 100% { transform: translateX(-20%); } }
 </style>
 
@@ -123,7 +158,12 @@ const workerUrl = SITE.liveScanWorker;
   const out = document.getElementById('live-results');
   const status = document.getElementById('live-status');
   const runBtn = document.getElementById('live-run');
+  const rescanBtn = document.getElementById('live-rescan');
   const progress = document.getElementById('live-progress');
+  const diffEl = document.getElementById('live-diff');
+  const urlInput = document.getElementById('live-url');
+  const ownOut = document.getElementById('own-out');
+  const STORE_KEY = 'vibelocked-live-scan-last';
 
   function el(tag, cls, text) {
     const node = document.createElement(tag);
@@ -148,16 +188,33 @@ const workerUrl = SITE.liveScanWorker;
     { id: 'headers', label: 'Headers' },
   ];
 
-  function renderFinding(f) {
-    const box = el('div', 'finding ' + f.severity, null);
+  function findingKey(f) {
+    return (f.id || '') + '|' + (f.where || '') + '|' + (f.title || '');
+  }
+
+  function loadPrev() {
+    try {
+      return JSON.parse(sessionStorage.getItem(STORE_KEY) || 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  function saveResult(url, summary, findings) {
+    try {
+      sessionStorage.setItem(STORE_KEY, JSON.stringify({ url, summary, findings, at: Date.now() }));
+    } catch {}
+  }
+
+  function renderFinding(f, mark) {
+    const box = el('div', 'finding ' + f.severity + (mark ? ' ' + mark : ''), null);
     let label = sevLabel(f.severity);
     if (f.confidence) label += ` (${f.confidence} confidence)`;
-    const head = el('strong', '', `${label}: ${f.title}`);
-    box.append(head);
+    box.append(el('strong', '', `${label}: ${f.title}`));
     if (f.where) box.append(el('div', '', 'Where: ' + f.where));
     if (f.evidence) {
-      const code = el('code', '', f.evidence);
-      box.append(el('div', '', null), code);
+      box.append(el('div', '', null));
+      box.append(el('code', '', f.evidence));
     }
     box.append(el('p', '', f.detail));
     if (f.fixPrompt) {
@@ -180,34 +237,86 @@ const workerUrl = SITE.liveScanWorker;
     return box;
   }
 
-  function renderSummary(summary, findings) {
+  function compareAndDiff(prev, url, summary, findings) {
+    diffEl.hidden = true;
+    diffEl.textContent = '';
+    if (!prev || prev.url !== url || !prev.summary) return { improved: new Set(), regressed: new Set() };
+    const prevKeys = new Set((prev.findings || []).map(findingKey));
+    const nextKeys = new Set(findings.map(findingKey));
+    const gone = [...prevKeys].filter((k) => !nextKeys.has(k));
+    const added = [...nextKeys].filter((k) => !prevKeys.has(k));
+    const scoreDelta = (summary.score ?? 0) - (prev.summary.score ?? 0);
+    const parts = [];
+    if (scoreDelta > 0) parts.push(`Risk score improved by ${scoreDelta} (${prev.summary.score} to ${summary.score}).`);
+    else if (scoreDelta < 0) parts.push(`Risk score got worse by ${-scoreDelta} (${prev.summary.score} to ${summary.score}).`);
+    else parts.push(`Risk score unchanged at ${summary.score}.`);
+    if (gone.length) parts.push(`${gone.length} finding${gone.length === 1 ? '' : 's'} cleared.`);
+    if (added.length) parts.push(`${added.length} new finding${added.length === 1 ? '' : 's'}.`);
+    diffEl.textContent = 'Rescan: ' + parts.join(' ');
+    diffEl.hidden = false;
+    return { improved: new Set(gone), regressed: new Set(added) };
+  }
+
+  function renderSummary(summary, findings, marks) {
     out.replaceChildren();
-    const stranger = el('p', 'sum stranger', summary.strangerSummary || '');
-    out.append(stranger);
+    out.append(el('p', 'sum stranger', summary.strangerSummary || ''));
+
+    const scoreCard = el('div', 'score-card', null);
+    scoreCard.append(el('div', 'score-num', String(summary.score ?? '?')));
+    scoreCard.append(el('div', 'score-grade', 'Grade ' + (summary.grade || '?')));
+    const meta = el('div', '', null);
+    meta.append(el('div', '', `${summary.findings || findings.length} finding${(summary.findings || findings.length) === 1 ? '' : 's'}`));
+    if (summary.ownership && summary.ownership.verified) meta.append(el('div', '', 'Ownership verified (deeper read-only checks on)'));
+    else meta.append(el('div', '', 'Anonymous scan (prove ownership for deeper reads)'));
+    scoreCard.append(meta);
+    out.append(scoreCard);
+
+    if (summary.stacks && summary.stacks.length) {
+      const badges = el('div', 'stack-badges', null);
+      for (const s of summary.stacks) {
+        const b = el('span', 'stack-badge', s.label || s.id);
+        b.title = s.evidence || '';
+        badges.append(b);
+      }
+      out.append(badges);
+    }
+
+    if (summary.topFixes && summary.topFixes.length) {
+      out.append(el('h2', 'find-group', 'Top fixes'));
+      for (const f of summary.topFixes) out.append(renderFinding(f));
+    }
+
     const crit = (summary.critical || 0) + (summary.high || 0);
     const line =
       findings.length === 0
         ? `No issues found on this pass (${summary.scriptsScanned} script${summary.scriptsScanned === 1 ? '' : 's'} checked). That is not a guarantee.`
         : `${crit} high-severity finding${crit === 1 ? '' : 's'}, ${summary.medium || 0} to review, ${(summary.low || 0) + (summary.info || 0)} lower priority. Values are masked.`;
     out.append(el('p', 'sum', line));
+
     for (const g of GROUP_ORDER) {
       const items = findings.filter((f) => (f.category || 'headers') === g.id);
       if (!items.length) continue;
       out.append(el('h2', 'find-group', g.label));
-      for (const f of items) out.append(renderFinding(f));
+      for (const f of items) {
+        const k = findingKey(f);
+        const mark = marks && marks.regressed.has(k) ? 'regressed' : '';
+        out.append(renderFinding(f, mark));
+      }
     }
-    const other = findings.filter((f) => !GROUP_ORDER.some((g) => g.id === (f.category || 'headers')));
-    for (const f of other) out.append(renderFinding(f));
   }
 
-  document.getElementById('live-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const url = document.getElementById('live-url').value.trim();
+  async function runScan(url, isRescan) {
     out.replaceChildren();
     runBtn.disabled = true;
+    rescanBtn.disabled = true;
     progress.hidden = false;
+    if (!isRescan) {
+      diffEl.hidden = true;
+      diffEl.textContent = '';
+    }
     status.textContent = 'Starting scan...';
     const findings = [];
+    const prev = isRescan ? loadPrev() : null;
     try {
       const res = await fetch(workerUrl + '/scan', {
         method: 'POST',
@@ -230,14 +339,16 @@ const workerUrl = SITE.liveScanWorker;
           status.textContent = data.error;
           return;
         }
-        status.textContent = `Done in ${Math.round((data.summary && data.summary.durationMs) || 0)} ms.`;
-        renderSummary(data.summary, data.findings || []);
+        const marks = isRescan ? compareAndDiff(prev, url, data.summary, data.findings || []) : { improved: new Set(), regressed: new Set() };
+        status.textContent = `Done in ${Math.round((data.summary && data.summary.durationMs) || 0)} ms. Score ${data.summary.score} (${data.summary.grade}).`;
+        renderSummary(data.summary, data.findings || [], marks);
+        saveResult(url, data.summary, data.findings || []);
+        rescanBtn.hidden = false;
         return;
       }
       const reader = res.body.getReader();
       const dec = new TextDecoder();
       let buf = '';
-      let summary = null;
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -250,13 +361,14 @@ const workerUrl = SITE.liveScanWorker;
           let ev;
           try { ev = JSON.parse(line.slice(6)); } catch { continue; }
           if (ev.type === 'status') status.textContent = ev.message;
-          else if (ev.type === 'finding') {
-            findings.push(ev.finding);
-            out.append(renderFinding(ev.finding));
-          } else if (ev.type === 'done') {
-            summary = ev.summary;
-            status.textContent = `Done in ${Math.round(summary.durationMs)} ms. Checked ${summary.scriptsScanned} script${summary.scriptsScanned === 1 ? '' : 's'}.`;
-            renderSummary(summary, findings);
+          else if (ev.type === 'finding') findings.push(ev.finding);
+          else if (ev.type === 'done') {
+            const summary = ev.summary;
+            const marks = isRescan ? compareAndDiff(prev, url, summary, findings) : { improved: new Set(), regressed: new Set() };
+            status.textContent = `Done in ${Math.round(summary.durationMs)} ms. Score ${summary.score} (${summary.grade}). Checked ${summary.scriptsScanned} script${summary.scriptsScanned === 1 ? '' : 's'}.`;
+            renderSummary(summary, findings, marks);
+            saveResult(url, summary, findings);
+            rescanBtn.hidden = false;
           } else if (ev.type === 'error') {
             status.textContent = ev.message;
           }
@@ -266,7 +378,65 @@ const workerUrl = SITE.liveScanWorker;
       status.textContent = 'Could not reach the scanner. Check your connection and try again.';
     } finally {
       runBtn.disabled = false;
+      rescanBtn.disabled = false;
       progress.hidden = true;
     }
+  }
+
+  document.getElementById('live-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    runScan(urlInput.value.trim(), false);
   });
+  rescanBtn.addEventListener('click', () => {
+    const url = urlInput.value.trim();
+    if (url) runScan(url, true);
+  });
+
+  document.getElementById('own-start').addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+    if (!url) { status.textContent = 'Enter the app URL first.'; return; }
+    ownOut.hidden = false;
+    ownOut.textContent = 'Requesting token...';
+    try {
+      const res = await fetch(workerUrl + '/verify/start', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const j = await res.json();
+      if (j.error) { ownOut.textContent = j.error; return; }
+      ownOut.textContent =
+        j.instructions +
+        '\n\nToken: ' + j.token +
+        '\nFile URL: ' + j.wellKnownUrl +
+        '\nDNS name: ' + j.dnsName;
+    } catch {
+      ownOut.textContent = 'Could not reach the verifier.';
+    }
+  });
+
+  document.getElementById('own-check').addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+    if (!url) { status.textContent = 'Enter the app URL first.'; return; }
+    ownOut.hidden = false;
+    ownOut.textContent = 'Checking...';
+    try {
+      const res = await fetch(workerUrl + '/verify/check', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const j = await res.json();
+      if (j.ok) ownOut.textContent = `Verified via ${j.method}. Run a scan to include deeper read-only checks.`;
+      else ownOut.textContent = j.reason || j.error || 'Not verified yet.';
+    } catch {
+      ownOut.textContent = 'Could not reach the verifier.';
+    }
+  });
+
+  // Restore rescan visibility if a prior result exists for the typed URL
+  try {
+    const prev = loadPrev();
+    if (prev && prev.url) rescanBtn.hidden = false;
+  } catch {}
 </script>

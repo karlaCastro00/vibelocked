@@ -1,13 +1,27 @@
 import { BlockedError, dohResolver, parseTarget, safeFetch, type Resolver } from './ssrf.ts';
 import { findGenericSecrets } from './entropy.ts';
 import {
+  extractAdminPaths,
   extractEndpoints,
+  extractOpenApiUrls,
   extractStorage,
   extractSupabaseTables,
+  pathsFromOpenApiDoc,
   tablesFromOpenApi,
   type EndpointHit,
 } from './surface.ts';
 import {
+  fingerprintStack,
+  findAuthJsCallbackRisks,
+  findVercelBlobUrls,
+  stackProbePaths,
+  type StackHit,
+} from './fingerprint.ts';
+import { scoreFindings } from './score.ts';
+import { OWNERSHIP_DEEP_POLICY, isVerified, type OwnershipRecord } from './ownership.ts';
+import {
+  adminPathFinding,
+  authJsCallbackFinding,
   detectFirebase,
   detectSupabase,
   exposureFinding,
@@ -17,16 +31,21 @@ import {
   headerFindings,
   corsKind,
   type CorsKind,
+  openApiDocFinding,
   openApiExposedFinding,
   openEndpointFinding,
   openTableFinding,
+  ownershipDeepNote,
   secretFindings,
   sourceMapCandidates,
+  sourceMapSecretFinding,
   scriptUrlsFromHtml,
   storagePublicFinding,
   supabaseConfigFinding,
+  vercelBlobFinding,
   type Finding,
 } from './findings.ts';
+
 
 export type ProgressEvent =
   | { type: 'status'; message: string }
@@ -46,6 +65,11 @@ export type ScanSummary = {
   durationMs: number;
   strangerSummary: string;
   categories: Record<string, number>;
+  score: number;
+  grade: string;
+  topFixes: Finding[];
+  stacks: StackHit[];
+  ownership: { verified: boolean; note?: string };
 };
 
 const COMMON_TABLES = [
@@ -70,6 +94,8 @@ export type ScanDeps = {
   resolve?: Resolver;
   onEvent?: (e: ProgressEvent) => void;
   now?: () => number;
+  /** Optional pre-loaded ownership record for this host (from KV). */
+  ownership?: OwnershipRecord | null;
 };
 
 function emit(deps: ScanDeps, e: ProgressEvent) {
@@ -245,7 +271,7 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
       }
       for (const mapUrl of sourceMapCandidates(src, r.body)) {
         try {
-          const m = await safeFetch(f, resolve, mapUrl, { method: 'GET', maxBytes: 4096, timeoutMs: 3000 });
+          const m = await safeFetch(f, resolve, mapUrl, { method: 'GET', maxBytes: 500_000, timeoutMs: 5000 });
           if (m.status === 200 && (m.body.includes('"mappings"') || m.body.includes('"sources"') || mapUrl.endsWith('.map'))) {
             try {
               const path = new URL(mapUrl).pathname;
@@ -253,6 +279,15 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
             } catch {
               add(exposureFinding(mapUrl, 200, m.body));
             }
+            for (const hit of secretFindings(m.body, 'source map: ' + mapUrl)) {
+              if (hit.severity === 'critical' || hit.severity === 'high') {
+                add(sourceMapSecretFinding(mapUrl, hit.title, hit.evidence || ''));
+              } else {
+                add(hit);
+              }
+            }
+            for (const hit of genericSecretFindings(findGenericSecrets(m.body, 15), 'source map: ' + mapUrl)) add(hit);
+            combinedJs += '\n' + m.body.slice(0, 200_000);
           }
         } catch {
           /* ignore */
@@ -535,6 +570,163 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
     }
   }
 
+  // --- v3: fingerprint + stack packs ---
+  emit(deps, { type: 'status', message: 'Fingerprinting stack...' });
+  const stacks = fingerprintStack(page.body, combinedJs, page.headers, target.href);
+
+  if (findAuthJsCallbackRisks(combinedJs).length) add(authJsCallbackFinding());
+  for (const blob of findVercelBlobUrls(combinedJs)) {
+    try {
+      const r = await safeFetch(f, resolve, blob, { method: 'GET', maxBytes: 4096, timeoutMs: 4000 });
+      if (r.status >= 200 && r.status < 400) add(vercelBlobFinding(blob));
+    } catch {
+      add(vercelBlobFinding(blob)); // still note embedded public URL
+    }
+  }
+
+  for (const path of stackProbePaths(stacks)) {
+    try {
+      const r = await safeFetch(f, resolve, new URL(path, target), {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        maxBytes: 64_000,
+        timeoutMs: 4000,
+      });
+      const ct = r.headers.get('content-type') || '';
+      if (bodyLooksLikeData(r.status, r.body, ct)) add(openEndpointFinding(new URL(path, target).href, r.status, 'same-origin-api'));
+    } catch {
+      /* skip */
+    }
+  }
+
+  // Chained: OpenAPI/Swagger URLs from JS
+  emit(deps, { type: 'status', message: 'Following OpenAPI and admin paths found in JavaScript...' });
+  let openApiProbeBudget = 12;
+  for (const oaUrl of extractOpenApiUrls(combinedJs, target.origin)) {
+    try {
+      const r = await safeFetch(f, resolve, oaUrl, { method: 'GET', maxBytes: 400_000, timeoutMs: 6000 });
+      if (r.status >= 200 && r.status < 300) {
+        const paths = pathsFromOpenApiDoc(r.body);
+        if (paths.length) {
+          add(openApiDocFinding(oaUrl, paths.length));
+          for (const path of paths) {
+            if (openApiProbeBudget-- <= 0) break;
+            if (!path.startsWith('/') || /\{/.test(path)) continue;
+            try {
+              const pr = await safeFetch(f, resolve, new URL(path, target), {
+                method: 'GET',
+                headers: { Accept: 'application/json' },
+                maxBytes: 32_000,
+                timeoutMs: 3000,
+              });
+              const ct = pr.headers.get('content-type') || '';
+              if (bodyLooksLikeData(pr.status, pr.body, ct)) {
+                add(openEndpointFinding(new URL(path, target).href, pr.status, 'same-origin-api'));
+              }
+            } catch {
+              /* skip */
+            }
+          }
+        }
+      }
+    } catch {
+      /* skip */
+    }
+  }
+
+  for (const path of extractAdminPaths(combinedJs)) {
+    try {
+      const head = await safeFetch(f, resolve, new URL(path, target), { method: 'HEAD', maxBytes: 1024, timeoutMs: 3000 });
+      let status = head.status;
+      if (status === 405 || status === 501) {
+        const g = await safeFetch(f, resolve, new URL(path, target), { method: 'GET', maxBytes: 8192, timeoutMs: 3000 });
+        status = g.status;
+      }
+      if (status > 0 && status < 500) add(adminPathFinding(path, status));
+    } catch {
+      try {
+        const g = await safeFetch(f, resolve, new URL(path, target), { method: 'GET', maxBytes: 8192, timeoutMs: 3000 });
+        if (g.status < 500) add(adminPathFinding(path, g.status));
+      } catch {
+        /* skip */
+      }
+    }
+  }
+
+  // Ownership-gated deeper READ checks (no throwaway signup)
+  const owned = isVerified(deps.ownership ?? null);
+  let ownershipNote: string | undefined;
+  if (owned) {
+    emit(deps, { type: 'status', message: 'Ownership verified: running deeper read-only checks...' });
+    add(ownershipDeepNote(OWNERSHIP_DEEP_POLICY.throwawaySignupSkipReason));
+    ownershipNote = OWNERSHIP_DEEP_POLICY.throwawaySignupSkipReason;
+    if (sbCfg && OWNERSHIP_DEEP_POLICY.allowIdorStyleReads) {
+      const restBase = sbCfg.url.replace(/\/$/, '') + '/rest/v1';
+      const openTables = findings
+        .filter((f) => f.id.startsWith('supabase-open-'))
+        .map((f) => f.id.replace('supabase-open-', ''))
+        .slice(0, 5);
+      for (const table of openTables) {
+        // IDOR-style: request with a fake user filter (still anon key) Limit 1
+        try {
+          const r = await safeFetch(f, resolve, `${restBase}/${table}?select=*&limit=1&id=eq.00000000-0000-0000-0000-000000000001`, {
+            method: 'GET',
+            headers: {
+              apikey: sbCfg.key,
+              Authorization: `Bearer ${sbCfg.key}`,
+              Prefer: 'count=exact',
+              Accept: 'application/json',
+            },
+            maxBytes: 32_000,
+            timeoutMs: 4000,
+          });
+          if (r.status >= 200 && r.status < 300 && r.body && r.body !== '[]') {
+            add({
+              id: 'supabase-idor-' + table,
+              severity: 'high',
+              category: 'database',
+              title: `Table "${table}" returns rows for an arbitrary id filter (anon)`,
+              detail: `With only the anon key, filtering ${table} by a guessed id still returned data. Review RLS so users cannot read other people's rows.`,
+              where: `GET /rest/v1/${table}?id=eq....`,
+              evidence: 'HTTP ' + r.status,
+              fixPrompt: `My Supabase table "${table}" returns data to anon requests that filter by id. Add RLS so each user only reads their own rows (auth.uid() checks). Show me the SQL.`,
+            });
+          }
+        } catch {
+          /* skip */
+        }
+      }
+      // Safe read-only RPC names sometimes embedded
+      if (OWNERSHIP_DEEP_POLICY.allowReadOnlyRpcProbe) {
+        for (const m of combinedJs.matchAll(/\.rpc\(\s*["'`]([a-zA-Z_][a-zA-Z0-9_]{2,40})["'`]/g)) {
+          const fn = m[1];
+          if (!/^(get_|list_|fetch_|read_|count_|search_)/i.test(fn)) continue;
+          try {
+            const r = await safeFetch(f, resolve, `${restBase}/rpc/${fn}`, {
+              method: 'GET',
+              headers: {
+                apikey: sbCfg.key,
+                Authorization: `Bearer ${sbCfg.key}`,
+                Accept: 'application/json',
+              },
+              maxBytes: 32_000,
+              timeoutMs: 4000,
+            });
+            // GET rpc often 405; only flag if body looks like data
+            const ct = r.headers.get('content-type') || '';
+            if (bodyLooksLikeData(r.status, r.body, ct)) {
+              add(openEndpointFinding(`${restBase}/rpc/${fn}`, r.status, 'supabase'));
+            }
+          } catch {
+            /* skip */
+          }
+          break; // one attempt is enough for MVP
+        }
+      }
+    }
+  }
+
+  const scored = scoreFindings(findings);
   const sev = countSev(findings);
   const categories = countCats(findings);
   const summary: ScanSummary = {
@@ -545,6 +737,11 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
     durationMs: (deps.now ?? Date.now)() - started,
     strangerSummary: strangerBlurb(findings, target.href),
     categories,
+    score: scored.score,
+    grade: scored.grade,
+    topFixes: scored.topFixes,
+    stacks,
+    ownership: { verified: owned, note: ownershipNote },
   };
   emit(deps, { type: 'done', summary });
   return { findings, summary };
