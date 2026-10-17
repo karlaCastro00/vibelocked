@@ -14,6 +14,8 @@ export type Finding = {
   evidence?: string;
   confidence?: 'high' | 'medium' | 'low';
   fixPrompt: string;
+  /** Short 3-step Fix now checklist (UI playbook). */
+  fixSteps?: string[];
 };
 
 const PRE =

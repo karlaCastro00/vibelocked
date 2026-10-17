@@ -17,7 +17,7 @@ const SEV_WEIGHT: Record<Severity, number> = {
   info: 1,
 };
 
-/** Category multipliers: open DB / storage / secrets hurt most. */
+/** Category multipliers: open DB / storage / secrets hurt most. Headers are soft. */
 const CAT_MULT: Record<FindingCategory, number> = {
   database: 1.35,
   storage: 1.25,
@@ -27,12 +27,12 @@ const CAT_MULT: Record<FindingCategory, number> = {
   api: 1.0,
   exposed: 1.15,
   tls: 0.9,
-  headers: 0.55,
+  headers: 0.35,
 };
 
-/** Cap contribution from noisy header-only findings. */
+/** Cap contribution from noisy header-only findings (v5: tighter than v4). */
 const CAT_CAP: Partial<Record<FindingCategory, number>> = {
-  headers: 12,
+  headers: 6,
 };
 
 export function letterGrade(score: number): Grade {
@@ -44,6 +44,8 @@ export function letterGrade(score: number): Grade {
 }
 
 function findingPoints(f: Finding): number {
+  // Info-only headers do not scare clean apps
+  if (f.category === 'headers' && f.severity === 'info') return 0;
   return SEV_WEIGHT[f.severity] * (CAT_MULT[f.category] ?? 1);
 }
 
@@ -52,7 +54,6 @@ function findingPoints(f: Finding): number {
  * Deterministic: same findings always same score (order-independent).
  */
 export function scoreFindings(findings: Finding[]): ScoreResult {
-  // Sort copy for stable topFixes; scoring sums regardless of order
   const sorted = [...findings].sort((a, b) => {
     const pa = findingPoints(a);
     const pb = findingPoints(b);
@@ -74,7 +75,6 @@ export function scoreFindings(findings: Finding[]): ScoreResult {
     deducted += pts;
   }
 
-  // Extra weight: each open DB table beyond the first
   const openDb = findings.filter((f) => f.category === 'database' && (f.severity === 'critical' || f.severity === 'high'));
   if (openDb.length > 1) deducted += (openDb.length - 1) * 4;
 

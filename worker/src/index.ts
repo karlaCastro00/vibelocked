@@ -52,7 +52,7 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(req, env) });
     }
     if (url.pathname === '/health') {
-      return json({ ok: true, service: 'vibelocked-live-scan', version: 4 }, 200, req, env);
+      return json({ ok: true, service: 'vibelocked-live-scan', version: 5 }, 200, req, env);
     }
 
     if (!originAllowed(req, env)) {

@@ -29,6 +29,16 @@ import {
 } from './authSurface.ts';
 import { getPeerStats, recordPeerScore } from './peer.ts';
 import { checkCertExpiry } from './tlsCheck.ts';
+import { detectBaasEndpoints, probeBaas } from './baas.ts';
+import {
+  findManifestUrls,
+  findServiceWorkerUrls,
+  urlsFromManifest,
+  urlsFromRobots,
+  urlsFromServiceWorker,
+  urlsFromSitemap,
+} from './discover.ts';
+import { withPlaybook } from './playbooks.ts';
 import {
   adminPathFinding,
   authJsCallbackFinding,
@@ -215,11 +225,12 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
   const seen = new Set<string>();
   const add = (finding: Finding | null | undefined) => {
     if (!finding) return;
-    const key = finding.id + '|' + (finding.where || '') + '|' + (finding.evidence || '');
+    const fWith = withPlaybook(finding);
+    const key = fWith.id + '|' + (fWith.where || '') + '|' + (fWith.evidence || '');
     if (seen.has(key)) return;
     seen.add(key);
-    findings.push(finding);
-    emit(deps, { type: 'finding', finding });
+    findings.push(fWith);
+    emit(deps, { type: 'finding', finding: fWith });
   };
 
   let target = parseTarget(inputUrl);
@@ -686,34 +697,93 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
         .filter((f) => f.id.startsWith('supabase-open-'))
         .map((f) => f.id.replace('supabase-open-', ''))
         .slice(0, 5);
-      for (const table of openTables) {
-        // IDOR-style: request with a fake user filter (still anon key) Limit 1
+      const IDOR_COLS = ['id', 'user_id', 'owner_id'] as const;
+      const hdrsIdor = {
+        apikey: sbCfg.key,
+        Authorization: `Bearer ${sbCfg.key}`,
+        Prefer: 'count=exact',
+        Accept: 'application/json',
+      };
+      const countOf = (r: { headers: Headers; body: string }) => {
+        const cr = r.headers.get('content-range') || '';
+        const m = cr.match(/\/(\d+|\*)/);
+        if (m && m[1] !== '*') return Number(m[1]);
         try {
-          const r = await safeFetch(f, resolve, `${restBase}/${table}?select=*&limit=1&id=eq.00000000-0000-0000-0000-000000000001`, {
+          const j = JSON.parse(r.body);
+          return Array.isArray(j) ? j.length : 0;
+        } catch {
+          return r.body && r.body !== '[]' ? 1 : 0;
+        }
+      };
+      for (const table of openTables) {
+        // Pull up to 2 sample rows (Limit) to reuse real column values when present
+        let sampleVals: Partial<Record<(typeof IDOR_COLS)[number], string[]>> = {};
+        try {
+          const sample = await safeFetch(f, resolve, `${restBase}/${table}?select=*&limit=2`, {
             method: 'GET',
-            headers: {
-              apikey: sbCfg.key,
-              Authorization: `Bearer ${sbCfg.key}`,
-              Prefer: 'count=exact',
-              Accept: 'application/json',
-            },
+            headers: hdrsIdor,
             maxBytes: 32_000,
             timeoutMs: 4000,
           });
-          if (r.status >= 200 && r.status < 300 && r.body && r.body !== '[]') {
-            add({
-              id: 'supabase-idor-' + table,
-              severity: 'high',
-              category: 'database',
-              title: `Table "${table}" returns rows for an arbitrary id filter (anon)`,
-              detail: `With only the anon key, filtering ${table} by a guessed id still returned data. Review RLS so users cannot read other people's rows.`,
-              where: `GET /rest/v1/${table}?id=eq....`,
-              evidence: 'HTTP ' + r.status,
-              fixPrompt: `My Supabase table "${table}" returns data to anon requests that filter by id. Add RLS so each user only reads their own rows (auth.uid() checks). Show me the SQL.`,
-            });
+          if (sample.status >= 200 && sample.status < 300) {
+            try {
+              const rows = JSON.parse(sample.body);
+              if (Array.isArray(rows)) {
+                for (const col of IDOR_COLS) {
+                  const vals = rows.map((row: Record<string, unknown>) => row?.[col]).filter((v: unknown) => v != null && String(v).length > 0).map(String);
+                  if (vals.length) sampleVals[col] = [...new Set(vals)].slice(0, 2);
+                }
+              }
+            } catch {}
           }
-        } catch {
-          /* skip */
+        } catch {}
+        for (const col of IDOR_COLS) {
+          try {
+            const vals = sampleVals[col] || [];
+            const a = vals[0] || '00000000-0000-4000-8000-000000000001';
+            const b = vals[1] || '00000000-0000-4000-8000-000000000002';
+            if (a === b && vals.length < 2) {
+              // Only one real value: compare real filter vs a clearly different guessed value
+            }
+            const ra = await safeFetch(
+              f,
+              resolve,
+              `${restBase}/${table}?select=*&limit=1&${col}=eq.${encodeURIComponent(a)}`,
+              { method: 'GET', headers: hdrsIdor, maxBytes: 16_000, timeoutMs: 4000 },
+            );
+            const rb = await safeFetch(
+              f,
+              resolve,
+              `${restBase}/${table}?select=*&limit=1&${col}=eq.${encodeURIComponent(b)}`,
+              { method: 'GET', headers: hdrsIdor, maxBytes: 16_000, timeoutMs: 4000 },
+            );
+            // Column missing / type error: skip this col
+            if (ra.status === 400 || rb.status === 400) continue;
+            if (ra.status === 404 || rb.status === 404) continue;
+            const okA = ra.status >= 200 && ra.status < 300;
+            const okB = rb.status >= 200 && rb.status < 300;
+            if (!okA || !okB) continue;
+            const ca = countOf(ra);
+            const cb = countOf(rb);
+            const bodyA = ra.body && ra.body !== '[]';
+            const bodyB = rb.body && rb.body !== '[]';
+            // Likely IDOR: two different ${col} filters both return rows to anon (Limit 1, count only)
+            if (bodyA && bodyB && a !== b) {
+              add({
+                id: 'supabase-idor-' + table + '-' + col,
+                severity: 'high',
+                category: 'database',
+                title: `Table "${table}" likely IDOR via ${col} filter (anon)`,
+                detail: `Anon PostgREST queries on ${table} with two different ${col} filters both returned data (counts ${ca} vs ${cb}, Limit 1). Tighten RLS so users cannot read other people's rows by guessing ${col}.`,
+                where: `GET /rest/v1/${table}?${col}=eq....&limit=1`,
+                evidence: `counts ${ca}/${cb}`,
+                fixPrompt: `My Supabase table "${table}" returns rows to anon when filtering by different ${col} values. Add RLS so each user only reads their own rows (auth.uid() checks on ${col}). Show me the SQL.`,
+              });
+              break;
+            }
+          } catch {
+            /* skip */
+          }
         }
       }
       // Safe read-only RPC names sometimes embedded
@@ -747,7 +817,69 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
   }
 
 
-  // --- v4: library fingerprint + CVE pack ---
+  // --- v5: discover more URLs from SW / manifest / robots / sitemap (capped) ---
+  emit(deps, { type: 'status', message: 'Parsing service worker, manifest, robots, and sitemap...' });
+  const discoveryUrls: string[] = [];
+  const pushDisc = (u: string) => {
+    try {
+      const parsed = new URL(u, target);
+      if (parsed.origin !== target.origin) return;
+      if (discoveryUrls.length >= 40) return;
+      if (discoveryUrls.includes(parsed.href)) return;
+      discoveryUrls.push(parsed.href);
+    } catch {}
+  };
+  for (const sw of findServiceWorkerUrls(page.body, target.href)) {
+    try {
+      const r = await safeFetch(f, resolve, sw, { maxBytes: 200_000, timeoutMs: 5000 });
+      if (r.status === 200) for (const u of urlsFromServiceWorker(r.body, target.href)) pushDisc(u);
+    } catch {}
+  }
+  for (const mf of findManifestUrls(page.body, target.href)) {
+    try {
+      const r = await safeFetch(f, resolve, mf, { maxBytes: 64_000, timeoutMs: 4000 });
+      if (r.status === 200) for (const u of urlsFromManifest(r.body, target.href)) pushDisc(u);
+    } catch {}
+  }
+  try {
+    const robots = await safeFetch(f, resolve, new URL('/robots.txt', target), { maxBytes: 32_000, timeoutMs: 4000 });
+    if (robots.status === 200) {
+      for (const u of urlsFromRobots(robots.body, target.href)) pushDisc(u);
+      for (const sm of urlsFromRobots(robots.body, target.href).filter((x) => /sitemap/i.test(x)).slice(0, 2)) {
+        try {
+          const sx = await safeFetch(f, resolve, sm, { maxBytes: 200_000, timeoutMs: 5000 });
+          if (sx.status === 200) for (const u of urlsFromSitemap(sx.body)) pushDisc(u);
+        } catch {}
+      }
+    }
+  } catch {}
+  try {
+    const sx = await safeFetch(f, resolve, new URL('/sitemap.xml', target), { maxBytes: 200_000, timeoutMs: 5000 });
+    if (sx.status === 200) for (const u of urlsFromSitemap(sx.body)) pushDisc(u);
+  } catch {}
+  // Chain a few discovered same-origin paths into lightweight probes
+  for (const href of discoveryUrls.slice(0, 12)) {
+    try {
+      const path = new URL(href).pathname;
+      if (!/^\/(api|app|dashboard|admin|login|auth|rest|graphql|v1|v2)/i.test(path) && !/\.(js|json)$/i.test(path)) continue;
+      const r = await safeFetch(f, resolve, href, { method: 'GET', maxBytes: 32_000, timeoutMs: 4000 });
+      const ct = r.headers.get('content-type') || '';
+      if (bodyLooksLikeData(r.status, r.body, ct) && /\/api\//i.test(path)) {
+        add(openEndpointFinding(href, r.status, 'discovered'));
+      }
+      if (/\.js$/i.test(path) && r.status === 200) {
+        combinedJs += '\n' + r.body;
+        for (const hit of secretFindings(r.body, href)) add(hit);
+      }
+    } catch {}
+  }
+
+  // --- v5: extra BaaS packs (Appwrite, PocketBase, Hasura/Nhost, Convex) ---
+  emit(deps, { type: 'status', message: 'Probing Appwrite, PocketBase, Hasura/Nhost, and Convex...' });
+  const baas = detectBaasEndpoints(combinedJs + '\n' + page.body, target.href);
+  await probeBaas(f, resolve, baas, add);
+
+    // --- v4: library fingerprint + CVE pack ---
   emit(deps, { type: 'status', message: 'Fingerprinting client libraries and matching CVE pack...' });
   const libs = detectLibraries(combinedJs + '\n' + page.body);
   for (const m of matchCves(libs)) add(cveFinding(m));

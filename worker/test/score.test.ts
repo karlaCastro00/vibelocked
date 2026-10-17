@@ -51,6 +51,6 @@ describe('scoreFindings', () => {
       f({ id: 'h' + i, severity: 'low', category: 'headers', title: 'h' + i }),
     );
     const s = scoreFindings(headers);
-    assert.ok(s.score >= 100 - 12 - 1); // cap ~12
+    assert.ok(s.score >= 100 - 6 - 1); // cap ~6 (v5)
   });
 });
