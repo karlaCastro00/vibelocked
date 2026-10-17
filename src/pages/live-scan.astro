@@ -24,7 +24,7 @@ const workerUrl = SITE.liveScanWorker;
       <p class="kicker">Free tool</p>
       <h1 class="page-title">Probe your deployed app like an attacker</h1>
       <p class="lede">
-        Enter the public URL of an app you shipped with Lovable, Bolt, v0, Cursor, or similar. We fetch it from the outside, look for secrets in shipped JavaScript, check common Supabase and Firebase misconfigs, and probe for exposed .env, .git, and source maps. Read only. We never ask you to paste code or secrets.
+        Enter the public URL of an app you shipped with Lovable, Bolt, v0, Cursor, or similar. We fetch it from the outside, hunt known and unknown secrets in shipped JavaScript, map API and BaaS endpoints, discover real Supabase tables from your bundle, and check storage buckets plus exposed .env, .git, and source maps. Read only. We never ask you to paste code or secrets.
       </p>
     </header>
 
@@ -53,11 +53,12 @@ const workerUrl = SITE.liveScanWorker;
     <article class="prose">
       <h2>What it checks</h2>
       <ul>
-        <li>Secrets in HTML and same-origin JavaScript bundles (Stripe sk_live, OpenAI, Anthropic, Supabase service_role / sb_secret, AWS, GitHub tokens, private keys, database URLs with passwords), with values masked</li>
-        <li>Supabase public config: then read-only REST probes of common tables (profiles, users, todos, and similar) with the anon key</li>
-        <li>Firebase web config, plus open Realtime Database or Firestore when detectable over public REST</li>
-        <li>Exposed /.env, /.git/HEAD, /.git/config, and JavaScript source maps</li>
-        <li>CORS that allows a foreign Origin, and missing security headers (CSP, X-Frame-Options, HSTS, nosniff)</li>
+        <li>Known provider secrets and generic high-entropy credentials (assignment names, Bearer tokens, JWTs), with values masked and confidence labels</li>
+        <li>Supabase: tables named in your bundle, OpenAPI schema if exposed, plus a common table list; Storage bucket visibility</li>
+        <li>Firebase Realtime Database, Firestore, and Storage listing when detectable over public REST</li>
+        <li>Backend surface: same-origin /api routes, GraphQL, and known BaaS hosts extracted from JavaScript, probed with anonymous GET only</li>
+        <li>Public S3 / R2 / GCS bucket URLs found in JavaScript, plus exposed /.env, .git, and source maps</li>
+        <li>CORS and missing security headers (CSP, X-Frame-Options, HSTS, nosniff)</li>
       </ul>
       <h2>How to use a finding</h2>
       <p>
@@ -93,6 +94,15 @@ const workerUrl = SITE.liveScanWorker;
   .scan-results :global(.finding.info) { border-color: #2e8b57; }
   .scan-results :global(code) { word-break: break-all; }
   .scan-results :global(.sum) { font-weight: 600; }
+  .scan-results :global(.stranger) {
+    padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 0.8rem;
+    background: color-mix(in srgb, #0e4f48 12%, var(--bg));
+    border: 1px solid color-mix(in srgb, #0e4f48 35%, transparent);
+  }
+  .scan-results :global(.find-group) {
+    font-size: 1.05rem; margin: 1.4rem 0 0.5rem; padding-bottom: 0.25rem;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  }
   .scan-results :global(.fix-box) {
     margin-top: 0.5rem; padding: 0.6rem 0.7rem; border-radius: 6px;
     border: 1px dashed color-mix(in srgb, currentColor 35%, transparent);
@@ -129,9 +139,20 @@ const workerUrl = SITE.liveScanWorker;
     return 'Note';
   }
 
+  const GROUP_ORDER = [
+    { id: 'secrets', label: 'Secrets' },
+    { id: 'database', label: 'Database' },
+    { id: 'storage', label: 'Storage' },
+    { id: 'api', label: 'API endpoints' },
+    { id: 'exposed', label: 'Exposed files' },
+    { id: 'headers', label: 'Headers' },
+  ];
+
   function renderFinding(f) {
     const box = el('div', 'finding ' + f.severity, null);
-    const head = el('strong', '', `${sevLabel(f.severity)}: ${f.title}`);
+    let label = sevLabel(f.severity);
+    if (f.confidence) label += ` (${f.confidence} confidence)`;
+    const head = el('strong', '', `${label}: ${f.title}`);
     box.append(head);
     if (f.where) box.append(el('div', '', 'Where: ' + f.where));
     if (f.evidence) {
@@ -161,13 +182,22 @@ const workerUrl = SITE.liveScanWorker;
 
   function renderSummary(summary, findings) {
     out.replaceChildren();
-    const crit = summary.critical + summary.high;
+    const stranger = el('p', 'sum stranger', summary.strangerSummary || '');
+    out.append(stranger);
+    const crit = (summary.critical || 0) + (summary.high || 0);
     const line =
       findings.length === 0
         ? `No issues found on this pass (${summary.scriptsScanned} script${summary.scriptsScanned === 1 ? '' : 's'} checked). That is not a guarantee.`
-        : `${crit} high-severity finding${crit === 1 ? '' : 's'}, ${summary.medium} to review, ${summary.low + summary.info} lower priority. Values are masked.`;
+        : `${crit} high-severity finding${crit === 1 ? '' : 's'}, ${summary.medium || 0} to review, ${(summary.low || 0) + (summary.info || 0)} lower priority. Values are masked.`;
     out.append(el('p', 'sum', line));
-    for (const f of findings) out.append(renderFinding(f));
+    for (const g of GROUP_ORDER) {
+      const items = findings.filter((f) => (f.category || 'headers') === g.id);
+      if (!items.length) continue;
+      out.append(el('h2', 'find-group', g.label));
+      for (const f of items) out.append(renderFinding(f));
+    }
+    const other = findings.filter((f) => !GROUP_ORDER.some((g) => g.id === (f.category || 'headers')));
+    for (const f of other) out.append(renderFinding(f));
   }
 
   document.getElementById('live-form').addEventListener('submit', async (e) => {

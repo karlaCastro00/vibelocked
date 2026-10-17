@@ -1,14 +1,18 @@
 // Pure parsers: no network. Shared by the Worker and the tests.
 import { scan as scanText, mask } from '../../src/lib/scanner.ts';
+import type { GenericHit } from './entropy.ts';
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+export type FindingCategory = 'secrets' | 'database' | 'storage' | 'api' | 'exposed' | 'headers';
 export type Finding = {
   id: string;
   severity: Severity;
+  category: FindingCategory;
   title: string;
   detail: string;
   where?: string;
   evidence?: string;
+  confidence?: 'high' | 'medium' | 'low';
   fixPrompt: string;
 };
 
@@ -33,16 +37,22 @@ export function scanJs(text: string) {
 
 const SEV = { high: 'critical', warn: 'medium', info: 'info' } as const;
 
+const FRAMEWORK_NOISE =
+  /^(?:NEXT_CACHE_|NEXT_PUBLIC_|__NEXT_|__NUXT_|VITE_|ASTRO_|webpackChunk|x-next-|x-vercel-|x-middleware-)/i;
+
 export function secretFindings(text: string, where: string): Finding[] {
   const res: Finding[] = [];
   for (const f of scanJs(text)) {
     if (f.level === 'info') continue;
     if (f.name === 'Google API key') continue;
     if (f.name === 'JSON Web Token') continue;
+    if (FRAMEWORK_NOISE.test(f.value) || FRAMEWORK_NOISE.test(f.name) || /NEXT_CACHE_.*TOKEN/i.test(f.name)) continue;
+    if (/^x-[a-z0-9-]{6,60}$/i.test(f.value)) continue; // HTTP header names, not secrets
     const crit = f.level === 'high';
     res.push({
       id: 'secret-' + f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       severity: SEV[f.level],
+      category: 'secrets',
       title: crit ? `${f.name} shipped to the browser` : `Possible secret in shipped code: ${f.name}`,
       detail: crit
         ? `Anyone who opens your site can read this value from your JavaScript. Treat it as leaked: ${f.fix}`
@@ -117,6 +127,7 @@ export function supabaseConfigFinding(cfg: SupabaseConfig): Finding {
   return {
     id: 'supabase-public-config',
     severity: 'info',
+    category: 'database',
     title: 'Supabase public config found in JavaScript',
     detail:
       `Your app ships a Supabase project URL (${cfg.url}) and a ${cfg.keyKind === 'publishable' ? 'publishable' : 'anon'} key. That is expected for a browser client. The risk is whether Row Level Security blocks anonymous reads on every table.`,
@@ -131,6 +142,7 @@ export function firebaseConfigFinding(cfg: FirebaseConfig): Finding {
   return {
     id: 'firebase-public-config',
     severity: 'info',
+    category: 'database',
     title: 'Firebase web config found in JavaScript',
     detail:
       `Your app ships a Firebase web config${cfg.projectId ? ` for project ${cfg.projectId}` : ''}. The web API key is public by design. Security depends on Auth, App Check, and your Realtime Database / Firestore / Storage rules.`,
@@ -149,6 +161,7 @@ export function exposureFinding(path: string, status: number, snippet: string): 
     return {
       id: 'exposed-env',
       severity: 'critical',
+      category: 'exposed',
       title: `${path} is publicly downloadable`,
       detail:
         'Your web server returned HTTP 200 for a .env file. Anyone can download it. Rotate every value in it, remove the file from the deploy output, and block .env in your host config.',
@@ -163,6 +176,7 @@ export function exposureFinding(path: string, status: number, snippet: string): 
     return {
       id: 'exposed-git-head',
       severity: 'high',
+      category: 'exposed',
       title: `${path} is publicly readable`,
       detail:
         'Your site exposes a .git/HEAD file. An attacker can often reconstruct the full repository from .git and recover secrets from history.',
@@ -177,6 +191,7 @@ export function exposureFinding(path: string, status: number, snippet: string): 
     return {
       id: 'exposed-git-config',
       severity: 'high',
+      category: 'exposed',
       title: `${path} is publicly readable`,
       detail:
         'Your site exposes .git/config. That confirms a public .git tree and can leak remote URLs and sometimes credentials.',
@@ -190,6 +205,7 @@ export function exposureFinding(path: string, status: number, snippet: string): 
     return {
       id: 'exposed-source-map',
       severity: 'medium',
+      category: 'exposed',
       title: `Source map exposed at ${path}`,
       detail:
         'A JavaScript source map is downloadable. Attackers can recover your original TypeScript or React source, including comments and string literals that may hold secrets.',
@@ -230,6 +246,7 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
     res.push({
       id: 'csp-meta-only',
       severity: 'info',
+      category: 'headers',
       title: 'Content-Security-Policy is set only in a meta tag',
       detail:
         'Your page sets CSP with a <meta http-equiv> tag, which browsers honor for script and connect rules. Browsers ignore frame-ancestors, report-uri, and sandbox in meta tags, so clickjacking protection and violation reports need a real response header.',
@@ -240,6 +257,7 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
     res.push({
       id: 'missing-csp',
       severity: 'low',
+      category: 'headers',
       title: 'No Content-Security-Policy header',
       detail:
         'Without CSP, a successful XSS can load any script. Add a CSP that defaults to self and lists the CDNs you actually need.',
@@ -251,6 +269,7 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
     res.push({
       id: 'missing-xfo',
       severity: 'low',
+      category: 'headers',
       title: 'Missing clickjacking protection',
       detail:
         'No X-Frame-Options header and no CSP frame-ancestors. Another site can iframe yours and trick users into clicking.',
@@ -262,6 +281,7 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
     res.push({
       id: 'missing-hsts',
       severity: 'low',
+      category: 'headers',
       title: 'No Strict-Transport-Security header',
       detail:
         'Browsers are not told to stick to HTTPS. Add HSTS once the site is always served over TLS.',
@@ -273,6 +293,7 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
     res.push({
       id: 'missing-xcto',
       severity: 'info',
+      category: 'headers',
       title: 'No X-Content-Type-Options header',
       detail: 'Add X-Content-Type-Options: nosniff so browsers do not guess MIME types.',
       fixPrompt: `Add the response header X-Content-Type-Options: nosniff on my site.`,
@@ -283,6 +304,7 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
     res.push({
       id: 'cors-wildcard',
       severity: 'info',
+      category: 'headers',
       title: 'CORS allows any site to read this page (Access-Control-Allow-Origin: *)',
       detail:
         'Fine for a public static site, because browsers never send cookies with a wildcard response. It becomes a problem only if the same rule covers API routes that return private data based on a token or IP.',
@@ -295,6 +317,7 @@ export function headerFindings(headers: Headers, originChecked: boolean, corsAll
     res.push({
       id: 'cors-open',
       severity: withCreds ? 'high' : 'medium',
+      category: 'headers',
       title: withCreds ? 'CORS reflects any Origin and allows credentials' : 'CORS reflects a foreign Origin',
       detail: withCreds
         ? 'A request with Origin: https://evil.example got that origin back in Access-Control-Allow-Origin together with Access-Control-Allow-Credentials: true. Any website a signed in user visits can read responses made with their cookies.'
@@ -310,6 +333,7 @@ export function openTableFinding(table: string, rowCount: number | null): Findin
   return {
     id: 'supabase-open-' + table,
     severity: 'high',
+    category: 'database',
     title: `Supabase table "${table}" is readable with the anon key`,
     detail:
       rowCount === null
@@ -325,6 +349,7 @@ export function firebaseOpenDbFinding(kind: 'rtdb' | 'firestore', path: string):
   return {
     id: kind === 'rtdb' ? 'firebase-open-rtdb' : 'firebase-open-firestore',
     severity: 'critical',
+    category: 'database',
     title: kind === 'rtdb' ? 'Firebase Realtime Database is world readable' : 'Cloud Firestore appears world readable via REST',
     detail:
       kind === 'rtdb'
@@ -372,4 +397,78 @@ export function sourceMapCandidates(scriptUrl: string, body: string): string[] {
     out.push(scriptUrl.split('?')[0] + '.map');
   } catch {}
   return out;
+}
+
+
+
+export function genericSecretFindings(hits: GenericHit[], where: string): Finding[] {
+  const out: Finding[] = [];
+  for (const h of hits) {
+    if (h.kind === 'public-note') {
+      out.push({
+        id: 'public-' + (h.reason || 'token').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 48),
+        severity: 'info',
+        category: 'secrets',
+        confidence: 'low',
+        title: h.reason + ' found in JavaScript',
+        detail: h.publicNote || 'This value is usually meant for the browser. Confirm matching secrets stay server side.',
+        where,
+        evidence: mask(h.value),
+        fixPrompt: `I found a ${h.reason} in my frontend bundle (${mask(h.value).slice(0, 8)}...). Confirm it is intentionally public. If it is a Maps or Gemini key, restrict it by HTTP referrer in Google Cloud. If anything next to it is a secret key, move that secret to a server only env var.`,
+      });
+      continue;
+    }
+    const sev = h.confidence === 'high' ? 'high' : h.confidence === 'medium' ? 'medium' : 'low';
+    out.push({
+      id: 'generic-secret-' + h.kind + '-' + mask(h.value).replace(/[^a-z0-9]+/gi, '').slice(0, 12),
+      severity: sev,
+      category: 'secrets',
+      confidence: h.confidence,
+      title: `Possible unknown secret (${h.confidence} confidence)`,
+      detail: `${h.reason}. Entropy and context look like a credential shipped to the browser. Rotate it if real, and keep secrets in server only env vars.`,
+      where,
+      evidence: mask(h.value),
+      fixPrompt: `My frontend JavaScript may contain an unknown secret (${h.reason}; masked ${mask(h.value)}). Search the repo for this value prefix, rotate it at the provider if it is real, and move any server call that needs it behind an API route that reads a server only environment variable.`,
+    });
+  }
+  return out;
+}
+
+export function openApiExposedFinding(tableCount: number): Finding {
+  return {
+    id: 'supabase-openapi-exposed',
+    severity: 'medium',
+    category: 'database',
+    title: 'Supabase REST OpenAPI schema is readable with the anon key',
+    detail: `GET /rest/v1/ returned an OpenAPI document listing ${tableCount} table${tableCount === 1 ? '' : 's'}. That helps attackers map your schema. Prefer disabling OpenAPI in PostgREST or restricting it.`,
+    where: 'GET /rest/v1/',
+    evidence: `tables=${tableCount}`,
+    fixPrompt: `My Supabase /rest/v1/ OpenAPI root is readable with the anon key and lists tables. In Supabase, turn off OpenAPI for the Data API if I do not need it (db-api / PostgREST openapi settings), keep RLS on every table, and avoid exposing unused schemas. Show me the dashboard or config change.`,
+  };
+}
+
+export function openEndpointFinding(url: string, status: number, kind: string): Finding {
+  return {
+    id: 'api-open-' + url.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80),
+    severity: kind.includes('graphql') ? 'high' : 'medium',
+    category: 'api',
+    title: `Anonymous GET returned data from ${url}`,
+    detail: `A stranger can call this ${kind} endpoint without credentials and got HTTP ${status} with a body. Confirm it is intentionally public; otherwise require auth.`,
+    where: `GET ${url}`,
+    evidence: `HTTP ${status}`,
+    fixPrompt: `My endpoint ${url} returns data to unauthenticated GET requests. Require a session or API key, add authorization checks, and rate limit it. Show me the route handler change.`,
+  };
+}
+
+export function storagePublicFinding(kind: string, bucket: string, detail: string): Finding {
+  return {
+    id: 'storage-public-' + kind + '-' + bucket.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40),
+    severity: 'high',
+    category: 'storage',
+    title: `Public ${kind} bucket listing: ${bucket}`,
+    detail,
+    where: bucket,
+    evidence: bucket,
+    fixPrompt: `My ${kind} bucket "${bucket}" allows public listing or anonymous reads of objects. Make the bucket private, require signed URLs for private files, and tighten storage policies (Supabase storage policies, Firebase Storage rules, or S3 Block Public Access). Show me the exact policy change.`,
+  };
 }
