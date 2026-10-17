@@ -58,7 +58,7 @@ match /users/{userId}/{document=**} {
 }
 ```
 
-Run the full [Firebase security rules checklist](/checklists/firebase-security-rules-checklist/) before launch, including the test mode rules that expire after 30 days.
+Run the full [Firebase security rules checklist](/checklists/firebase-security-rules-checklist/) before launch, including the test mode rules that expire after 30 days. If your rules already say `if true`, start with [how to replace allow read, write: if true in Firestore and Storage](/guides/firestore-security-rules-allow-read-write-if-true/).
 
 ## What protects your backend from abuse: App Check
 

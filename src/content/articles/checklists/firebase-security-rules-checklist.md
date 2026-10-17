@@ -30,7 +30,7 @@ For a fast outside check, paste your deployed URL into the [Live App Scanner](/l
 
 When you create a database or storage bucket in the console, Firebase asks you to choose Locked mode or Test mode. The [rules basics](https://firebase.google.com/docs/rules/basics) page says Locked mode denies access to all users for Cloud Firestore and Realtime Database. For Cloud Storage, Locked mode allows only authenticated users. Test mode allows anyone access.
 
-Open the rules you deployed. Do not trust a memory of which button you clicked.
+Open the rules you deployed. Do not trust a memory of which button you clicked. If you find test mode or `if true`, the [guide to fixing allow read, write: if true](/guides/firestore-security-rules-allow-read-write-if-true/) walks through the replacement rules for Firestore and Storage and how to deploy them.
 
 Locked mode for Firestore looks like this:
 

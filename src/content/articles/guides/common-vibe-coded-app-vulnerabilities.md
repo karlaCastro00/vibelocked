@@ -79,7 +79,7 @@ Returning 404 when the row is missing or not yours avoids confirming that the id
 
 The same bug exists in the database client. If the browser uses the Supabase publishable key, an RLS policy of `(select auth.uid()) = user_id` makes the filter automatic, including for requests your UI never meant to send. That is the point of the [RLS checklist](/checklists/supabase-rls-security-checklist/). If the server uses the secret key, RLS will not save you. Supabase says the secret key bypasses RLS when the request has no user access token. Your server code has to apply the owner filter itself.
 
-On Firebase, the matching bug is a rule of `if request.auth != null` plus a client that can name any document id. The [rules checklist](/checklists/firebase-security-rules-checklist/) shows the owner comparison.
+On Firebase, the matching bug is a rule of `if request.auth != null` plus a client that can name any document id. The [rules checklist](/checklists/firebase-security-rules-checklist/) shows the owner comparison. Worse still is a database left in test mode or on `allow read, write: if true`, which our [Firestore open rules guide](/guides/firestore-security-rules-allow-read-write-if-true/) shows how to close.
 
 How to test: create two users. Copy an id from user A's network tab. Repeat the request with user B's session. You want no row, not A's row. For full Route Handler code (read, update, delete, team membership), matching RLS policies, and a curl test, see [fix IDOR in Next.js and Supabase](/guides/idor-broken-object-level-authorization-nextjs-supabase/).
 
