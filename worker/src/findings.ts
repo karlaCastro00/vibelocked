@@ -3,7 +3,7 @@ import { scan as scanText, mask } from '../../src/lib/scanner.ts';
 import type { GenericHit } from './entropy.ts';
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
-export type FindingCategory = 'secrets' | 'database' | 'storage' | 'api' | 'exposed' | 'headers';
+export type FindingCategory = 'secrets' | 'database' | 'storage' | 'api' | 'exposed' | 'headers' | 'cve' | 'auth' | 'tls';
 export type Finding = {
   id: string;
   severity: Severity;
@@ -546,5 +546,113 @@ export function ownershipDeepNote(reason: string): Finding {
     title: 'Ownership verified: throwaway signup skipped',
     detail: reason,
     fixPrompt: `Ownership is verified for deeper read-only checks. Throwaway signup was skipped because cleanup would need an admin key. Keep RLS strict and test policies in CI with pgTAP instead.`,
+  };
+}
+
+export function cveFinding(m: {
+  id: string;
+  package: string;
+  version: string;
+  title: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  guide?: string | null;
+  note?: string;
+}): Finding {
+  const guideBit = m.guide
+    ? ` Read our guide: https://vibelocked.com${m.guide}`
+    : '';
+  return {
+    id: 'cve-' + m.id.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    severity: m.severity,
+    category: 'cve',
+    title: `${m.id}: ${m.title}`,
+    detail: `Detected ${m.package}@${m.version} in shipped JavaScript, which falls in a known affected range. ${m.note || ''}${guideBit}`,
+    where: `${m.package}@${m.version}`,
+    evidence: m.id,
+    fixPrompt: `My frontend or framework bundle looks like ${m.package}@${m.version}, flagged for ${m.id} (${m.title}). Upgrade to a patched release, redeploy, and re-scan. ${m.guide ? 'Follow https://vibelocked.com' + m.guide : ''}`,
+  };
+}
+
+export function authOpenRedirectFinding(url: string, param: string, location: string): Finding {
+  return {
+    id: 'auth-open-redirect-' + param.toLowerCase(),
+    severity: 'high',
+    category: 'auth',
+    title: `Open redirect via ${param}`,
+    detail: `Requesting an auth URL with ${param} set to https://evil.example/ produced a redirect to ${location.slice(0, 120)}. Attackers can craft login links that send users to a phishing site after sign-in.`,
+    where: url.slice(0, 160),
+    evidence: `${param} -> ${location.slice(0, 80)}`,
+    fixPrompt: `My auth flow reflects ${param} into a redirect. Allow only relative paths or an explicit allow list of my domains. Reject absolute external URLs. Show me the auth config or middleware change.`,
+  };
+}
+
+export function authOAuthStateFinding(url: string): Finding {
+  return {
+    id: 'auth-oauth-missing-state',
+    severity: 'medium',
+    category: 'auth',
+    title: 'OAuth authorize URL missing state parameter',
+    detail: `An OAuth authorize URL embedded in the client has client_id or response_type but no state= parameter. Without state, CSRF on the OAuth callback is easier.`,
+    where: url.slice(0, 160),
+    evidence: 'state missing',
+    fixPrompt: `My OAuth authorize URL is missing a state parameter. Generate a random state, store it in the session or a secure cookie, send it on authorize, and verify it on the callback before issuing a session. Show me the change.`,
+  };
+}
+
+export function authSurfaceNote(kinds: string[]): Finding {
+  return {
+    id: 'auth-surface-map',
+    severity: 'info',
+    category: 'auth',
+    title: 'Auth surface mapped from JavaScript',
+    detail: `Found auth-related routes: ${kinds.join(', ')}. Review that each one enforces CSRF, rate limits, and safe redirects.`,
+    fixPrompt: `Audit every auth route (login, signup, reset, callback, OAuth). Ensure redirects are allow-listed, callbacks verify state, and password reset tokens are single use.`,
+  };
+}
+
+export function tlsFinding(kind: 'no-https-redirect' | 'cert-expiring' | 'cert-expired', detail: string, evidence?: string): Finding {
+  const title =
+    kind === 'no-https-redirect'
+      ? 'HTTP does not redirect to HTTPS'
+      : kind === 'cert-expired'
+        ? 'TLS certificate appears expired'
+        : 'TLS certificate expires within 14 days';
+  return {
+    id: 'tls-' + kind,
+    severity: kind === 'no-https-redirect' ? 'medium' : kind === 'cert-expired' ? 'high' : 'medium',
+    category: 'tls',
+    title,
+    detail,
+    evidence,
+    fixPrompt:
+      kind === 'no-https-redirect'
+        ? `My site answers on http:// without redirecting to https://. Add a permanent redirect to HTTPS at the host (Vercel/Netlify/Cloudflare/nginx) and enable HSTS after that works.`
+        : `Renew my TLS certificate before it expires, confirm auto-renewal is on at my DNS/host, and verify the live cert in the browser.`,
+  };
+}
+
+export function graphqlIntrospectionFinding(url: string): Finding {
+  return {
+    id: 'graphql-introspection',
+    severity: 'medium',
+    category: 'api',
+    title: 'GraphQL introspection is enabled anonymously',
+    detail: `A safe introspection query against ${url} returned schema data without auth. Attackers use this to map mutations and types. Disable introspection in production.`,
+    where: url,
+    evidence: 'introspection',
+    fixPrompt: `Disable GraphQL introspection in production and require auth for sensitive queries. Show me the server config change.`,
+  };
+}
+
+export function nestSelectFinding(table: string): Finding {
+  return {
+    id: 'supabase-nest-' + table,
+    severity: 'high',
+    category: 'database',
+    title: `Supabase nested select returned data on "${table}"`,
+    detail: `An anonymous PostgREST request with a one-level nested select on ${table} returned rows. That often means related tables are readable through embedding. Tighten RLS on the base and related tables.`,
+    where: `GET /rest/v1/${table}?select=*,*&limit=1`,
+    evidence: 'nested select',
+    fixPrompt: `Anonymous nested selects on Supabase table "${table}" return data. Enable RLS on related tables, restrict embedding, and re-test with the anon key. Show me the SQL.`,
   };
 }

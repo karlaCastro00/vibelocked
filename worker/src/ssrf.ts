@@ -186,6 +186,12 @@ export async function safeFetch(f: typeof fetch, resolve: Resolver, target: stri
         headers: sanitizeOutboundHeaders(o.headers),
       });
       if (res.status >= 300 && res.status < 400 && res.headers.get('location')) {
+        if (hop >= maxRedirects) {
+          // Return the redirect response itself (used for open-redirect probes).
+          let body = '';
+          try { await res.body?.cancel(); } catch {}
+          return { status: res.status, headers: res.headers, body, url: url.href, truncated: false };
+        }
         try { await res.body?.cancel(); } catch {}
         url = new URL(res.headers.get('location')!, url);
         continue;

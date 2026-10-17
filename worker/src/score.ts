@@ -22,8 +22,11 @@ const CAT_MULT: Record<FindingCategory, number> = {
   database: 1.35,
   storage: 1.25,
   secrets: 1.2,
+  cve: 1.3,
+  auth: 1.15,
   api: 1.0,
   exposed: 1.15,
+  tls: 0.9,
   headers: 0.55,
 };
 

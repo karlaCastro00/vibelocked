@@ -19,33 +19,49 @@ import {
 } from './fingerprint.ts';
 import { scoreFindings } from './score.ts';
 import { OWNERSHIP_DEEP_POLICY, isVerified, type OwnershipRecord } from './ownership.ts';
+import { detectLibraries, type LibHit } from './libs.ts';
+import { matchCves } from './cveMatch.ts';
+import {
+  extractAuthUrls,
+  oauthMissingState,
+  redirectParamNames,
+  withEvilRedirect,
+} from './authSurface.ts';
+import { getPeerStats, recordPeerScore } from './peer.ts';
+import { checkCertExpiry } from './tlsCheck.ts';
 import {
   adminPathFinding,
   authJsCallbackFinding,
+  authOAuthStateFinding,
+  authOpenRedirectFinding,
+  authSurfaceNote,
+  corsKind,
+  cveFinding,
   detectFirebase,
   detectSupabase,
   exposureFinding,
   firebaseConfigFinding,
   firebaseOpenDbFinding,
   genericSecretFindings,
+  graphqlIntrospectionFinding,
   headerFindings,
-  corsKind,
-  type CorsKind,
+  nestSelectFinding,
   openApiDocFinding,
   openApiExposedFinding,
   openEndpointFinding,
   openTableFinding,
   ownershipDeepNote,
+  scriptUrlsFromHtml,
   secretFindings,
   sourceMapCandidates,
   sourceMapSecretFinding,
-  scriptUrlsFromHtml,
   storagePublicFinding,
   supabaseConfigFinding,
+  tlsFinding,
   vercelBlobFinding,
+  type CorsKind,
   type Finding,
 } from './findings.ts';
-
 
 export type ProgressEvent =
   | { type: 'status'; message: string }
@@ -70,6 +86,8 @@ export type ScanSummary = {
   topFixes: Finding[];
   stacks: StackHit[];
   ownership: { verified: boolean; note?: string };
+  libs: LibHit[];
+  peer: { n: number; median: number; stackKey: string } | null;
 };
 
 const COMMON_TABLES = [
@@ -96,6 +114,8 @@ export type ScanDeps = {
   now?: () => number;
   /** Optional pre-loaded ownership record for this host (from KV). */
   ownership?: OwnershipRecord | null;
+  /** KV for peer buckets (same namespace as rate limit is fine). */
+  kv?: KVNamespace;
 };
 
 function emit(deps: ScanDeps, e: ProgressEvent) {
@@ -726,9 +746,150 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
     }
   }
 
+
+  // --- v4: library fingerprint + CVE pack ---
+  emit(deps, { type: 'status', message: 'Fingerprinting client libraries and matching CVE pack...' });
+  const libs = detectLibraries(combinedJs + '\n' + page.body);
+  for (const m of matchCves(libs)) add(cveFinding(m));
+
+  // --- v4: smarter read-only API abuse ---
+  emit(deps, { type: 'status', message: 'Running deeper read-only API probes...' });
+  if (sbCfg) {
+    const restBase = sbCfg.url.replace(/\/$/, '') + '/rest/v1';
+    const openTables = findings
+      .filter((f) => f.id.startsWith('supabase-open-'))
+      .map((f) => f.id.replace('supabase-open-', ''))
+      .slice(0, 6);
+    const relCandidates = extractSupabaseTables(combinedJs).slice(0, 8);
+    for (const table of openTables) {
+      for (const rel of relCandidates) {
+        if (rel === table) continue;
+        try {
+          const r = await safeFetch(
+            f,
+            resolve,
+            `${restBase}/${table}?select=*,${encodeURIComponent(rel)}(*)&limit=1`,
+            {
+              method: 'GET',
+              headers: {
+                apikey: sbCfg.key,
+                Authorization: `Bearer ${sbCfg.key}`,
+                Prefer: 'count=exact',
+                Accept: 'application/json',
+              },
+              maxBytes: 64_000,
+              timeoutMs: 5000,
+            },
+          );
+          if (
+            r.status >= 200 &&
+            r.status < 300 &&
+            r.body &&
+            r.body !== '[]' &&
+            !r.body.includes('"code":"PGRST') &&
+            r.body.includes('"' + rel + '"')
+          ) {
+            add(nestSelectFinding(table));
+            break;
+          }
+        } catch {
+          /* skip */
+        }
+      }
+    }
+  }
+  // GraphQL introspection (safe read-only query)
+  for (const ep of endpoints.filter((e) => e.kind === 'graphql').slice(0, 3)) {
+    try {
+      const q = '{"query":"{ __schema { queryType { name } } }"}';
+      // GET with query string (never mutate)
+      const u = new URL(ep.url);
+      u.searchParams.set('query', '{ __schema { queryType { name } } }');
+      const r = await safeFetch(f, resolve, u.href, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        maxBytes: 64_000,
+        timeoutMs: 5000,
+      });
+      if (r.status >= 200 && r.status < 300 && /__schema|queryType/i.test(r.body)) {
+        add(graphqlIntrospectionFinding(ep.url));
+      }
+    } catch {
+      /* skip */
+    }
+  }
+
+  // --- v4: auth surface ---
+  emit(deps, { type: 'status', message: 'Mapping auth surface...' });
+  const authUrls = extractAuthUrls(combinedJs + '\n' + page.body, target.origin);
+  if (authUrls.length) {
+    const kinds = [...new Set(authUrls.map((a) => a.kind))];
+    add(authSurfaceNote(kinds));
+  }
+  for (const a of authUrls.slice(0, 12)) {
+    if (oauthMissingState(a.url)) add(authOAuthStateFinding(a.url));
+    for (const param of redirectParamNames(a.url).slice(0, 2)) {
+      const probe = withEvilRedirect(a.url, param);
+      if (!probe) continue;
+      try {
+        const r = await safeFetch(f, resolve, probe, {
+          method: 'GET',
+          maxBytes: 2048,
+          timeoutMs: 4000,
+          maxRedirects: 0,
+        });
+        const loc = r.headers.get('location') || '';
+        if (r.status >= 300 && r.status < 400 && /evil\.example/i.test(loc)) {
+          add(authOpenRedirectFinding(a.url, param, loc));
+        }
+      } catch {
+        /* skip */
+      }
+    }
+  }
+
+  // --- v4: passive TLS / HTTPS redirect ---
+  emit(deps, { type: 'status', message: 'Checking HTTPS redirect and certificate expiry...' });
+  try {
+    const http = await safeFetch(f, resolve, `http://${target.hostname}/`, {
+      method: 'GET',
+      maxBytes: 2048,
+      timeoutMs: 5000,
+      maxRedirects: 0,
+    });
+    const loc = http.headers.get('location') || '';
+    if (!(http.status >= 300 && http.status < 400 && /^https:/i.test(loc))) {
+      // Only flag if we actually got a non-HTTPS redirect response or 200
+      if (http.status > 0 && http.status < 500) {
+        add(tlsFinding('no-https-redirect', `http://${target.hostname}/ did not redirect to HTTPS (HTTP ${http.status}).`, `HTTP ${http.status}`));
+      }
+    }
+  } catch {
+    /* HTTP closed/blocked is ok */
+  }
+  try {
+    const cert = await checkCertExpiry(f, target.hostname, (deps.now ?? Date.now)());
+    if (cert) add(tlsFinding(cert.kind, cert.detail, cert.evidence));
+  } catch {
+    /* optional */
+  }
+
+
   const scored = scoreFindings(findings);
   const sev = countSev(findings);
   const categories = countCats(findings);
+
+  let peer: ScanSummary['peer'] = null;
+  if (deps.kv) {
+    try {
+      await recordPeerScore(deps.kv, stacks, scored.score);
+      const stats = await getPeerStats(deps.kv, stacks, 5);
+      if (stats) peer = { n: stats.n, median: stats.median, stackKey: stats.bucketKey };
+    } catch {
+      peer = null;
+    }
+  }
+
   const summary: ScanSummary = {
     url: target.href,
     findings: findings.length,
@@ -742,6 +903,8 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
     topFixes: scored.topFixes,
     stacks,
     ownership: { verified: owned, note: ownershipNote },
+    libs,
+    peer,
   };
   emit(deps, { type: 'done', summary });
   return { findings, summary };

@@ -52,7 +52,7 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(req, env) });
     }
     if (url.pathname === '/health') {
-      return json({ ok: true, service: 'vibelocked-live-scan', version: 3 }, 200, req, env);
+      return json({ ok: true, service: 'vibelocked-live-scan', version: 4 }, 200, req, env);
     }
 
     if (!originAllowed(req, env)) {
@@ -196,7 +196,7 @@ export default {
       };
       (async () => {
         try {
-          await runScan(body.url!, { fetch, ownership, onEvent: (e) => { void send(e); } });
+          await runScan(body.url!, { fetch, ownership, kv: env.RATE_LIMIT, onEvent: (e) => { void send(e); } });
         } catch (err) {
           const message = err instanceof BlockedError ? err.message : 'Scan failed. Try again in a minute.';
           await send({ type: 'error', message });
@@ -216,7 +216,7 @@ export default {
     }
 
     try {
-      const result = await runScan(body.url, { fetch, ownership });
+      const result = await runScan(body.url, { fetch, ownership, kv: env.RATE_LIMIT });
       return json(result, 200, req, env);
     } catch (err) {
       const message = err instanceof BlockedError ? err.message : 'Scan failed. Try again in a minute.';
