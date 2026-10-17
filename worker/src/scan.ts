@@ -6,7 +6,8 @@ import {
   extractOpenApiUrls,
   extractStorage,
   extractSupabaseTables,
-  pathsFromOpenApiDoc,
+  getPathsFromOpenApi,
+  resolveOpenApiProbeUrl,
   tablesFromOpenApi,
   type EndpointHit,
 } from './surface.ts';
@@ -39,6 +40,7 @@ import {
   urlsFromSitemap,
 } from './discover.ts';
 import { withPlaybook } from './playbooks.ts';
+import { extractFirebasePaths, probeFirebasePaths } from './firebasePaths.ts';
 import {
   adminPathFinding,
   authJsCallbackFinding,
@@ -537,6 +539,19 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
     } catch {
       /* ignore */
     }
+
+    // v6: deeper Firestore + RTDB path probes from JS literals / SDK calls
+    emit(deps, { type: 'status', message: 'Probing Firebase collection and RTDB paths from JavaScript...' });
+    await probeFirebasePaths(f, resolve, fbCfg, extractFirebasePaths(combinedJs + '\n' + page.body), add);
+  } else if (fbCfg?.databaseURL) {
+    emit(deps, { type: 'status', message: 'Probing Firebase RTDB paths from JavaScript...' });
+    await probeFirebasePaths(
+      f,
+      resolve,
+      fbCfg,
+      extractFirebasePaths(combinedJs + '\n' + page.body).filter((x) => x.kind === 'rtdb'),
+      add,
+    );
   }
 
   // External / discovered storage buckets (S3/R2/GCS)
@@ -630,21 +645,22 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
     }
   }
 
-  // Chained: OpenAPI/Swagger URLs from JS
-  emit(deps, { type: 'status', message: 'Following OpenAPI and admin paths found in JavaScript...' });
-  let openApiProbeBudget = 12;
-  for (const oaUrl of extractOpenApiUrls(combinedJs, target.origin)) {
+  // Chained: OpenAPI/Swagger URLs from JS (GET-only path expansion, same-origin, capped)
+  emit(deps, { type: 'status', message: 'Expanding OpenAPI GET paths and probing anonymously...' });
+  let openApiProbeBudget = 20;
+  for (const oaUrl of extractOpenApiUrls(combinedJs + '\n' + page.body, target.origin)) {
     try {
       const r = await safeFetch(f, resolve, oaUrl, { method: 'GET', maxBytes: 400_000, timeoutMs: 6000 });
       if (r.status >= 200 && r.status < 300) {
-        const paths = pathsFromOpenApiDoc(r.body);
-        if (paths.length) {
-          add(openApiDocFinding(oaUrl, paths.length));
-          for (const path of paths) {
+        const gets = getPathsFromOpenApi(r.body);
+        if (gets.length) {
+          add(openApiDocFinding(oaUrl, gets.length));
+          for (const g of gets) {
             if (openApiProbeBudget-- <= 0) break;
-            if (!path.startsWith('/') || /\{/.test(path)) continue;
+            const href = resolveOpenApiProbeUrl(g.path, target.origin, g.server);
+            if (!href) continue;
             try {
-              const pr = await safeFetch(f, resolve, new URL(path, target), {
+              const pr = await safeFetch(f, resolve, href, {
                 method: 'GET',
                 headers: { Accept: 'application/json' },
                 maxBytes: 32_000,
@@ -652,7 +668,7 @@ export async function runScan(inputUrl: string, deps: ScanDeps): Promise<{ findi
               });
               const ct = pr.headers.get('content-type') || '';
               if (bodyLooksLikeData(pr.status, pr.body, ct)) {
-                add(openEndpointFinding(new URL(path, target).href, pr.status, 'same-origin-api'));
+                add(openEndpointFinding(href, pr.status, 'openapi-get'));
               }
             } catch {
               /* skip */

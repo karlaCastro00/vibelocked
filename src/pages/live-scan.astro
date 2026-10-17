@@ -62,6 +62,7 @@ const workerUrl = SITE.liveScanWorker;
       <div id="live-export" class="scan-actions" hidden>
         <button class="button button-ghost" type="button" id="btn-md">Download Markdown report</button>
         <button class="button button-ghost" type="button" id="btn-copy">Copy summary</button>
+        <button class="button button-ghost" type="button" id="btn-badge">Copy README badge</button>
       </div>
     </section>
 
@@ -70,10 +71,10 @@ const workerUrl = SITE.liveScanWorker;
     <article class="prose">
       <h2>What it checks</h2>
       <ul>
-        <li>Stack and client library fingerprint with a curated free CVE pack (including CVE-2025-29927), Appwrite/PocketBase/Hasura/Convex probes, Fix now playbooks, and Serious vs Hardening tips</li>
+        <li>Stack and client library fingerprint with a curated free CVE pack (including CVE-2025-29927), Firebase path probes, OpenAPI GET expansion, Appwrite/PocketBase/Hasura/Convex, Fix now playbooks, Serious vs Hardening tips, and a README score badge</li>
         <li>Auth surface map, open-redirect probes, GraphQL introspection checks, and nested Supabase selects (read only)</li>
         <li>Risk score 0-100, peer comparison by stack (anonymous buckets only), TLS expiry and HTTPS redirect notes</li>
-        <li>Export Markdown report and copy a shareable summary; rescan to see what improved</li>
+        <li>Export Markdown report, copy a shareable summary, and one-click copy a README badge snippet; rescan to see what improved</li>
       </ul>
       <h2>Ownership</h2>
       <p>
@@ -140,11 +141,26 @@ const workerUrl = SITE.liveScanWorker;
     font-size: 1.05rem; margin: 1.4rem 0 0.5rem; padding-bottom: 0.25rem;
     border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
   }
-  .scan-results :global(.playbook { margin: 0.6rem 0; padding: 0.6rem 0.8rem; border-left: 3px solid var(--accent, #3b82f6); background: rgba(59,130,246,0.06); }
-  .playbook-steps { margin: 0.35rem 0 0 1.1rem; padding: 0; }
-  .playbook-steps li { margin: 0.2rem 0; }
-  .find-group-sub { font-size: 1rem; margin: 0.8rem 0 0.4rem; opacity: 0.85; }
-  .fix-box) {
+  .scan-results :global(.playbook) {
+    margin: 0.6rem 0; padding: 0.6rem 0.8rem;
+    border-left: 3px solid #3b82f6;
+    background: color-mix(in srgb, #3b82f6 8%, var(--bg));
+  }
+  .scan-results :global(.playbook-steps) { margin: 0.35rem 0 0 1.1rem; padding: 0; }
+  .scan-results :global(.playbook-steps li) { margin: 0.2rem 0; }
+  .scan-results :global(.find-group-sub) { font-size: 1rem; margin: 0.8rem 0 0.4rem; opacity: 0.85; }
+  .scan-results :global(.badge-box) {
+    margin: 0.8rem 0; padding: 0.75rem 0.9rem; border-radius: 8px;
+    border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  }
+  .scan-results :global(.badge-box img) { vertical-align: middle; margin-right: 0.5rem; }
+  .scan-results :global(.badge-md) {
+    display: block; margin-top: 0.45rem; padding: 0.45rem 0.55rem; border-radius: 6px;
+    font-size: 0.75rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-break: break-all;
+    background: color-mix(in srgb, currentColor 6%, var(--bg));
+  }
+  .scan-results :global(.fix-box) {
     margin-top: 0.5rem; padding: 0.6rem 0.7rem; border-radius: 6px;
     border: 1px dashed color-mix(in srgb, currentColor 35%, transparent);
     font-size: 0.82rem; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -335,6 +351,34 @@ const workerUrl = SITE.liveScanWorker;
     else meta.append(el('div', '', 'Anonymous scan (prove ownership for deeper reads)'));
     scoreCard.append(meta);
     out.append(scoreCard);
+
+    if (summary.score != null && summary.grade) {
+      const badgeUrl = workerUrl + '/badge.svg?score=' + encodeURIComponent(summary.score) + '&grade=' + encodeURIComponent(summary.grade);
+      const md = '[![VibeLocked score: ' + summary.score + '/' + summary.grade + '](' + badgeUrl + ')](https://vibelocked.com/live-scan/)';
+      const box = el('div', 'badge-box', null);
+      const img = document.createElement('img');
+      img.src = badgeUrl;
+      img.alt = 'VibeLocked score: ' + summary.score + '/' + summary.grade;
+      img.width = 132;
+      img.height = 20;
+      box.append(img);
+      box.append(el('span', '', 'README badge (score and grade only; we do not store your URL)'));
+      const code = el('code', 'badge-md', md);
+      box.append(code);
+      const copyBadge = el('button', '', 'Copy README badge');
+      copyBadge.type = 'button';
+      copyBadge.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(md);
+          copyBadge.textContent = 'Copied';
+          setTimeout(() => { copyBadge.textContent = 'Copy README badge'; }, 1500);
+        } catch {
+          copyBadge.textContent = 'Select and copy manually';
+        }
+      });
+      box.append(copyBadge);
+      out.append(box);
+    }
 
     if (summary.stacks && summary.stacks.length) {
       const badges = el('div', 'stack-badges', null);
@@ -541,6 +585,18 @@ const workerUrl = SITE.liveScanWorker;
       status.textContent = 'Summary copied.';
     } catch {
       status.textContent = 'Could not copy. Select the summary manually.';
+    }
+  });
+  document.getElementById('btn-badge').addEventListener('click', async () => {
+    if (!lastReport || lastReport.summary == null) return;
+    const s = lastReport.summary;
+    const badgeUrl = workerUrl + '/badge.svg?score=' + encodeURIComponent(s.score) + '&grade=' + encodeURIComponent(s.grade);
+    const md = '[![VibeLocked score: ' + s.score + '/' + s.grade + '](' + badgeUrl + ')](https://vibelocked.com/live-scan/)';
+    try {
+      await navigator.clipboard.writeText(md);
+      status.textContent = 'README badge Markdown copied.';
+    } catch {
+      status.textContent = 'Could not copy badge Markdown.';
     }
   });
 

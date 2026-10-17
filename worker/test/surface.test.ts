@@ -54,6 +54,6 @@ describe('extractOpenApiUrls', () => {
 
 describe('pathsFromOpenApiDoc', () => {
   it('lists paths', () => {
-    assert.deepEqual(pathsFromOpenApiDoc(JSON.stringify({ paths: { '/api/me': {}, '/api/users': {} } })).sort(), ['/api/me', '/api/users']);
+    assert.deepEqual(pathsFromOpenApiDoc(JSON.stringify({ paths: { '/api/me': { get: {} }, '/api/users': { get: {} }, '/api/wipe': { post: {} } } })).sort(), ['/api/me', '/api/users']);
   });
 });

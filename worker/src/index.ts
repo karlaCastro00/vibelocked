@@ -6,6 +6,7 @@ import {
   issueOwnershipToken,
   verifyOwnership,
 } from './ownership.ts';
+import { parseBadgeQuery, renderBadgeSvg } from './badge.ts';
 
 export interface Env {
   RATE_LIMIT: KVNamespace;
@@ -52,7 +53,24 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(req, env) });
     }
     if (url.pathname === '/health') {
-      return json({ ok: true, service: 'vibelocked-live-scan', version: 5 }, 200, req, env);
+      return json({ ok: true, service: 'vibelocked-live-scan', version: 6 }, 200, req, env);
+    }
+
+    // Public score badge for README embeds. Client passes score+grade only; no URL stored.
+    if (url.pathname === '/badge.svg' && (req.method === 'GET' || req.method === 'HEAD')) {
+      const parsed = parseBadgeQuery(url.searchParams);
+      if ('error' in parsed) {
+        return new Response(parsed.error, { status: 400, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      }
+      const svg = renderBadgeSvg(parsed.score, parsed.grade);
+      return new Response(req.method === 'HEAD' ? null : svg, {
+        status: 200,
+        headers: {
+          'content-type': 'image/svg+xml; charset=utf-8',
+          'cache-control': 'public, max-age=300',
+          'access-control-allow-origin': '*',
+        },
+      });
     }
 
     if (!originAllowed(req, env)) {

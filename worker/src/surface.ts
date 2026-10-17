@@ -213,20 +213,71 @@ export function extractOpenApiUrls(text: string, pageOrigin: string): string[] {
 
 /** Paths listed inside an OpenAPI/Swagger document (limited). */
 export function pathsFromOpenApiDoc(body: string): string[] {
-  const paths: string[] = [];
+  return getPathsFromOpenApi(body).map((x) => x.path);
+}
+
+export type OpenApiGetPath = { path: string; server?: string };
+
+/**
+ * Extract GET-only operations from OpenAPI/Swagger JSON (YAML soft-fallback via path keys).
+ * Skips path templates with {params}. Cap 40.
+ */
+export function getPathsFromOpenApi(body: string): OpenApiGetPath[] {
+  const out: OpenApiGetPath[] = [];
+  const seen = new Set<string>();
+  const push = (path: string, server?: string) => {
+    if (!path.startsWith('/') || path.length > 120) return;
+    if (/\{/.test(path)) return; // no unresolved templates
+    if (seen.has(path)) return;
+    seen.add(path);
+    out.push({ path, server });
+  };
   try {
     const j = JSON.parse(body);
+    let defaultServer: string | undefined;
+    if (Array.isArray(j.servers) && j.servers[0]?.url && typeof j.servers[0].url === 'string') {
+      defaultServer = j.servers[0].url;
+    } else if (typeof j.host === 'string' && j.swagger) {
+      const schemes = Array.isArray(j.schemes) && j.schemes[0] ? j.schemes[0] : 'https';
+      const base = typeof j.basePath === 'string' ? j.basePath : '';
+      defaultServer = `${schemes}://${j.host}${base}`;
+    }
     if (j.paths && typeof j.paths === 'object') {
-      for (const p of Object.keys(j.paths)) {
-        if (p.startsWith('/') && p.length < 120) paths.push(p);
-        if (paths.length >= 25) break;
+      for (const [p, methods] of Object.entries(j.paths)) {
+        if (!methods || typeof methods !== 'object') continue;
+        const m = methods as Record<string, unknown>;
+        if (!('get' in m) && !('GET' in m)) continue;
+        push(p, defaultServer);
+        if (out.length >= 40) break;
       }
     }
   } catch {
-    for (const m of body.matchAll(/["'](\/[A-Za-z0-9._~/-]{1,80})["']\s*:/g)) {
-      paths.push(m[1]);
-      if (paths.length >= 25) break;
+    // Soft YAML / broken JSON: look for path keys near get:
+    for (const m of body.matchAll(/["'](\/[A-Za-z0-9._~/-]{1,80})["']\s*:\s*\{[^}]{0,200}\bget\b/gi)) {
+      push(m[1]);
+      if (out.length >= 40) break;
+    }
+    if (!out.length) {
+      for (const m of body.matchAll(/["'](\/[A-Za-z0-9._~/-]{1,80})["']\s*:/g)) {
+        push(m[1]);
+        if (out.length >= 25) break;
+      }
     }
   }
-  return paths;
+  return out;
+}
+
+/** Resolve OpenAPI path against page origin; only same-origin https/http. */
+export function resolveOpenApiProbeUrl(path: string, pageOrigin: string, server?: string): string | null {
+  try {
+    const page = new URL(pageOrigin);
+    if (server) {
+      const base = new URL(server, pageOrigin);
+      if (base.origin !== page.origin) return null;
+      return new URL(path.replace(/^\//, ''), base.href.endsWith('/') ? base.href : base.href + '/').href;
+    }
+    return new URL(path, pageOrigin).href;
+  } catch {
+    return null;
+  }
 }

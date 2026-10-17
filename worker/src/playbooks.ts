@@ -75,6 +75,30 @@ const BY_PREFIX: { prefix: string; steps: string[] }[] = [
     ],
   },
   {
+    prefix: 'firebase-open-',
+    steps: [
+      'Open Firebase Console Security Rules for Realtime Database or Firestore.',
+      'Replace open read rules with auth and ownership checks (request.auth != null).',
+      'Publish rules and re-scan the live URL.',
+    ],
+  },
+  {
+    prefix: 'api-open-',
+    steps: [
+      'Require a session or API key on this GET endpoint.',
+      'Return 401 for anonymous callers; avoid returning PII in public responses.',
+      'Re-scan and confirm the endpoint finding is cleared.',
+    ],
+  },
+  {
+    prefix: 'openapi-doc-',
+    steps: [
+      'Decide whether the OpenAPI document should be public in production.',
+      'If not, block /openapi.json and /swagger in the host or app router.',
+      'Re-scan; keep GET probes in mind for any paths that stay public.',
+    ],
+  },
+  {
     prefix: 'baas-open-',
     steps: [
       'Open the BaaS permissions or rules UI for the flagged path.',
